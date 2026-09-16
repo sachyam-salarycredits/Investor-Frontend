@@ -25,6 +25,8 @@ class RoutesName {
   static const String ProfileDetail = 'profile_detail_page';
   static const String Redemption = 'redemption_page';
   static const String Withdraw = 'withdraw_page';
+  static const String MyInvestments = 'my_investments_page';
+  static const String MyInvestmentDetail = 'my_investment_detail_page';
   static const String Dialog = "dialog";
   static const String WebPaymentScreen = "payment";
 

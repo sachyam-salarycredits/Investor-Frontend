@@ -22,7 +22,7 @@ class Constants {
   /// //////////////////////////////////////////////////
   /// ////////Change environment from here  ////////////
   /// ///Check the CashFree api key before go live /////
-  static const environment = Environments.QA;
+  static const environment = Environments.Dev;
   static const isProd = false;
 
   /// //////////////////////////////////////////////////
@@ -60,6 +60,7 @@ class Constants {
   static final validateWatchTime = 'validateWatchTime';
   static final amount = 'amount';
   static final viewTitle = 'viewTitle';
+  static final contractId = 'contractId';
   static final forSIP = 'forSIP';
   static final cashFreeText = 'cashFreeText';
 

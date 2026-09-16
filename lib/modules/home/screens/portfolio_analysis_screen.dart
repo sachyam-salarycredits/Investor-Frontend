@@ -1,6 +1,7 @@
 import 'package:Monexo/modules/home/models/DelinquencyStatusModel.dart';
 import 'package:Monexo/modules/home/models/PortfolioAnalysisModel.dart';
 import 'package:Monexo/modules/home/models/PortfolioTabStatusModel.dart';
+import 'package:Monexo/modules/home/models/portfolio_summary.dart';
 import 'package:Monexo/modules/marketplace/widgets/outlined_popup_container.dart';
 import 'package:Monexo/providers/app_state_provider.dart';
 import 'package:Monexo/routes_management/routes_list.dart';
@@ -26,9 +27,12 @@ class PortfolioAnalysis extends StatefulWidget {
   _PortfolioAnalysisState createState() => _PortfolioAnalysisState();
 }
 
+enum _PortfolioBookSection { active, closed }
+
 class _PortfolioAnalysisState extends State<PortfolioAnalysis>
     with TickerProviderStateMixin {
   bool _isLoading = false;
+  _PortfolioBookSection _selectedBook = _PortfolioBookSection.active;
   late TabController _riskTabController;
   late TabController _loanTennuretabController;
   late TabController _remainingLoanTenuretabController;
@@ -52,6 +56,7 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis>
   void initState() {
     getPortfolioTabStatus();
     getPortfolioData();
+    context.read<AppStateProvider>().getUserFundDetails();
 
     // TODO: implement initState
     _riskTabController = new TabController(length: 2, vsync: this);
@@ -347,10 +352,187 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis>
     );
   }
 
+  Color _healthColor(String health) {
+    switch (health.toUpperCase()) {
+      case 'GOOD':
+      case 'COMPLETED':
+        return ColorsUtil.green;
+      case 'MODERATE':
+      case 'REDEEMED':
+        return ColorsUtil.orange;
+      case 'CLOSED':
+        return ColorsUtil.blueColor;
+      default:
+        return ColorsUtil.lightGrey;
+    }
+  }
+
+  Widget _portfolioBookTabs(PortfolioSummary? summary) {
+    final activeCount = summary?.active?.loanCount ?? 0;
+    final closedCount = summary?.closed?.loanCount ?? 0;
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: ColorsUtil.lightestGrey,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _portfolioBookTab(
+              label: 'Active ($activeCount)',
+              section: _PortfolioBookSection.active,
+            ),
+          ),
+          Expanded(
+            child: _portfolioBookTab(
+              label: 'Closed ($closedCount)',
+              section: _PortfolioBookSection.closed,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _portfolioBookTab({
+    required String label,
+    required _PortfolioBookSection section,
+  }) {
+    final selected = _selectedBook == section;
+    return InkWell(
+      onTap: () {
+        if (_selectedBook == section) return;
+        setState(() => _selectedBook = section);
+      },
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? ColorsUtil.blueColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: CustomFonts.nunito,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: selected ? ColorsUtil.white : ColorsUtil.lightBlack,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _portfolioSummaryCards(PortfolioSectionSummary section) {
+    final fourthTitle = _selectedBook == _PortfolioBookSection.active
+        ? 'Principal Outstanding'
+        : 'Interest Earned';
+    final fourthValue = _selectedBook == _PortfolioBookSection.active
+        ? '₹${section.principalOutstanding.commaAddedValue()}'
+        : '₹${section.interestEarned.commaAddedValue()}';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: _healthColor(section.health).withOpacity(0.12),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: _healthColor(section.health)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.health_and_safety_outlined,
+                  color: _healthColor(section.health), size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Portfolio Health',
+                      style: TextStyle(
+                        fontFamily: CustomFonts.nunito,
+                        fontSize: 11,
+                        color: ColorsUtil.lightGrey,
+                      ),
+                    ),
+                    Text(
+                      section.healthLabel,
+                      style: TextStyle(
+                        fontFamily: CustomFonts.nunito,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: _healthColor(section.health),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '${section.loanCount} loans',
+                style: TextStyle(
+                  fontFamily: CustomFonts.nunito,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: ColorsUtil.lightBlack,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        GridView.count(
+          shrinkWrap: true,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          childAspectRatio: 1.55 / 1,
+          children: [
+            OutlinePopupContainer(
+              tabColor: ColorsUtil.portfolioTabColor1,
+              tabBorderColor: ColorsUtil.portfolioTabBorderColor1,
+              title: 'Total Invested',
+              subtitle: '₹${section.totalInvested.commaAddedValue()}',
+            ),
+            OutlinePopupContainer(
+              tabColor: ColorsUtil.portfolioTabColor2,
+              tabBorderColor: ColorsUtil.portfolioTabBorderColor2,
+              title: 'Total Return',
+              subtitle: '₹${section.totalReturn.commaAddedValue()}',
+            ),
+            OutlinePopupContainer(
+              tabColor: ColorsUtil.portfolioTabColor3,
+              tabBorderColor: ColorsUtil.portfolioTabBorderColor3,
+              title: '% Earned',
+              subtitle: '${section.percentageEarned.toStringAsFixed(2)} %',
+            ),
+            OutlinePopupContainer(
+              tabColor: ColorsUtil.portfolioTabColor1,
+              tabBorderColor: ColorsUtil.portfolioTabBorderColor1,
+              title: fourthTitle,
+              subtitle: fourthValue,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Column mainWidget(BuildContext context) {
     var provider = Provider.of<AppStateProvider>(context);
     var userDetails = provider.userDetails!;
     var fundDetails = provider.userFundTransferDetails;
+    final portfolioSummary = provider.portfolioSummary;
+    final selectedSummary = _selectedBook == _PortfolioBookSection.active
+        ? portfolioSummary?.active
+        : portfolioSummary?.closed;
     return Column(
       children: [
         SizedBox(height: 10),
@@ -396,12 +578,79 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis>
                         child: Column(
                           children: [
                             Text(
-                              'INVESTMENT PERFORMANCE',
+                              'PORTFOLIO SUMMARY',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontFamily: CustomFonts.nunito,
                                 color: ColorsUtil.greyTabColor,
                                 fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            _portfolioBookTabs(portfolioSummary),
+                            const SizedBox(height: 12),
+                            if (selectedSummary != null &&
+                                selectedSummary.loanCount > 0)
+                              _portfolioSummaryCards(selectedSummary)
+                            else
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 16),
+                                child: Text(
+                                  _selectedBook == _PortfolioBookSection.active
+                                      ? 'No active loans in your portfolio.'
+                                      : 'No closed loans in your portfolio.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: CustomFonts.nunito,
+                                    fontSize: 14,
+                                    color: ColorsUtil.lightBlack,
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'ACCOUNT OVERVIEW',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: CustomFonts.nunito,
+                                color: ColorsUtil.greyTabColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            InkWell(
+                              onTap: () {
+                                context.pushNamed(RoutesName.MyInvestments);
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: ColorsUtil.blueColor,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'My Investments',
+                                      style: TextStyle(
+                                        fontFamily: CustomFonts.nunito,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: ColorsUtil.white,
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.arrow_forward_ios,
+                                      size: 14,
+                                      color: ColorsUtil.white,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                             SizedBox(

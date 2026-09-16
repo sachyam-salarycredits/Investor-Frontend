@@ -7,6 +7,7 @@ import 'package:Monexo/modules/authentication/models/WylthReferDataModel.dart';
 import 'package:Monexo/modules/bankDetails/models/penny_drop_response.dart';
 import 'package:Monexo/modules/home/models/DelinquencyStatusModel.dart';
 import 'package:Monexo/modules/home/models/PortfolioAnalysisModel.dart';
+import 'package:Monexo/modules/home/models/portfolio_summary.dart';
 import 'package:Monexo/modules/home/models/PortfolioTabStatusModel.dart';
 import 'package:Monexo/modules/home/models/ViewRiskDataModel.dart';
 import 'package:Monexo/modules/marketplace/models/common_loan_cart.dart';
@@ -15,6 +16,7 @@ import 'package:Monexo/modules/marketplace/models/primary_loan_details.dart';
 import 'package:Monexo/modules/marketplace/models/primary_market_loan.dart';
 import 'package:Monexo/modules/marketplace/models/primary_market_loan_response.dart';
 import 'package:Monexo/modules/marketplace/models/redemption_data.dart';
+import 'package:Monexo/modules/marketplace/models/my_investments_data.dart';
 import 'package:Monexo/modules/marketplace/models/secondary_market_loan.dart';
 import 'package:Monexo/modules/marketplace/models/secondary_market_loan_detail.dart';
 import 'package:Monexo/modules/marketplace/models/secondary_market_response.dart';
@@ -84,6 +86,7 @@ class AppStateProvider with ChangeNotifier {
   YoutubeVideosModel? youtubeVideos;
   WylthReferDataModel? wylthReferalData;
   PortfolioAnalysisModel? portfolioAnalysis;
+  PortfolioSummary? portfolioSummary;
   ViewDataModel? portfolioRiskAnalysis;
   PortfolioTabStatusModel? portfolioTabStatusData;
   DelinquencyStatusModel? delinquencyTabStatusData;
@@ -354,9 +357,12 @@ class AppStateProvider with ChangeNotifier {
 
       var response = json.decode(otpResponse);
       if (response["statusCode"] == "200") {
-        if (response['data']['token'] != null &&
+        final data = response['data'];
+        final responseToken =
+            data is Map ? data['token'] : null;
+        if (responseToken != null &&
             (token == null || token == '' || newMobileOtp == null)) {
-          token = response['data']['token'];
+          token = responseToken;
           mobileNo = phoneNo;
         }
         mobileNo = phoneNo;
@@ -1735,6 +1741,37 @@ class AppStateProvider with ChangeNotifier {
     }
   }
 
+  Future<MyInvestmentsResponse?> getMyInvestments() async {
+    try {
+      final url = '${APIUrls.getMyInvestments}?customerId=$customerId';
+      final mipResp = await apiCalling.getRequest(url: url, headers: null);
+      final response = json.decode(mipResp);
+      if (response["statusCode"] == "200" && response["data"] != null) {
+        return MyInvestmentsResponse.fromJson(response["data"]);
+      }
+      return MyInvestmentsResponse(loanList: [], count: 0);
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<MyInvestmentDetail?> getMyInvestmentDetail(String contractId) async {
+    try {
+      final url =
+          '${APIUrls.getMyInvestmentDetail}?customerId=$customerId&contractId=$contractId';
+      final mipResp = await apiCalling.getRequest(url: url, headers: null);
+      final response = json.decode(mipResp);
+      if (response["statusCode"] == "200" && response["data"] != null) {
+        return MyInvestmentDetail.fromJson(response["data"]);
+      }
+      return null;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
   Future<bool> submitRedemption(List<LoanList> loans) async {
     var url = APIUrls.submitRedemptionData;
 
@@ -2004,9 +2041,11 @@ class AppStateProvider with ChangeNotifier {
 
       var response = json.decode(otpResponse);
       if (response["statusCode"] == "200") {
-        if (response['data']['token'] != null &&
+        final data = response['data'];
+        final responseToken = data is Map ? data['token'] : null;
+        if (responseToken != null &&
             (token == null || token == '' || newMobileOtp == null)) {
-          token = response['data']['token'];
+          token = responseToken;
         }
         if (!isLoggedIn) {
           getCustomerDetails();
@@ -2176,11 +2215,15 @@ class AppStateProvider with ChangeNotifier {
     if (response["statusCode"] == "200") {
       if (response['data'] != null) {
         portfolioAnalysis = PortfolioAnalysisModel.fromJson(response);
+        final summary = response['data']['portfolioSummary'];
+        portfolioSummary = summary != null
+            ? PortfolioSummary.fromJson(Map<String, dynamic>.from(summary))
+            : null;
+        notifyListeners();
       }
-      // final portfolioResponse =
-      //     PortfolioAnalysisModel.fromJson(response['data']);
-      // return portfolioResponse;
+      return portfolioAnalysis;
     } else {
+      portfolioSummary = null;
       return null;
     }
   }

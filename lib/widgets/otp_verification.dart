@@ -268,7 +268,13 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
   }
 
   void verifyOtp() async {
-    if (isValid()) {
+    if (!isValid() || isLoading) {
+      return;
+    }
+    setState(() {
+      isLoading = true;
+    });
+    try {
       var result = false;
       if (widget.mobileNumber == null || widget.mobileNumber == '') {
         result =
@@ -286,6 +292,12 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
           Navigator.pop(context);
         }
         widget.onVerified();
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
       }
     }
   }

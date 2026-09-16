@@ -465,6 +465,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       ListTile(
                         onTap: () {
+                          context.pushNamed(RoutesName.MyInvestments);
+                        },
+                        title: Container(
+                          height: 50,
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              color: Color(0xff37405D),
+                              borderRadius: BorderRadius.circular(8)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'My Investments',
+                                style: TextStyle(
+                                    fontFamily: CustomFonts.nunito,
+                                    fontSize: 15.0,
+                                    color: ColorsUtil.white,
+                                    fontWeight: FontWeight.w700),
+                              ),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                color: ColorsUtil.white,
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        onTap: () {
                           context.pushNamed(RoutesName.Redemption);
                         },
                         title: Container(

@@ -92,6 +92,8 @@ class APIUrls {
       '${baseURL}getInvesmentDetails';
   static final getRedemptionData = '${baseURL}getRedimptionLoanAmount';
   static final submitRedemptionData = '${baseURL}getRedimptionLoanUpdated';
+  static final getMyInvestments = '${baseURL}getMyInvestments';
+  static final getMyInvestmentDetail = '${baseURL}getMyInvestmentDetail';
   static final getStatement = '${baseURL}getStatement';
   static final getAutoinvestDate = '${baseURL}getAutoinvestDate';
   static final getAppVersion = '${baseURL}getAppVersion';

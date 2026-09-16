@@ -18,6 +18,8 @@ import 'package:Monexo/modules/home/screens/player_video_page.dart';
 import 'package:Monexo/modules/home/screens/view_detail_screen.dart';
 import 'package:Monexo/modules/marketplace/screens/market_place_screen.dart';
 import 'package:Monexo/modules/marketplace/screens/redemption_screen.dart';
+import 'package:Monexo/modules/marketplace/screens/my_investments_screen.dart';
+import 'package:Monexo/modules/marketplace/screens/my_investment_detail_screen.dart';
 import 'package:Monexo/modules/marketplace/screens/withdraw_screen.dart';
 import 'package:Monexo/modules/onboardingSteps/screens/aadhaar_verification.dart';
 import 'package:Monexo/modules/onboardingSteps/screens/authorized_signatory_screen.dart';
@@ -436,6 +438,22 @@ class AppRouter {
         name: RoutesName.Redemption,
         pageBuilder: (context, state) {
           return MaterialPage(key: state.pageKey, child: RedemptionScreen());
+        }),
+    GoRoute(
+        path: RoutesName.MyInvestments,
+        name: RoutesName.MyInvestments,
+        pageBuilder: (context, state) {
+          return MaterialPage(key: state.pageKey, child: MyInvestmentsScreen());
+        }),
+    GoRoute(
+        path: '${RoutesName.MyInvestmentDetail}/:${Constants.contractId}',
+        name: RoutesName.MyInvestmentDetail,
+        pageBuilder: (context, state) {
+          final contractId = state.params[Constants.contractId] ?? '';
+          return MaterialPage(
+            key: state.pageKey,
+            child: MyInvestmentDetailScreen(contractId: contractId),
+          );
         }),
     GoRoute(
         path: RoutesName.Withdraw,
