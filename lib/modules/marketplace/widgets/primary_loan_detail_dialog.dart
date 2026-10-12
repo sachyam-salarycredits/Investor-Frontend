@@ -6,7 +6,6 @@ import 'package:Monexo/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:Monexo/utils/colours_util.dart';
 import 'package:Monexo/utils/fonts.dart';
-import 'package:expand_widget/expand_widget.dart';
 import 'package:provider/src/provider.dart';
 
 //UI for mobile
@@ -506,8 +505,7 @@ class PrimaryLoanDetailsDialog extends StatelessWidget {
                                     SizedBox(
                                       height: 10,
                                     ),
-                                    Stack(children: [
-                                      Table(
+                                    Table(
                                           defaultColumnWidth:
                                               FixedColumnWidth(150.0),
                                           children: [
@@ -667,20 +665,10 @@ class PrimaryLoanDetailsDialog extends StatelessWidget {
                                               ),
                                             ]),
                                           ]),
-                                      FadeEndListView(),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          top: 95.0,
-                                        ),
-                                        child: ExpandChild(
-                                          arrowPadding: EdgeInsets.symmetric(
-                                              horizontal: 0),
-                                          arrowColor: ColorsUtil.blueColorCart,
-                                          icon: Icons.expand_more_rounded,
-                                          child: Column(
+                                      Column(
                                             children: <Widget>[
                                               SizedBox(
-                                                height: 70,
+                                                height: 20,
                                               ),
                                               Divider(
                                                 thickness: 1,
@@ -1366,9 +1354,6 @@ class PrimaryLoanDetailsDialog extends StatelessWidget {
                                               ),
                                             ],
                                           ),
-                                        ),
-                                      ),
-                                    ])
                                   ],
                                 ),
                               )
@@ -2452,31 +2437,6 @@ const rowSpacer = TableRow(children: [
     height: 8,
   )
 ]);
-
-class FadeEndListView extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 70,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0.0, 1.0],
-            colors: [
-              Theme.of(context).scaffoldBackgroundColor.withOpacity(0.0),
-              Theme.of(context).scaffoldBackgroundColor,
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class HeadingValueContainer extends StatelessWidget {
   final String heading;

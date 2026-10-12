@@ -2,6 +2,7 @@ import 'package:Monexo/modules/home/models/DelinquencyStatusModel.dart';
 import 'package:Monexo/modules/home/models/PortfolioAnalysisModel.dart';
 import 'package:Monexo/modules/home/models/PortfolioTabStatusModel.dart';
 import 'package:Monexo/modules/home/models/portfolio_summary.dart';
+import 'package:Monexo/modules/marketplace/models/my_investments_data.dart';
 import 'package:Monexo/modules/marketplace/widgets/outlined_popup_container.dart';
 import 'package:Monexo/providers/app_state_provider.dart';
 import 'package:Monexo/routes_management/routes_list.dart';
@@ -51,11 +52,14 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis>
   bool isDelinquencyShown = false;
   PortfolioTabStatusModel? portfolioTabStatusData;
   DelinquencyStatusModel? delinquencyTabStatusData;
+  List<MyInvestmentLoan> _investments = [];
+  bool _investmentsLoading = false;
 
   @override
   void initState() {
     getPortfolioTabStatus();
     getPortfolioData();
+    _loadInvestments();
     context.read<AppStateProvider>().getUserFundDetails();
 
     // TODO: implement initState
@@ -127,6 +131,53 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis>
             false) &&
         (delinquencyTabStatusData?.data == '1' ? true : false));
     // print('delin $isDelinquencyShown');
+
+    // Charts hidden for now — loan list is shown under Portfolio Summary.
+    isInterestEarnedShown = false;
+    isRiskShown = false;
+    isLoanTenureShown = false;
+    isRemainingLoanShown = false;
+    isInterestRatioShown = false;
+    isDelinquencyShown = false;
+  }
+
+  Future<void> _loadInvestments() async {
+    setState(() => _investmentsLoading = true);
+    final data = await context.read<AppStateProvider>().getMyInvestments();
+    if (!mounted) return;
+    setState(() {
+      _investments = data?.loanList ?? [];
+      _investmentsLoading = false;
+    });
+  }
+
+  bool _isClosedInvestmentStatus(String? status) {
+    final value = (status ?? '').toUpperCase();
+    return value == 'CLOSED' || value == 'REDEEMED';
+  }
+
+  List<MyInvestmentLoan> get _visibleInvestments {
+    if (_selectedBook == _PortfolioBookSection.active) {
+      return _investments
+          .where((loan) => !_isClosedInvestmentStatus(loan.status))
+          .toList();
+    }
+    return _investments
+        .where((loan) => _isClosedInvestmentStatus(loan.status))
+        .toList();
+  }
+
+  Color _investmentStatusColor(String? status) {
+    switch ((status ?? '').toUpperCase()) {
+      case 'ACTIVE':
+        return ColorsUtil.green;
+      case 'CLOSED':
+        return ColorsUtil.blueColor;
+      case 'REDEEMED':
+        return ColorsUtil.orange;
+      default:
+        return ColorsUtil.lightGrey;
+    }
   }
 
   getPortfolioData() async {
@@ -525,10 +576,190 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis>
     );
   }
 
+  Widget _investmentsSection() {
+    if (_investmentsLoading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final visible = _visibleInvestments;
+    if (_investments.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Text(
+          "You haven't funded any loans yet.",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: CustomFonts.nunito,
+            fontSize: 14,
+            color: ColorsUtil.lightBlack,
+          ),
+        ),
+      );
+    }
+
+    if (visible.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Text(
+          _selectedBook == _PortfolioBookSection.active
+              ? 'No active loans.'
+              : 'No closed loans.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: CustomFonts.nunito,
+            fontSize: 14,
+            color: ColorsUtil.lightBlack,
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        for (int i = 0; i < visible.length; i++) ...[
+          if (i > 0) const SizedBox(height: 12),
+          _investmentLoanCard(visible[i]),
+        ],
+      ],
+    );
+  }
+
+  Widget _investmentLoanCard(MyInvestmentLoan loan) {
+    return InkWell(
+      onTap: () {
+        final contract = loan.contractId ?? '';
+        if (contract.isEmpty) return;
+        context.pushNamed(
+          RoutesName.MyInvestmentDetail,
+          params: {
+            Constants.contractId: contract,
+          },
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: ColorsUtil.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: ColorsUtil.settingDivider),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    loan.borrowerName?.isNotEmpty == true
+                        ? loan.borrowerName!
+                        : (loan.contractId ?? '-'),
+                    style: TextStyle(
+                      fontFamily: CustomFonts.nunito,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: ColorsUtil.blueColor,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _investmentStatusColor(loan.status).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    loan.status ?? '-',
+                    style: TextStyle(
+                      fontFamily: CustomFonts.nunito,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: _investmentStatusColor(loan.status),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if ((loan.productName ?? '').isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  loan.productName!,
+                  style: TextStyle(
+                    fontFamily: CustomFonts.nunito,
+                    fontSize: 13,
+                    color: ColorsUtil.lightGrey,
+                  ),
+                ),
+              ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                _investmentMeta(
+                  'Invested',
+                  '₹${(loan.investedAmount ?? 0).commaAddedValue()}',
+                ),
+                _investmentMeta(
+                  'Interest earned',
+                  '₹${(loan.interestReceived ?? 0).commaAddedValue()}',
+                ),
+                _investmentMeta(
+                  'Rate',
+                  '${loan.interestRate ?? 0}%',
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Invested on ${loan.investedDate ?? '-'}  ·  ${loan.contractId ?? ''}',
+              style: TextStyle(
+                fontFamily: CustomFonts.nunito,
+                fontSize: 11,
+                color: ColorsUtil.lightGrey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _investmentMeta(String label, String value) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontFamily: CustomFonts.nunito,
+              fontSize: 11,
+              color: ColorsUtil.lightGrey,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: TextStyle(
+              fontFamily: CustomFonts.nunito,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: ColorsUtil.blackish,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Column mainWidget(BuildContext context) {
     var provider = Provider.of<AppStateProvider>(context);
-    var userDetails = provider.userDetails!;
-    var fundDetails = provider.userFundTransferDetails;
     final portfolioSummary = provider.portfolioSummary;
     final selectedSummary = _selectedBook == _PortfolioBookSection.active
         ? portfolioSummary?.active
@@ -609,118 +840,20 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis>
                                 ),
                               ),
                             const SizedBox(height: 16),
-                            Text(
-                              'ACCOUNT OVERVIEW',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontFamily: CustomFonts.nunito,
-                                color: ColorsUtil.greyTabColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            InkWell(
-                              onTap: () {
-                                context.pushNamed(RoutesName.MyInvestments);
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: ColorsUtil.blueColor,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'My Investments',
-                                      style: TextStyle(
-                                        fontFamily: CustomFonts.nunito,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                        color: ColorsUtil.white,
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.arrow_forward_ios,
-                                      size: 14,
-                                      color: ColorsUtil.white,
-                                    ),
-                                  ],
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'MY INVESTMENTS',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: CustomFonts.nunito,
+                                  color: ColorsUtil.greyTabColor,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            GridView.count(
-                              shrinkWrap: true,
-                              crossAxisSpacing: 15,
-                              mainAxisSpacing: 15,
-                              physics: NeverScrollableScrollPhysics(),
-                              crossAxisCount: 2,
-                              children: [
-                                OutlinePopupContainer(
-                                  tabColor: ColorsUtil.portfolioTabColor1,
-                                  tabBorderColor:
-                                      ColorsUtil.portfolioTabBorderColor1,
-                                  title: 'Total Funds Transferred',
-                                  subtitle:
-                                      '₹${fundDetails?.totalFundsTransferred?.transactionAmount.commaAddedValue() ?? " 0"}',
-                                  statement: fundDetails
-                                          ?.totalFundsTransferred?.statement ??
-                                      [],
-                                ),
-                                OutlinePopupContainer(
-                                  tabColor: ColorsUtil.portfolioTabColor1,
-                                  tabBorderColor:
-                                      ColorsUtil.portfolioTabBorderColor1,
-                                  title: 'Total Funds Withdrawn',
-                                  subtitle:
-                                      '₹${fundDetails?.totalFundsWithdrawn?.transactionAmount.commaAddedValue() ?? " 0"}',
-                                  statement: fundDetails
-                                          ?.totalFundsWithdrawn?.statement ??
-                                      [],
-                                ),
-                                OutlinePopupContainer(
-                                  tabColor: ColorsUtil.portfolioTabColor2,
-                                  tabBorderColor:
-                                      ColorsUtil.portfolioTabBorderColor2,
-                                  title: 'Income Since Inception',
-                                  subtitle:
-                                      '₹${fundDetails?.totalIncome?.income.commaAddedValue() ?? " 0"}',
-                                  statement:
-                                      fundDetails?.totalIncome?.statement ?? [],
-                                ),
-                                OutlinePopupContainer(
-                                  tabColor: ColorsUtil.portfolioTabColor2,
-                                  tabBorderColor:
-                                      ColorsUtil.portfolioTabBorderColor2,
-                                  title: 'Annualized Net Yield',
-                                  subtitle:
-                                      '${fundDetails?.totalNetYeild?.netYeild ?? " 0"} %',
-                                ),
-                                OutlinePopupContainer(
-                                  tabColor: ColorsUtil.portfolioTabColor3,
-                                  tabBorderColor:
-                                      ColorsUtil.portfolioTabBorderColor3,
-                                  title: 'Live \nLoans',
-                                  subtitle: '${fundDetails?.liveLoans ?? " 0"}',
-                                ),
-                                OutlinePopupContainer(
-                                  tabColor: ColorsUtil.portfolioTabColor3,
-                                  tabBorderColor:
-                                      ColorsUtil.portfolioTabBorderColor3,
-                                  title: 'Loans Fully Collected',
-                                  subtitle:
-                                      '${fundDetails?.LoansFullyCompleted ?? " 0"}',
-                                ),
-                              ],
-                              childAspectRatio: 1.7 / 1,
-                            ),
+                            const SizedBox(height: 10),
+                            _investmentsSection(),
                           ],
                         ),
                       )),

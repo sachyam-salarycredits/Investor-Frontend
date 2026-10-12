@@ -1,11 +1,9 @@
-import 'dart:async';
 import 'package:Monexo/providers/app_state_provider.dart';
 import 'package:Monexo/routes_management/routes_list.dart';
 import 'package:Monexo/utils/api_constant.dart';
 import 'package:Monexo/utils/colours_util.dart';
 import 'package:Monexo/utils/images.dart';
 import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/utils.dart';
 import 'package:Monexo/widgets/custom_button.dart';
 import 'package:Monexo/utils/fonts.dart';
 import 'package:Monexo/widgets/loader.dart';
@@ -14,9 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../utils/constants.dart';
-import '../../home/models/YoutubeVediosModel.dart';
 
 class FirstDepositScreen extends StatefulWidget {
   final bool fromOtp;
@@ -28,9 +23,7 @@ class FirstDepositScreen extends StatefulWidget {
 
 class _FirstDepositScreenState extends State<FirstDepositScreen> {
   bool _isLoading = false;
-  List<VideoData>? youtubevideos = [];
   bool loading = false;
-  String thumbnailUrl = '';
   setLoader(bool value) {
     setState(() {
       loading = value;
@@ -40,60 +33,17 @@ class _FirstDepositScreenState extends State<FirstDepositScreen> {
   @override
   void initState() {
     super.initState();
-    getYoutubeVideosLocaly();
 
     resetOnbaordingScreenStatus();
     if (widget.fromOtp == false) {
       //get  AutoInvestCategoryDetails only before fund transfer screen
       getAutoInvestCategoryDetails();
     }
-    Timer(Duration(seconds: 1), () {
-      navigateToVideoPlayer();
-    });
   }
 
   Future<void> resetOnbaordingScreenStatus() async {
     var pref = await SharedPreferences.getInstance();
     await pref.setBool('show_onboarding', false);
-  }
-
-  getYoutubeVideosLocaly() async {
-    final youtubeVideo = context.read<AppStateProvider>().youtubeVideos;
-    youtubevideos = youtubeVideo?.data;
-    print('youtube:::$youtubeVideo');
-    if (widget.fromOtp) {
-      thumbnailUrl = youtubevideos
-              ?.firstWhere((element) => element.videoType == 'BankVerification')
-              .thumbnailUrl ??
-          '';
-    } else {
-      thumbnailUrl = youtubevideos
-              ?.firstWhere((element) => element.videoType == 'FirstDeposit')
-              .thumbnailUrl ??
-          '';
-    }
-  }
-
-  void navigateToVideoPlayer() {
-    String? url;
-    if (widget.fromOtp) {
-      url = youtubevideos
-          ?.firstWhere((element) => element.videoType == 'BankVerification')
-          .videoUrl;
-    } else {
-      url = youtubevideos
-          ?.firstWhere((element) => element.videoType == 'FirstDeposit')
-          .videoUrl;
-    }
-    if (Utils.isWeb) {
-      Utils.launchURL(url ?? '');
-    } else {
-      final checkForValidation = widget.fromOtp == false ? 'true' : 'false';
-      context.pushNamed(RoutesName.VideoPlayerPage, params: {
-        Constants.videoUrl: url ?? '',
-        Constants.validateWatchTime: checkForValidation,
-      });
-    }
   }
 
   getAutoInvestCategoryDetails() async {
@@ -263,92 +213,6 @@ class _FirstDepositScreenState extends State<FirstDepositScreen> {
                       SizedBox(
                         height: 30,
                       ),
-                      Container(
-                        height: 200,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: ColorsUtil.inputBG,
-                          border: Border.all(
-                              width: 1.25, color: ColorsUtil.blueColor),
-                          // color: ColorsUtil.blueColor,
-                          borderRadius: BorderRadius.all(Radius.circular(
-                                  5.0) //                 <--- border radius here
-                              ),
-                        ),
-                        child: Container(
-                            child: Stack(
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                navigateToVideoPlayer();
-                              },
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.network(
-                                  thumbnailUrl,
-                                  height: double.infinity,
-                                  width: double.infinity,
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: Container(
-                                height: 35,
-                                width: 90,
-                                child: TextButton(
-                                  style: ButtonStyle(
-                                      padding:
-                                          MaterialStateProperty.all<EdgeInsets>(
-                                              EdgeInsets.only(
-                                                  top: 10,
-                                                  bottom: 10,
-                                                  left: 15)),
-                                      backgroundColor:
-                                          MaterialStateProperty.all<Color>(
-                                              ColorsUtil.blueColor),
-                                      shape: MaterialStateProperty.all<
-                                              RoundedRectangleBorder>(
-                                          RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(20.0),
-                                      ))),
-                                  onPressed: () {
-                                    navigateToVideoPlayer();
-                                  },
-                                  child: Row(
-                                    // mainAxisAlignment:
-                                    // MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                          widget.fromOtp
-                                              ? content[0].videoText
-                                              : content[1].videoText,
-                                          style: TextStyle(
-                                              fontFamily: CustomFonts.nunito,
-                                              fontSize: 17,
-                                              color: ColorsUtil.white,
-                                              fontWeight: FontWeight.w700)),
-                                      // SizedBox(
-                                      //   width: 5,
-                                      // ),
-                                      Icon(
-                                        Icons.arrow_right,
-                                        size: 30,
-                                        color: ColorsUtil.white,
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
-                        )),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
                       Visibility(
                         visible: widget.fromOtp
                             ? content[0].showActionText
@@ -421,7 +285,7 @@ class _FirstDepositScreenState extends State<FirstDepositScreen> {
                     : content[1].btnText,
                 onPress: () {
                   if (widget.fromOtp) {
-                    context.pushNamed(RoutesName.BankDetail);
+                    context.pushNamed(RoutesName.SelfieCapture);
                   } else {
                     context.pushNamed(RoutesName.NewFundTransferScreen);
                   }
@@ -439,7 +303,6 @@ class _FirstDepositScreenState extends State<FirstDepositScreen> {
 class FirstDepositScreenContent {
   String titleText;
   String subTitleText;
-  String videoText;
   String actionText;
   String descriptionText;
   String btnText;
@@ -450,7 +313,6 @@ class FirstDepositScreenContent {
   FirstDepositScreenContent({
     required this.titleText,
     required this.subTitleText,
-    required this.videoText,
     required this.actionText,
     required this.descriptionText,
     required this.btnText,
@@ -467,7 +329,6 @@ List<FirstDepositScreenContent> content = [
     titleText: 'Welcome Monexo Investor',
     subTitleText:
         'You are now a step closer to making your\nfirst investment with Monexo',
-    videoText: 'Play',
     actionText: 'Now lets verify your\nbank account',
     btnText: 'Start Verification',
     descriptionText: '',
@@ -482,7 +343,6 @@ List<FirstDepositScreenContent> content = [
     titleText: 'Your Bank Account is Verified!',
     subTitleText:
         'You are just a step away to making your first\ninvestment with Monexo',
-    videoText: 'Play',
     actionText: 'Make your First Fund Transfer',
     btnText: 'Deposit Money',
     showShieldText: true,
@@ -495,7 +355,6 @@ List<FirstDepositScreenContent> content = [
     titleText: 'Setup you MIP',
     subTitleText:
         'Transfer your montly interest earnings back to your\nbank account',
-    videoText: 'Play',
     actionText: 'Make your First Fund Transfer',
     btnText: 'Setup MIP',
     descriptionText:
@@ -510,7 +369,6 @@ List<FirstDepositScreenContent> content = [
     titleText: 'Your Bank Account is Verified!',
     subTitleText:
         'You are just a step away to making your first\ninvestment with Monexo',
-    videoText: 'Play',
     actionText: 'Make your First Fund Transfer',
     btnText: 'Deposit Money',
     descriptionText:

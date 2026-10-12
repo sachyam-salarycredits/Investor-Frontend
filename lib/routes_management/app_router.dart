@@ -12,6 +12,7 @@ import 'package:Monexo/modules/authentication/screens/term_condtion_screen.dart'
 import 'package:Monexo/modules/authentication/screens/welcome_back_screen.dart';
 import 'package:Monexo/modules/bankDetails/screens/bank_details.dart';
 import 'package:Monexo/modules/bankDetails/screens/penny_drop_screen.dart';
+import 'package:Monexo/modules/bankDetails/screens/selfie_capture_screen.dart';
 import 'package:Monexo/modules/bankDetails/screens/welcome_screen.dart';
 import 'package:Monexo/modules/home/screens/home_screen.dart';
 import 'package:Monexo/modules/home/screens/player_video_page.dart';
@@ -274,6 +275,13 @@ class AppRouter {
 
   //these are used within the app
   static final commonRoutes = [
+    GoRoute(
+        path: RoutesName.SelfieCapture,
+        name: RoutesName.SelfieCapture,
+        pageBuilder: (context, state) {
+          return MaterialPage(
+              key: state.pageKey, child: SelfieCaptureScreen());
+        }),
     GoRoute(
         path: RoutesName.BankDetail,
         name: RoutesName.BankDetail,

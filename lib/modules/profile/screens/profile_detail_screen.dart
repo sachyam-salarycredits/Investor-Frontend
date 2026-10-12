@@ -77,7 +77,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen>
     var userData = provider.userDetails!;
     return WillPopScope(
       onWillPop: () async {
-        return false;
+        return true;
       },
       child: Scaffold(
         body: SafeArea(

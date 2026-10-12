@@ -8,6 +8,7 @@ class RoutesName {
   static const String OTPVerification = 'otp_verification_page';
   static const String WelcomeBack = 'welcome_back_page';
   static const String BankDetail = 'bank_detail_page';
+  static const String SelfieCapture = 'selfie_capture_page';
   static const String PennyDrop = 'penny_drop_page';
   static const String Welcome = 'welcome_page';
   static const String WhatsNext = 'whats_next_page';

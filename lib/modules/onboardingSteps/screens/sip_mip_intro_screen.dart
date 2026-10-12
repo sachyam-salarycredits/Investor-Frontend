@@ -1,22 +1,12 @@
-import 'dart:async';
-import 'package:Monexo/providers/app_state_provider.dart';
 import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/api_constant.dart';
 import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/images.dart';
 import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/utils.dart';
 import 'package:Monexo/widgets/custom_button.dart';
 import 'package:Monexo/utils/fonts.dart';
 import 'package:Monexo/widgets/loader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../utils/constants.dart';
-import '../../home/models/YoutubeVediosModel.dart';
 
 class SIPMIPIntroScreen extends StatefulWidget {
   final bool forSIP;
@@ -28,65 +18,10 @@ class SIPMIPIntroScreen extends StatefulWidget {
 
 class _SIPMIPIntroScreen extends State<SIPMIPIntroScreen> {
   bool _isLoading = false;
-  List<VideoData>? youtubevideos = [];
-  bool loading = false;
-  String thumbnailUrl = '';
-  setLoader(bool value) {
-    setState(() {
-      loading = value;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    getYoutubeVideosLocaly();
-
-    Timer(Duration(seconds: 1), () {
-      navigateToVideoPlayer();
-    });
-  }
-
-  getYoutubeVideosLocaly() async {
-    final youtubeVideo = context.read<AppStateProvider>().youtubeVideos;
-    youtubevideos = youtubeVideo?.data;
-    print('youtube:::$youtubeVideo');
-    if(widget.forSIP) {
-      thumbnailUrl = youtubevideos
-          ?.firstWhere((element) => element.videoType == 'SIP')
-          .thumbnailUrl ?? '';
-    } else {
-      thumbnailUrl = youtubevideos
-          ?.firstWhere((element) => element.videoType == 'MIP')
-          .thumbnailUrl ?? '';
-    }
-  }
-
-  void navigateToVideoPlayer() {
-    String? url;
-    if (widget.forSIP) {
-      url = youtubevideos
-          ?.firstWhere((element) => element.videoType == 'SIP')
-          .videoUrl;
-    } else {
-      url = youtubevideos
-          ?.firstWhere((element) => element.videoType == 'MIP')
-          .videoUrl;
-    }
-    if (Utils.isWeb) {
-      Utils.launchURL(url ?? '');
-    } else {
-      context.pushNamed(RoutesName.VideoPlayerPage, params: {
-        Constants.videoUrl: url ?? '',
-        Constants.validateWatchTime: 'false',
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
-    // context.read<AppStateProvider>().context = context;
 
     return WillPopScope(
       onWillPop: () async {
@@ -181,7 +116,6 @@ class _SIPMIPIntroScreen extends State<SIPMIPIntroScreen> {
   }
 
   Widget mainWidgets(BuildContext context) {
-    var provider = Provider.of<AppStateProvider>(context, listen: false);
     return Expanded(
       child: Column(
         children: [
@@ -218,89 +152,6 @@ class _SIPMIPIntroScreen extends State<SIPMIPIntroScreen> {
                               fontWeight: FontWeight.w400)),
                       SizedBox(
                         height: 50,
-                      ),
-                      Container(
-                        height: 200,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: ColorsUtil.inputBG,
-                          border: Border.all(
-                              width: 1.25, color: ColorsUtil.blueColor),
-                          // color: ColorsUtil.blueColor,
-                          borderRadius: BorderRadius.all(Radius.circular(
-                              5.0) //                 <--- border radius here
-                          ),
-                        ),
-                        child: Container(
-                            child: Stack(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    navigateToVideoPlayer();
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: Image.network(
-                                      thumbnailUrl,
-                                      height: double.infinity,
-                                      width: double.infinity,
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                ),
-                                Align(
-                                  alignment: Alignment.center,
-                                  child: Container(
-                                    height: 35,
-                                    width: 90,
-                                    child: TextButton(
-                                      style: ButtonStyle(
-                                          padding:
-                                          MaterialStateProperty.all<EdgeInsets>(
-                                              EdgeInsets.only(
-                                                  top: 10,
-                                                  bottom: 10,
-                                                  left: 15)),
-                                          backgroundColor:
-                                          MaterialStateProperty.all<Color>(
-                                              ColorsUtil.blueColor),
-                                          shape: MaterialStateProperty.all<
-                                              RoundedRectangleBorder>(
-                                              RoundedRectangleBorder(
-                                                borderRadius:
-                                                BorderRadius.circular(20.0),
-                                              ))),
-                                      onPressed: () {
-                                        navigateToVideoPlayer();
-                                      },
-                                      child: Row(
-                                        // mainAxisAlignment:
-                                        // MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                              widget.forSIP
-                                                  ? content[0].videoText
-                                                  : content[1].videoText,
-                                              style: TextStyle(
-                                                  fontFamily: CustomFonts.nunito,
-                                                  fontSize: 17,
-                                                  color: ColorsUtil.white,
-                                                  fontWeight: FontWeight.w700)),
-                                          Icon(
-                                            Icons.arrow_right,
-                                            size: 30,
-                                            color: ColorsUtil.white,
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            )),
-                      ),
-                      SizedBox(
-                        height: 10,
                       ),
                     ],
                   ),
@@ -345,14 +196,12 @@ class _SIPMIPIntroScreen extends State<SIPMIPIntroScreen> {
 class SIPMIPIntroScreenContent {
   String titleText;
   String subTitleText;
-  String videoText;
   String descriptionText;
   String btnText;
 
   SIPMIPIntroScreenContent({
     required this.titleText,
     required this.subTitleText,
-    required this.videoText,
     required this.descriptionText,
     required this.btnText,
   });
@@ -365,7 +214,6 @@ List<SIPMIPIntroScreenContent> content = [
     titleText: 'Setup you SIP',
     subTitleText:
     'Don’t miss out on investment opportunities and make the most out to compound your returns',
-    videoText: 'Play',
     btnText: 'Setup SIP',
     descriptionText: 'Automate adding funds to your Monexo Account with our SIP Feature',
   ),
@@ -374,7 +222,6 @@ List<SIPMIPIntroScreenContent> content = [
     titleText: 'Setup you MIP',
     subTitleText:
     'Transfer your montly interest earnings back to your\nbank account',
-    videoText: 'Play',
     btnText: 'Setup MIP',
     descriptionText:
     'Automate what to do with your interest earned every month',

@@ -607,6 +607,38 @@ class AppStateProvider with ChangeNotifier {
     return ok;
   }
 
+  /// Upload registration selfie to S3 and set as profile photo.
+  Future<bool> uploadProfilePhoto(String filePath) async {
+    try {
+      if (customerId.isEmpty || filePath.isEmpty) return false;
+      final platformFile = Utils.getPlatformFile(filePath);
+      if (platformFile == null) return false;
+
+      final files = <String, PlatformFile>{
+        ApiParams.profileImage: platformFile,
+      };
+      final param = <String, String>{
+        ApiParams.customerId: customerId,
+      };
+
+      final resp = await apiCalling.dataPostRequestAllPlatform(
+        url: APIUrls.uploadProfilePhoto,
+        headers: null,
+        parameters: param,
+        files: files,
+      );
+      final response = json.decode(resp);
+      if (response["statusCode"] == "200") {
+        await getCustomerDetails();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
   /// Get CashFreeToken api
   Future<bool> saveBankDetails(param) async {
     try {

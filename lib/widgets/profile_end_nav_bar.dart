@@ -91,7 +91,7 @@ class _NavBarWidgetState extends State<NavBarWidget> {
     var screenSize = MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: () async {
-        return false;
+        return true;
       },
       child: Scaffold(
         backgroundColor: ColorsUtil.white,
@@ -115,9 +115,7 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                 ),
                 leading: BackButton(
                   onPressed: () {
-                    // context.pop();
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()));
+                    Navigator.pop(context);
                   },
                 ),
               )

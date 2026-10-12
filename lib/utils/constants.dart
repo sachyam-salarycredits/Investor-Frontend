@@ -90,6 +90,9 @@ class Constants {
   static var registration = false;
   static var showOnbaording = true;
 
+  /// Local path of registration selfie (camera capture before bank details).
+  static const registrationSelfiePath = 'registration_selfie_path';
+
   static var paymentMethod = 'paymentMethod';
 
 

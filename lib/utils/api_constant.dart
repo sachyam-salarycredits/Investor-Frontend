@@ -78,6 +78,7 @@ class APIUrls {
   static final getOldSipDetails = '${baseURL}getSipDetails?customerId=';
   static final getOldMipDetail = '${baseURL}getMipDetail?customerId=';
   static final updateProfile = '${baseURL}updateProfile';
+  static final uploadProfilePhoto = '${baseURL}uploadProfilePhoto';
   static final getAmountDetails = '${baseURL}v2/getAmountDetails?customerId=';
   static final getCashFreeOrderStatus = '${baseURL}getOrderStatusByOrderId/';
   static final getPrimaryMarketLoanList = '${baseURL}v2/getprimeryMarketLoans';

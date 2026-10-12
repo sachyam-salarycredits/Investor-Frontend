@@ -1,5 +1,4 @@
 import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/constants.dart';
 import 'package:Monexo/utils/images.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +11,9 @@ class LogoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (url.isEmpty || !url.contains(Constants.profileUrl))
+    final hasNetworkPhoto =
+        url.isNotEmpty && (url.startsWith('http://') || url.startsWith('https://'));
+    if (!hasNetworkPhoto)
       return Container(
         width: size,
         height: size,

@@ -95,7 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     var screenSize = MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: () async {
-        return false;
+        return true;
       },
       child: Scaffold(
         backgroundColor: ColorsUtil.blueColor,
@@ -465,7 +465,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       ListTile(
                         onTap: () {
-                          context.pushNamed(RoutesName.MyInvestments);
+                          context.pushNamed(RoutesName.PortfolioAnalysis);
                         },
                         title: Container(
                           height: 50,
