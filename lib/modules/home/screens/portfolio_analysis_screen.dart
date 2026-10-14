@@ -1230,7 +1230,7 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis>
                                               paletteList: [
                                                 Color(0xffD9ED92),
                                                 Color(0xff52B69A),
-                                                Color(0xff00164E),
+                                                ColorsUtil.blueColor,
                                                 Color(0xffFFDC4A),
                                               ],
                                             ),
@@ -1312,7 +1312,7 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis>
                                               paletteList: [
                                                 Color(0xffD9ED92),
                                                 Color(0xff52B69A),
-                                                Color(0xff00164E),
+                                                ColorsUtil.blueColor,
                                                 Color(0xffFFDC4A),
                                                 Color(0xffC67B00),
                                               ],
@@ -1553,7 +1553,7 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis>
                                               paletteList: [
                                                 Color(0xffD9ED92),
                                                 Color(0xff52B69A),
-                                                Color(0xff00164E),
+                                                ColorsUtil.blueColor,
                                                 Color(0xffC67B00),
                                                 Color(0xff3F704D),
                                                 Color(0xffBFD7ED),
@@ -1650,7 +1650,7 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis>
                                               paletteList: [
                                                 Color(0xffD9ED92),
                                                 Color(0xff52B69A),
-                                                Color(0xff00164E),
+                                                ColorsUtil.blueColor,
                                                 Color(0xffC67B00),
                                                 Color(0xff3F704D),
                                                 Color(0xffBFD7ED),
@@ -1869,7 +1869,7 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis>
                                               paletteList: [
                                                 Color(0xffD9ED92),
                                                 Color(0xff52B69A),
-                                                Color(0xff00164E),
+                                                ColorsUtil.blueColor,
                                                 Color(0xffFFDC4A),
                                                 Color(0xffC67B00),
                                                 Color(0xff3F704D),
@@ -1985,7 +1985,7 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis>
                                               paletteList: [
                                                 Color(0xffD9ED92),
                                                 Color(0xff52B69A),
-                                                Color(0xff00164E),
+                                                ColorsUtil.blueColor,
                                                 Color(0xffFFDC4A),
                                                 Color(0xffC67B00),
                                                 Color(0xff3F704D),

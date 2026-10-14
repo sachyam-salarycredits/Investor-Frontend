@@ -455,7 +455,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         ),
         child: Icon(
           Icons.arrow_forward_ios_outlined,
-          color: Color(0xff333333),
+          color: ColorsUtil.arrowColor,
           size: 14.0,
         ),
       ),

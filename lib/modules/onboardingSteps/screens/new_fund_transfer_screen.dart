@@ -435,7 +435,7 @@ class _NewFundTransferScreenState extends State<NewFundTransferScreen> {
                   ),
                 ),
                 toolbarHeight: 70,
-                backgroundColor: Color(0xff2B3453),
+                backgroundColor: ColorsUtil.blueColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(
                     bottom: Radius.circular(8),
@@ -1058,7 +1058,7 @@ class PointWidget extends StatelessWidget {
           ),
           child: Icon(
             Icons.arrow_forward_ios_outlined,
-            color: Color(0xff333333),
+            color: ColorsUtil.arrowColor,
             size: 14.0,
           ),
         ),

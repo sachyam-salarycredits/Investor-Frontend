@@ -328,7 +328,7 @@ class _AutoInvestmentScreenState extends State<AutoInvestmentScreen> {
                   ),
                 ),
                 toolbarHeight: 70,
-                backgroundColor: Color(0xff2B3453),
+                backgroundColor: ColorsUtil.blueColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(
                     bottom: Radius.circular(8),

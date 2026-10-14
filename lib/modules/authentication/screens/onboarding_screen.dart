@@ -174,7 +174,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                       color: Colors.white,
                                     ),
                                   ),
-                                  Icon(Icons.arrow_forward, color: Colors.white,)
+                                  Icon(Icons.arrow_forward, color: ColorsUtil.arrowColor,)
                                 ],
                               )
                           ),

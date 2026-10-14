@@ -52,7 +52,7 @@ class FlySdk {
     print("init flyyy sdk");
     // GlobalData.referralCode = "LRW6QV3";
     FlyyFlutterPlugin.setPackageName("com.monexo.lender.app");
-    FlyyFlutterPlugin.setThemeColor("#2B3453", "#2B3453");
+    FlyyFlutterPlugin.setThemeColor("#01503A", "#CC9C20");
 
     final stage = Constants.isProd
         ? FlyyFlutterPlugin.PRODUCTION

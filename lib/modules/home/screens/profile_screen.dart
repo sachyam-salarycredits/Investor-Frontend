@@ -430,7 +430,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             padding: EdgeInsets.symmetric(horizontal: 10),
                             width: double.infinity,
                             decoration: BoxDecoration(
-                                color: Color(0xff37405D),
+                                color: ColorsUtil.blueColor,
                                 borderRadius: BorderRadius.circular(8)),
 
                             child: ExpansionTile(
@@ -439,7 +439,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               textColor: Colors.white,
                               trailing: Icon(
                                 Icons.arrow_forward_ios,
-                                color: ColorsUtil.white,
+                                color: ColorsUtil.arrowColor,
                               ),
                               iconColor: ColorsUtil.dividerColor,
                               title: Text(
@@ -472,7 +472,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           padding: EdgeInsets.symmetric(horizontal: 10),
                           width: double.infinity,
                           decoration: BoxDecoration(
-                              color: Color(0xff37405D),
+                              color: ColorsUtil.blueColor,
                               borderRadius: BorderRadius.circular(8)),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -487,7 +487,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               Icon(
                                 Icons.arrow_forward_ios,
-                                color: ColorsUtil.white,
+                                color: ColorsUtil.arrowColor,
                               )
                             ],
                           ),
@@ -502,7 +502,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           padding: EdgeInsets.symmetric(horizontal: 10),
                           width: double.infinity,
                           decoration: BoxDecoration(
-                              color: Color(0xff37405D),
+                              color: ColorsUtil.blueColor,
                               borderRadius: BorderRadius.circular(8)),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -517,7 +517,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               Icon(
                                 Icons.arrow_forward_ios,
-                                color: ColorsUtil.white,
+                                color: ColorsUtil.arrowColor,
                               )
                             ],
                           ),
@@ -532,7 +532,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           padding: EdgeInsets.symmetric(horizontal: 10),
                           width: double.infinity,
                           decoration: BoxDecoration(
-                              color: Color(0xff37405D),
+                              color: ColorsUtil.blueColor,
                               borderRadius: BorderRadius.circular(8)),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -547,7 +547,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               Icon(
                                 Icons.arrow_forward_ios,
-                                color: ColorsUtil.white,
+                                color: ColorsUtil.arrowColor,
                               )
                             ],
                           ),
@@ -559,7 +559,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           padding: EdgeInsets.symmetric(horizontal: 10),
                           width: double.infinity,
                           decoration: BoxDecoration(
-                              color: Color(0xff37405D),
+                              color: ColorsUtil.blueColor,
                               borderRadius: BorderRadius.circular(8)),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -590,7 +590,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           padding: EdgeInsets.symmetric(horizontal: 10),
                           width: double.infinity,
                           decoration: BoxDecoration(
-                              color: Color(0xff37405D),
+                              color: ColorsUtil.blueColor,
                               borderRadius: BorderRadius.circular(8)),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -640,8 +640,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(7.0),
                                       border:
-                                          Border.all(color: Color(0xff37405D)),
-                                      color: Color(0xff37405D)),
+                                          Border.all(color: ColorsUtil.blueColor),
+                                      color: ColorsUtil.blueColor),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
@@ -679,8 +679,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(7.0),
                                       border:
-                                          Border.all(color: Color(0xff37405D)),
-                                      color: Color(0xff37405D)),
+                                          Border.all(color: ColorsUtil.blueColor),
+                                      color: ColorsUtil.blueColor),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
@@ -718,8 +718,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(7.0),
                                       border:
-                                          Border.all(color: Color(0xff37405D)),
-                                      color: Color(0xff37405D)),
+                                          Border.all(color: ColorsUtil.blueColor),
+                                      color: ColorsUtil.blueColor),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,

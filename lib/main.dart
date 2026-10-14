@@ -101,7 +101,8 @@ class _MyAppState extends State<MyApp> {
             routeInformationParser: appRouter.router.routeInformationParser,
 
             theme: ThemeData(
-                primarySwatch: Colors.blue,
+                primaryColor: ColorsUtil.blueColor,
+                accentColor: ColorsUtil.arrowColor,
                 visualDensity: VisualDensity.compact),
             debugShowCheckedModeBanner: false,
             // home: PaymentWebScreen(cashFreeResponse: CashFreeResponse(data: Data(

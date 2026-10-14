@@ -4,11 +4,12 @@ class ColorsUtil {
   static const lightGrey = Color(0xff74726E);
   static const lightGreen = Color(0xffDDEBE4);
   // Color(0xffDDEBE4);
-  static const blueColor = Color(0xff2B3453);
-  static const blueColorCart = Color(0xff00164E);
+  static const blueColor = Color(0xff01503A);
+  static const arrowColor = Color(0xffCC9C20);
+  static const blueColorCart = Color(0xff01503A);
   // Color(0xff2A9134);
   // static const greenColor = Color(0xff2A9134);
-  static const lighterGreen = Color(0xffEFF0FF);
+  static const lighterGreen = Color(0xffE6F2EE);
   // Color(0xffE7F1EE);
   static const yellowCheckbox = Color(0xffff671b);
   static const blueUserIcon = Color(0xff4fccaf);
@@ -46,7 +47,7 @@ class ColorsUtil {
   static const transparent = Colors.transparent;
   static const grey = Color(0xffF2F3F4);
 
-  // static const blueColor = Color(0xff2B3453);
+  // static const blueColor = ColorsUtil.blueColor;
   static const blueColorText = Color(0xff0F849C);
   static const greyColorText = Color(0xffAAAAB4);
   static const homeCardContainer = Color(0xffF0EFF8);
@@ -58,7 +59,7 @@ class ColorsUtil {
   static const stackedChatColor = Color(0xffC1CAE9);
   static const viewDetailTableColor = Color(0xff5B5B5B);
   static const viewDetailTableTextColor = Color(0xff888888);
-  static const viewDetailTabColor = Color(0xff00164E);
+  static const viewDetailTabColor = Color(0xff01503A);
   static const greyPlaceHolder = Color(0xff8F909A);
   static const greyDisable = Color(0xff767680);
 
@@ -85,10 +86,10 @@ class ColorsUtil {
   static Color moderateRiskColor = Color(0xffAFECFF);
   static Color highRiskColor = Color(0xffFFDC4A);
   static Color conservativeRiskColor = Color(0xffB9FFE7);
-  static Color portfolioTabColor1 = Color(0xffEFF0FF);
-  static Color portfolioTabBorderColor1 = Color(0xff5A73C4);
-  static Color portfolioTabColor2 = Color(0xffDAF5FF);
-  static Color portfolioTabBorderColor2 = Color(0xff009EBB);
+  static Color portfolioTabColor1 = Color(0xffE6F2EE);
+  static Color portfolioTabBorderColor1 = Color(0xff01503A);
+  static Color portfolioTabColor2 = Color(0xffF8F1DC);
+  static Color portfolioTabBorderColor2 = Color(0xffCC9C20);
   static Color portfolioTabColor3 = Color(0xffEAF4EB);
   static Color portfolioTabBorderColor3 = Color(0xff0DA384);
 }

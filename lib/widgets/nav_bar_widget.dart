@@ -93,7 +93,7 @@ class NavBarBoxWidget extends StatelessWidget {
                               // isFundTransfer
                               //     ? ColorsUtil.blueColor
                               //     :
-                              ColorsUtil.blueColor.withAlpha(swithValue
+                              ColorsUtil.arrowColor.withAlpha(swithValue
                                   ? 50
                                   : isDisabled
                                       ? 50
