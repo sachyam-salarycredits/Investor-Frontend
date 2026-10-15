@@ -1,16 +1,16 @@
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/api_constant.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/constants.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/header.dart';
-import 'package:Monexo/widgets/loader.dart';
-import 'package:Monexo/widgets/title_header.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/api_constant.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/constants.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/header.dart';
+import 'package:peerbridge/widgets/loader.dart';
+import 'package:peerbridge/widgets/title_header.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -98,7 +98,7 @@ class _UPIScreenSecondState extends State<UPIScreenSecond> {
                 ),
               )
             : null,
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: _isLoading,
           child: SafeArea(
             child: ResponsiveWidget.isSmallScreen(context)

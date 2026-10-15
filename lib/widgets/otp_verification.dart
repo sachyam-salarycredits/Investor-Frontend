@@ -1,9 +1,11 @@
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/supporting_file/otp_auto_detect.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/supporting_file/otp_auto_detect.dart';
+import 'package:peerbridge/theme/app_colors.dart';
+import 'package:peerbridge/theme/app_text_styles.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:otp_autofill/otp_autofill.dart';
@@ -113,43 +115,31 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
         width: 220,
         child: ListView(
           shrinkWrap: true,
-          padding: EdgeInsets.all(8),
+          padding: EdgeInsets.fromLTRB(8, 24, 8, 16),
           //  mainAxisSize: MainAxisSize.min,
           children: [
             Image(
-              image: AssetImage(LocalImages.monexo_m),
-              width: 30,
-              height: 40,
+              image: AssetImage(LocalImages.peerbridge_mark),
+              width: 48,
+              height: 48,
             ),
             SizedBox(height: 20),
             Text(
               'OTP Verification',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: CustomFonts.nunito,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                fontSize: 24,
-              ),
+              style: AppTextStyles.semiBold(22),
             ),
             SizedBox(height: 10),
             Text(
               'A verification OTP code will be sent to',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: CustomFonts.nunito,
-                fontSize: 16,
-              ),
+              style: AppTextStyles.regular(14, color: AppColors.muted),
             ),
             SizedBox(height: 10),
             Text(
               '(+91) $mobileNo',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: CustomFonts.nunito,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: AppTextStyles.semiBold(15, color: AppColors.greenDeep),
             ),
             SizedBox(height: 5),
             Container(
@@ -178,19 +168,21 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
                 },
                 obscureText: false,
                 pinTheme: PinTheme(
-                  shape: PinCodeFieldShape.underline,
-                  inactiveColor: Colors.grey.shade200,
-                  inactiveFillColor: Colors.grey.shade200,
-                  selectedFillColor: Colors.grey.shade200,
-                  disabledColor: Colors.grey.shade200,
-                  activeFillColor: ColorsUtil.blueContainerColor,
-                  borderRadius: BorderRadius.circular(5),
-                  activeColor: ColorsUtil.blueColor,
+                  shape: PinCodeFieldShape.box,
+                  inactiveColor: AppColors.line,
+                  inactiveFillColor: Colors.white,
+                  selectedColor: AppColors.green,
+                  selectedFillColor: AppColors.mintSurface,
+                  disabledColor: AppColors.line,
+                  activeFillColor: AppColors.mint,
+                  borderRadius: BorderRadius.circular(10),
+                  borderWidth: 1.2,
+                  activeColor: AppColors.green,
                   fieldHeight: 50,
                   fieldWidth: 40,
                 ),
                 autoFocus: true,
-                cursorColor: Colors.black,
+                cursorColor: AppColors.green,
                 animationDuration: Duration(milliseconds: 300),
                 enableActiveFill: true,
                 //  controller: otpTextController,
@@ -227,13 +219,16 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
                       child: Text(
                     "${(time.min ?? 0)}:${time.sec ?? "00"}",
                     textAlign: TextAlign.center,
+                    style: AppTextStyles.medium(13, color: AppColors.muted),
                   ));
                 } else {
                   return TextButton(
                       onPressed: () {
                         sendOTP();
                       },
-                      child: Text("RESEND OTP"));
+                      child: Text("Resend OTP",
+                          style: AppTextStyles.semiBold(13,
+                              color: AppColors.green)));
                 }
               },
               key: UniqueKey(),
@@ -254,7 +249,7 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
                 ? Container()
                 : CustomButton(
                     bgColor: ColorsUtil.transparent,
-                    textColor: ColorsUtil.black,
+                    textColor: AppColors.ink,
                     titleStr: "Cancel",
                     onPress: () {
                       Navigator.pop(context);

@@ -1,5 +1,6 @@
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
+import 'package:peerbridge/theme/app_colors.dart';
+import 'package:peerbridge/theme/app_text_styles.dart';
+import 'package:peerbridge/utils/colours_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -83,17 +84,17 @@ class InputWidget extends StatelessWidget {
 
             decoration: BoxDecoration(
                 border: Border.all(
-                    width: 1,
+                    width: (isFocused ?? false) ? 1.4 : 1,
                     color: (isValid && (isFocused ?? false))
-                        ? ColorsUtil.blueColor
+                        ? AppColors.green
                         : isValid
-                            ? ColorsUtil.greyTabColor
+                            ? AppColors.line
                             : (isError
                                 ? ColorsUtil.redColor
                                 : isFocused ?? false
-                                    ? ColorsUtil.blueColor
-                                    : ColorsUtil.greyTabColor)),
-                borderRadius: BorderRadius.all(Radius.circular(5)),
+                                    ? AppColors.green
+                                    : AppColors.line)),
+                borderRadius: BorderRadius.all(Radius.circular(12)),
                 color: ((isUPI ?? false) && (isFocused ?? false))
                     ? ColorsUtil.white
                     : (isUPI ?? false)
@@ -163,35 +164,33 @@ class InputWidget extends StatelessWidget {
                         decoration: InputDecoration(
                           prefixText: prefixText,
                           suffixText: suffixText,
-                          prefixStyle: TextStyle(
-                              color: ColorsUtil.blueColor, fontSize: 16),
+                          prefixStyle: AppTextStyles.medium(15,
+                              color: AppColors.greenDeep),
                           labelText: heading,
-                          labelStyle: TextStyle(
-                              fontSize: 16,
-                              fontFamily: CustomFonts.nunito,
+                          labelStyle: AppTextStyles.regular(14,
                               color: isError
                                   ? ColorsUtil.redColor
-                                  : ColorsUtil.greyPlaceHolder,
-                              fontWeight: FontWeight.w400),
-                          floatingLabelStyle: TextStyle(
-                              fontSize: 13,
-                              fontFamily: CustomFonts.nunito,
+                                  : AppColors.muted),
+                          floatingLabelStyle: AppTextStyles.medium(12,
                               color: isError
                                   ? ColorsUtil.redColor
-                                  : ColorsUtil.greyPlaceHolder,
-                              fontWeight: FontWeight.w400),
+                                  : (isFocused ?? false)
+                                      ? AppColors.green
+                                      : AppColors.muted),
                           // hintText: hintStr,
                           isDense: true,
+                          filled: false,
                           contentPadding: EdgeInsets.all(2),
                           border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
                           counterText: '',
                           counterStyle: TextStyle(fontSize: 0),
                         ),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontFamily: CustomFonts.nunito,
-                          color: ColorsUtil.blueColor,
-                        ),
+                        style: AppTextStyles.medium(15,
+                            color: AppColors.ink),
                         onChanged: onChange,
                       ),
                     ],
@@ -217,8 +216,7 @@ class InputWidget extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(15, 5, 15, 0),
               child: Text(
                 alertStr,
-                style: TextStyle(
-                    fontSize: 12,
+                style: AppTextStyles.regular(11.5,
                     color: isError ? ColorsUtil.redColor : alertColor),
               ),
             ),

@@ -1,9 +1,9 @@
-import 'package:Monexo/modules/marketplace/models/filter_data.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/modules/marketplace/models/filter_data.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -74,7 +74,7 @@ class _MarketPlaceFilterState extends State<MarketPlaceFilter> {
                       ),
                       SliderTheme(
                         data: SliderThemeData(
-                          inactiveTrackColor: Colors.blue.shade100,
+                          inactiveTrackColor: ColorsUtil.lightGreen,
                           activeTrackColor: ColorsUtil.blueColor,
                           overlayColor: Colors.transparent,
                           thumbColor: ColorsUtil.blueColor,
@@ -127,7 +127,7 @@ class _MarketPlaceFilterState extends State<MarketPlaceFilter> {
                       ),
                       SliderTheme(
                         data: SliderThemeData(
-                          inactiveTrackColor: Colors.blue.shade100,
+                          inactiveTrackColor: ColorsUtil.lightGreen,
                           activeTrackColor: ColorsUtil.blueColor,
                           overlayColor: Colors.transparent,
                           thumbColor: ColorsUtil.blueColor,

@@ -1,48 +1,36 @@
-import 'package:Monexo/modules/onboardingSteps/models/steps_data.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/whats_next_screen.dart';
-import 'package:Monexo/modules/profile/models/user_details.dart';
-import 'package:Monexo/modules/profile/widgets/logoWidget.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
+import 'package:peerbridge/modules/profile/models/user_details.dart';
+import 'package:peerbridge/modules/profile/widgets/logoWidget.dart';
+import 'package:peerbridge/modules/shell/main_shell.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/loader.dart';
+import 'package:peerbridge/widgets/pb/pb.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_switch/flutter_switch.dart';
+import 'package:flutter/services.dart';
 import 'package:flyy_flutter_plugin/flyy_flutter_plugin.dart';
 import 'package:go_router/go_router.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-
-import '../../../widgets/custom_button.dart';
-import '../../../widgets/header.dart';
-import '../../../widgets/loader.dart';
-import '../../../widgets/nav_bar_widget.dart';
 
 class ProfileScreen extends StatefulWidget {
   final Size? screenSize;
+  final bool embedded;
 
-  ProfileScreen({this.screenSize});
+  ProfileScreen({Key? key, this.screenSize, this.embedded = false})
+      : super(key: key);
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  CustomPopupMenuController _controller = CustomPopupMenuController();
   bool isLoading = false;
-  bool isAddPressed = false;
-  bool switchValue = false;
   bool loadingAmount = false;
+  bool _showStatements = false;
 
   @override
   void initState() {
-    //for getting always update state
-    // context.read<AppStateProvider>().getStepsStatus();
     super.initState();
     getFundDetails();
   }
@@ -52,13 +40,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       loadingAmount = true;
     });
     await context.read<AppStateProvider>().getUserFundDetails();
+    if (!mounted) return;
     setState(() {
       loadingAmount = false;
     });
   }
 
   void logOutTap() {
-    _controller.hideMenu();
     Utils.showDoubleBtnAlert(
         context: context,
         title: "Logout",
@@ -66,759 +54,469 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onTap: () {
           context.read<AppStateProvider>().logout();
           context.read<AppStateProvider>().clearUserState();
-          context.pushNamed(RoutesName.Login);
+          context.goNamed(RoutesName.Login);
         });
   }
 
   @override
   Widget build(BuildContext context) {
-    print("nav bar called");
-    _controller.hideMenu();
-
-    var provider = Provider.of<AppStateProvider>(context);
-    var userData = provider.userDetails;
-    var statusData = provider.stepsData ?? StepsData();
-    var stepsList =
-        StepsContent.getStepsList(statusData, userData?.panDetails?.gender);
-    var advanceStepsList = StepsContent.getAdvanceStepsList(
-        statusData, userData?.panDetails?.gender);
+    final provider = Provider.of<AppStateProvider>(context);
+    final userData = provider.userDetails;
     if (userData == null) {
-      return SizedBox();
-    }
-    // print('changed screen size');
-
-    Future<String> getVersion() async {
-      var packageInfo = await PackageInfo.fromPlatform();
-      return packageInfo.version;
+      return const Scaffold(
+        backgroundColor: AppColors.surface,
+        body: Center(child: CircularProgressIndicator(color: AppColors.green)),
+      );
     }
 
-    var screenSize = MediaQuery.of(context).size;
-    return WillPopScope(
-      onWillPop: () async {
-        return true;
-      },
-      child: Scaffold(
-        backgroundColor: ColorsUtil.blueColor,
-        // appBar: ResponsiveWidget.isSmallScreen(context)
-        //     ? AppBar(
-        //   title: Image(
-        //     width: 100,
-        //     height: 40,
-        //     // fit: BoxFit.cover,
-        //     image: AssetImage(
-        //       LocalImages.monexo_logo,
-        //     ),
-        //   ),
-        //   actions: [
-        //     InkWell(
-        //       onTap: (){
-        //         Navigator.pop(context);
-        //       },
-        //       child: Padding(
-        //         padding: const EdgeInsets.symmetric(vertical: 10),
-        //         child: Image(
-        //           image: AssetImage(LocalImages.close),
-        //           width: 15,
-        //           height: 15,
-        //         ),
-        //       ),
-        //     )
-        //
-        //   ],
-        //   elevation: 0,
-        //   toolbarHeight: 70,
-        //   backgroundColor: ColorsUtil.white,
-        //
-        //   leading: Container(width: 10,)
-        //     ,
-        //
-        // )
-        //     : null,
-        body: MonexoLoader(
-          isLoading: isLoading,
-          child: SafeArea(
-            child: ResponsiveWidget.isSmallScreen(context)
-                ? Column(
-                    children: [
-                      Expanded(
-                        child: mainWidget(context, userData),
-                      ),
-                    ],
-                  )
-                : Row(
-                    children: [
-                      Container(
-                        width: screenSize.width * .56,
-                        color: ColorsUtil.white,
-                        child: Column(
-                          children: [
-                            // Header(
-                            //   backOnPressed: () {
-                            //     context.pop();
-                            //   },
-                            // ),
-                            Expanded(
-                                child: Container(
-                                    width: screenSize.width * .4,
-                                    constraints: BoxConstraints(maxWidth: 500),
-                                    child: mainWidget(context, userData))),
-                            // Expanded(
-                            //   child: Container(
-                            //     child: Center(
-                            //       child: Container(
-                            //         width: screenSize.width * .4,
-                            //         constraints: BoxConstraints(maxWidth: 500),
-                            //         child: Column(
-                            //           children: [
-                            //             SizedBox(height: 30),
-                            //             // mainWidget(context, userData),
-                            //           ],
-                            //         ),
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        width: screenSize.width * .44,
-                        color: ColorsUtil.blueColor,
-                      )
-                    ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: PeerBridgeLoader(
+        isLoading: isLoading,
+        child: Scaffold(
+          backgroundColor: AppColors.surface,
+          body: SafeArea(
+            bottom: false,
+            child: RefreshIndicator(
+              color: AppColors.green,
+              onRefresh: () async {
+                await Future.wait([
+                  provider.getUserFundDetails(),
+                  provider.getCustomerDetails(),
+                ]);
+              },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 28),
+                children: [
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 560),
+                      child: mainWidget(context, userData, provider),
+                    ),
                   ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Column mainWidget(BuildContext context, UserDetails userData) {
+  Widget mainWidget(
+      BuildContext context, UserDetails userData, AppStateProvider provider) {
+    final kycDone = provider.stepsData?.kyc == '1';
     return Column(
-      children: <Widget>[
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              // stops: [0.1, 0.5, 0.7, 0.9],
-              colors: [
-                Color(0xffCEEFE9),
-                Colors.white,
-              ],
-            ),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Image(
-                      width: 130,
-                      height: 60,
-                      color: ColorsUtil.blueColor,
-                      // fit: BoxFit.cover,
-                      image: AssetImage(
-                        LocalImages.monexo_logo,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Icon(
-                            Icons.close,
-                            color: ColorsUtil.blueColor,
-                          )),
-                    ),
-                  )
-                ],
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            if (!widget.embedded) ...[
+              PbIconButton(
+                icon: Icons.arrow_back_rounded,
+                onTap: () => context.pop(),
               ),
-              InkWell(
-                onTap: () {
-                  context.pushNamed(RoutesName.ProfileDetail);
-                },
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 115,
-                  color: Colors.transparent,
-                  margin: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 24.0,
-                      ),
-                      Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Container(
-                                child: LogoWidget(
-                                  size: 60,
-                                  url: userData.profileDetails!.profileUrl,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 15.0,
-                            ),
-                            Expanded(
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      height: 5.0,
-                                    ),
-                                    Text(
-                                      userData.profileDetails!.fullName,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.left,
-                                      style: TextStyle(
-                                        fontSize: 20.0,
-                                        fontFamily: CustomFonts.nunito,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    Text(
-                                      userData.profileDetails?.email ?? '',
-                                      textAlign: TextAlign.left,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          fontSize: 14.0,
-                                          fontFamily: CustomFonts.nunito,
-                                          fontWeight: FontWeight.w400,
-                                          color: ColorsUtil.lighterGrey),
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                  ]),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10.0),
-                              child: InkWell(
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.edit_outlined,
-                                      size: 20.0,
-                                      color: ColorsUtil.black,
-                                    ),
-                                    SizedBox(
-                                      width: 6.0,
-                                    ),
-                                    Text(
-                                      'Edit',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 16.0,
-                                          fontFamily: CustomFonts.nunito),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ]),
-                      SizedBox(
-                        height: 15.0,
-                      ),
-                    ],
-                  ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(child: Text('Profile', style: AppTextStyles.headline)),
+            PbIconButton(
+              icon: Icons.settings_outlined,
+              onTap: () => context.pushNamed(RoutesName.SettingsScreen),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        _identityPanel(userData, kycDone),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _QuickAction(
+                icon: Icons.account_balance_outlined,
+                label: 'Withdraw funds',
+                onTap: () => context.pushNamed(RoutesName.Withdraw),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _QuickAction(
+                icon: Icons.currency_exchange_rounded,
+                label: 'Redemption',
+                onTap: () => context.pushNamed(RoutesName.Redemption),
+              ),
+            ),
+          ],
+        ),
+        if (!Utils.isWeb) ...[
+          const SizedBox(height: 22),
+          const PbSectionTitle(
+            title: 'Rewards & offers',
+            subtitle: 'Earn while you invest',
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _RewardTile(
+                  icon: Icons.emoji_events_outlined,
+                  label: 'Rewards',
+                  onTap: () => FlyyFlutterPlugin.openFlyyRewardsPage(),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _RewardTile(
+                  icon: Icons.local_offer_outlined,
+                  label: 'Offers',
+                  onTap: () => FlyyFlutterPlugin.openFlyyOffersPage(),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _RewardTile(
+                  icon: Icons.quiz_outlined,
+                  label: 'Quiz',
+                  onTap: () => FlyyFlutterPlugin.openFlyyQuizListPage(),
                 ),
               ),
             ],
           ),
-        ),
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10)),
-                color: ColorsUtil.blueColor),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    children: [
-                      Container(
-                        margin:
-                            EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  child: Text('Balance Available To Invest',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: ColorsUtil.white,
-                                          fontFamily: CustomFonts.nunito,
-                                          fontWeight: FontWeight.w700)),
-                                ),
-                                loadingAmount
-                                    ? CircularProgressIndicator(
-                                        backgroundColor: ColorsUtil.blueColor,
-                                        strokeWidth: 2.0,
-                                      )
-                                    : Text(
-                                        Utils.availableAmount == 0.0
-                                            ? '₹  Nil'
-                                            : '₹  ${Utils.availableAmount.truncate().commaAddedValue()}',
-                                        style: TextStyle(
-                                            fontSize: 22,
-                                            color: ColorsUtil.white,
-                                            fontFamily: CustomFonts.nunito,
-                                            fontWeight: FontWeight.w700),
-                                      ),
-                              ],
-                            ),
-                            Container(
-                                height: 40,
-                                width: 120,
-                                margin: EdgeInsets.all(8),
-                                child: CustomButton(
-                                  bgColor: ColorsUtil.white,
-                                  horizontalMargin: 0,
-                                  textSize: 13,
-                                  leftIcon: Icon(
-                                    Icons.add,
-                                    size: 15,
-                                    color: ColorsUtil.blueColor,
-                                  ),
-                                  titleStr: 'Add Funds',
-                                  textColor: ColorsUtil.blueColor,
-                                  onPress: () {
-                                    context.pushNamed(
-                                        RoutesName.NewFundTransferScreen);
-                                  },
-                                )),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 15.0,
-                        ),
-                        child: Divider(
-                          thickness: 1.0,
-                          height: 1.0,
-                          color: ColorsUtil.circleGrey,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      ListTile(
-                        title: Theme(
-                          data: Theme.of(context)
-                              .copyWith(dividerColor: Colors.transparent),
-                          child: Container(
-                            // height: 50,
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                                color: ColorsUtil.blueColor,
-                                borderRadius: BorderRadius.circular(8)),
-
-                            child: ExpansionTile(
-                              tilePadding: EdgeInsets.symmetric(
-                                  horizontal: 0, vertical: 0),
-                              textColor: Colors.white,
-                              trailing: Icon(
-                                Icons.arrow_forward_ios,
-                                color: ColorsUtil.arrowColor,
-                              ),
-                              iconColor: ColorsUtil.dividerColor,
-                              title: Text(
-                                'Account Statement',
-                                style: TextStyle(
-                                    fontFamily: CustomFonts.nunito,
-                                    fontSize: 15.0,
-                                    color: ColorsUtil.white,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                              children: [
-                                Align(
-                                  alignment: Alignment.topLeft,
-                                  child: getStatement(),
-                                ),
-                                SizedBox(
-                                  height: 15.0,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      ListTile(
-                        onTap: () {
-                          context.pushNamed(RoutesName.PortfolioAnalysis);
-                        },
-                        title: Container(
-                          height: 50,
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: ColorsUtil.blueColor,
-                              borderRadius: BorderRadius.circular(8)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'My Investments',
-                                style: TextStyle(
-                                    fontFamily: CustomFonts.nunito,
-                                    fontSize: 15.0,
-                                    color: ColorsUtil.white,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                              Icon(
-                                Icons.arrow_forward_ios,
-                                color: ColorsUtil.arrowColor,
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                      ListTile(
-                        onTap: () {
-                          context.pushNamed(RoutesName.Redemption);
-                        },
-                        title: Container(
-                          height: 50,
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: ColorsUtil.blueColor,
-                              borderRadius: BorderRadius.circular(8)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Redemption',
-                                style: TextStyle(
-                                    fontFamily: CustomFonts.nunito,
-                                    fontSize: 15.0,
-                                    color: ColorsUtil.white,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                              Icon(
-                                Icons.arrow_forward_ios,
-                                color: ColorsUtil.arrowColor,
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                      ListTile(
-                        onTap: () {
-                          context.pushNamed(RoutesName.Withdraw);
-                        },
-                        title: Container(
-                          height: 50,
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: ColorsUtil.blueColor,
-                              borderRadius: BorderRadius.circular(8)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Withdraw Funds',
-                                style: TextStyle(
-                                    fontFamily: CustomFonts.nunito,
-                                    fontSize: 15.0,
-                                    color: ColorsUtil.white,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                              Icon(
-                                Icons.arrow_forward_ios,
-                                color: ColorsUtil.arrowColor,
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                      ListTile(
-                        title: Container(
-                          height: 50,
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: ColorsUtil.blueColor,
-                              borderRadius: BorderRadius.circular(8)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Call Support',
-                                style: TextStyle(
-                                  fontFamily: CustomFonts.nunito,
-                                  fontSize: 15.0,
-                                  fontWeight: FontWeight.w700,
-                                  color: ColorsUtil.white,
-                                ),
-                              ),
-                              Icon(
-                                Icons.support_agent,
-                                color: ColorsUtil.white,
-                              ),
-                            ],
-                          ),
-                        ),
-                        onTap: () {
-                          Utils.launchSupportCall();
-                        },
-                      ),
-                      ListTile(
-                        title: Container(
-                          height: 50,
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: ColorsUtil.blueColor,
-                              borderRadius: BorderRadius.circular(8)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'LogOut',
-                                style: TextStyle(
-                                  fontFamily: CustomFonts.nunito,
-                                  fontSize: 15.0,
-                                  fontWeight: FontWeight.w700,
-                                  color: ColorsUtil.white,
-                                ),
-                              ),
-                              Icon(
-                                Icons.logout,
-                                color: ColorsUtil.white,
-                                size: 25.0,
-                              ),
-                            ],
-                          ),
-                        ),
-                        onTap: logOutTap,
-                      ),
-                    ],
-                  ),
-                  if (!Utils.isWeb)
-                    Column(
-                      children: [
-                        SizedBox(
-                          height: 50,
-                        ),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                              vertical: 0, horizontal: 16.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  FlyyFlutterPlugin.openFlyyRewardsPage();
-                                },
-                                child: Container(
-                                  width: ResponsiveWidget.isSmallScreen(context)
-                                      ? MediaQuery.of(context).size.width / 3.6
-                                      : 105,
-                                  height: 92,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(7.0),
-                                      border:
-                                          Border.all(color: ColorsUtil.blueColor),
-                                      color: ColorsUtil.blueColor),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        LocalImages.rewardsWhite,
-                                        width: 30,
-                                        height: 34,
-                                      ),
-                                      SizedBox(
-                                        height: 12,
-                                      ),
-                                      Text(
-                                        'Rewards',
-                                        style: TextStyle(
-                                            fontSize: 13.0,
-                                            fontFamily: CustomFonts.nunito,
-                                            fontWeight: FontWeight.w700,
-                                            color: ColorsUtil.white),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  FlyyFlutterPlugin.openFlyyOffersPage();
-                                },
-                                child: Container(
-                                  width: ResponsiveWidget.isSmallScreen(context)
-                                      ? MediaQuery.of(context).size.width / 3.6
-                                      : 105,
-                                  height: 92,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(7.0),
-                                      border:
-                                          Border.all(color: ColorsUtil.blueColor),
-                                      color: ColorsUtil.blueColor),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        LocalImages.offersWhite,
-                                        width: 30,
-                                        height: 34,
-                                      ),
-                                      SizedBox(
-                                        height: 12,
-                                      ),
-                                      Text(
-                                        'Offers',
-                                        style: TextStyle(
-                                            fontSize: 13.0,
-                                            fontFamily: CustomFonts.nunito,
-                                            fontWeight: FontWeight.w700,
-                                            color: ColorsUtil.white),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  FlyyFlutterPlugin.openFlyyQuizListPage();
-                                },
-                                child: Container(
-                                  width: ResponsiveWidget.isSmallScreen(context)
-                                      ? MediaQuery.of(context).size.width / 3.6
-                                      : 105,
-                                  height: 92,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(7.0),
-                                      border:
-                                          Border.all(color: ColorsUtil.blueColor),
-                                      color: ColorsUtil.blueColor),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        LocalImages.quizWhite,
-                                        width: 30,
-                                        height: 34,
-                                      ),
-                                      SizedBox(
-                                        height: 12,
-                                      ),
-                                      Text(
-                                        'Quiz',
-                                        style: TextStyle(
-                                            fontSize: 13.0,
-                                            fontFamily: CustomFonts.nunito,
-                                            fontWeight: FontWeight.w700,
-                                            color: ColorsUtil.white),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 7,
-                        ),
-                        InkWell(
-                            onTap: () {
-                              FlyyFlutterPlugin.openFlyyCustomInviteAndEarnPage(
-                                  0, '#ffffff');
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 5, horizontal: 15),
-                              child: Image.asset(
-                                LocalImages.profileRect,
-                                height: 120,
-                              ),
-                            )),
-                        Center(
-                            child: Text(
-                                "Monexo Fintech Version: ${context.read<AppStateProvider>().appVersion} ",
-                                style: TextStyle(
-                                    fontSize: 12.0,
-                                    fontFamily: CustomFonts.nunito,
-                                    fontWeight: FontWeight.w500,
-                                    color: ColorsUtil.white))),
-                        SizedBox(height: 20),
-                      ],
-                    ),
-                ],
+        ],
+        const SizedBox(height: 22),
+        const PbSectionTitle(title: 'Account'),
+        const SizedBox(height: 12),
+        PbCard(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            children: [
+              _LinkRow(
+                icon: Icons.pie_chart_outline_rounded,
+                label: 'My investments',
+                onTap: () => openShellTab(context, ShellTab.portfolio),
               ),
-            ),
+              const _LinkDivider(),
+              _LinkRow(
+                icon: Icons.receipt_long_outlined,
+                label: 'Account statement',
+                trailing: AnimatedRotation(
+                  turns: _showStatements ? 0.25 : 0,
+                  duration: const Duration(milliseconds: 180),
+                  child: const Icon(Icons.chevron_right_rounded,
+                      color: AppColors.muted),
+                ),
+                onTap: () =>
+                    setState(() => _showStatements = !_showStatements),
+              ),
+              AnimatedCrossFade(
+                firstChild: const SizedBox(width: double.infinity),
+                secondChild: getStatement(),
+                crossFadeState: _showStatements
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 180),
+              ),
+              const _LinkDivider(),
+              _LinkRow(
+                icon: Icons.manage_accounts_outlined,
+                label: 'Account settings',
+                onTap: () => context.pushNamed(RoutesName.SettingsScreen),
+              ),
+              const _LinkDivider(),
+              _LinkRow(
+                icon: Icons.support_agent_rounded,
+                label: 'Call support',
+                onTap: () => Utils.launchSupportCall(),
+              ),
+              const _LinkDivider(),
+              _LinkRow(
+                icon: Icons.logout_rounded,
+                label: 'Log out',
+                color: AppColors.error,
+                showChevron: false,
+                onTap: logOutTap,
+              ),
+            ],
           ),
-        )
+        ),
+        if (!Utils.isWeb) ...[
+          const SizedBox(height: 18),
+          ReferCard(
+            title: 'Invite friends, earn rewards',
+            subtitle: 'Share PeerBridge with people you trust.',
+            onTap: () =>
+                FlyyFlutterPlugin.openFlyyCustomInviteAndEarnPage(0, '#ffffff'),
+          ),
+        ],
+        const SizedBox(height: 22),
+        Center(
+          child: Text(
+            'PeerBridge · Version ${provider.appVersion}',
+            style: AppTextStyles.caption,
+          ),
+        ),
       ],
     );
   }
 
-  Widget getStatement() {
-    var provider = Provider.of<AppStateProvider>(context);
-    return ListView.builder(
-      physics: NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 16.0),
-      itemBuilder: (context, index) {
-        final statement = provider.statementList[index];
-        final currentYear = int.tryParse(statement.year.trim()) ?? 0;
-        if (currentYear == 0) {
-          return const SizedBox.shrink();
-        }
-        return InkWell(
-          onTap: () {
-            if (statement.statementUrl != null &&
-                statement.statementUrl != '') {
-              Utils.launchURL(statement.statementUrl);
-            }
-          },
-          child: Container(
-            child: Text(
-              'Financial Year ${currentYear - 1}-$currentYear',
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                  fontSize: 14.0,
-                  fontFamily: CustomFonts.nunito,
-                  fontWeight: FontWeight.w500,
-                  color: ColorsUtil.white),
-            ),
-            padding: EdgeInsets.symmetric(vertical: 8),
-            width: double.infinity,
+  Widget _identityPanel(UserDetails userData, bool kycDone) {
+    final profile = userData.profileDetails;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: AppColors.greenGradient,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.greenDeep.withOpacity(0.2),
+            blurRadius: 34,
+            offset: const Offset(0, 16),
           ),
-        );
-      },
-      itemCount: provider.statementList.length,
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 4, 4, 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: AppColors.goldGradient,
+                  ),
+                  child: LogoWidget(size: 60, url: profile?.profileUrl ?? ''),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        profile?.fullName ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.semiBold(18, color: Colors.white),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        profile?.email ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.regular(12,
+                            color: Colors.white.withOpacity(0.7)),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            kycDone
+                                ? Icons.verified_rounded
+                                : Icons.error_outline_rounded,
+                            size: 14,
+                            color:
+                                kycDone ? AppColors.greenLink : AppColors.goldLight,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            kycDone ? 'KYC verified' : 'KYC pending',
+                            style: AppTextStyles.medium(11,
+                                color: kycDone
+                                    ? AppColors.greenLink
+                                    : AppColors.goldLight),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => context.pushNamed(RoutesName.ProfileDetail),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
+                      border:
+                          Border.all(color: Colors.white.withOpacity(0.18)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.edit_outlined,
+                            size: 14, color: Colors.white),
+                        const SizedBox(width: 4),
+                        Text('Edit',
+                            style: AppTextStyles.semiBold(12,
+                                color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          BalanceStrip(
+            amount: loadingAmount
+                ? '…'
+                : '₹${Utils.availableAmount.truncate().commaAddedValue()}',
+            onAdd: () => context.pushNamed(RoutesName.NewFundTransferScreen),
+          ),
+        ],
+      ),
     );
   }
+
+  Widget getStatement() {
+    final provider = Provider.of<AppStateProvider>(context);
+    final rows = <Widget>[];
+    for (final statement in provider.statementList) {
+      final currentYear = int.tryParse(statement.year.trim()) ?? 0;
+      if (currentYear == 0) continue;
+      rows.add(InkWell(
+        onTap: () {
+          if (statement.statementUrl != null && statement.statementUrl != '') {
+            Utils.launchURL(statement.statementUrl);
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            children: [
+              const SizedBox(width: 42),
+              Expanded(
+                child: Text('Financial year ${currentYear - 1}–$currentYear',
+                    style: AppTextStyles.medium(13)),
+              ),
+              const Icon(Icons.download_rounded,
+                  size: 18, color: AppColors.green),
+            ],
+          ),
+        ),
+      ));
+    }
+    if (rows.isEmpty) {
+      rows.add(Padding(
+        padding: const EdgeInsets.fromLTRB(58, 4, 16, 12),
+        child: Text('No statements available yet.',
+            style: AppTextStyles.caption),
+      ));
+    }
+    return Column(children: rows);
+  }
+}
+
+class _QuickAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _QuickAction(
+      {required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return PbCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        children: [
+          PbIconTile(icon: icon),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(label,
+                maxLines: 2, style: AppTextStyles.semiBold(13)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RewardTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _RewardTile(
+      {required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return PbCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      child: Column(
+        children: [
+          PbIconTile(
+            icon: icon,
+            size: 40,
+            background: AppColors.goldSoft,
+            color: AppColors.goldDark,
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: AppTextStyles.semiBold(12.5)),
+        ],
+      ),
+    );
+  }
+}
+
+class _LinkRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color? color;
+  final Widget? trailing;
+  final bool showChevron;
+
+  const _LinkRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color,
+    this.trailing,
+    this.showChevron = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tint = color ?? AppColors.green;
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            PbIconTile(
+              icon: icon,
+              background: tint.withOpacity(0.1),
+              color: tint,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(label,
+                  style: AppTextStyles.medium(14,
+                      color: color ?? AppColors.ink)),
+            ),
+            if (trailing != null)
+              trailing!
+            else if (showChevron)
+              const Icon(Icons.chevron_right_rounded, color: AppColors.muted),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LinkDivider extends StatelessWidget {
+  const _LinkDivider();
+
+  @override
+  Widget build(BuildContext context) =>
+      const Divider(height: 1, indent: 60, color: AppColors.line);
 }

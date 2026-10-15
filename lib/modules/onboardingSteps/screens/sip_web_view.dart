@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:Monexo/language/language_en.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/utils/api_constant.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/loader.dart';
+import 'package:peerbridge/language/language_en.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/utils/api_constant.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';

@@ -1,5 +1,5 @@
-import 'package:Monexo/utils/constants.dart';
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/utils/constants.dart';
+import 'package:peerbridge/utils/utils.dart';
 import 'package:appsflyer_sdk/appsflyer_sdk.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -7,7 +7,7 @@ import '../utils/enums.dart';
 
 class AFSdk {
   static final devKey = "fhtyehx3ft4GLrb97RDqUU";
-  static final androidAppId = "com.monexo.lender";
+  static final androidAppId = "co.peerbridge.investor";
   static final iosAppId = "1614462026";
 
   //MARK:- Custom event

@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:Monexo/supporting_file/appsFlyerSdk.dart';
-import 'package:Monexo/supporting_file/notificationService.dart';
-import 'package:Monexo/utils/constants.dart';
-import 'package:Monexo/utils/enums.dart';
-import 'package:Monexo/utils/global_data.dart';
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/supporting_file/appsFlyerSdk.dart';
+import 'package:peerbridge/supporting_file/notificationService.dart';
+import 'package:peerbridge/utils/constants.dart';
+import 'package:peerbridge/utils/enums.dart';
+import 'package:peerbridge/utils/global_data.dart';
+import 'package:peerbridge/utils/utils.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -51,7 +51,7 @@ class FlySdk {
     }
     print("init flyyy sdk");
     // GlobalData.referralCode = "LRW6QV3";
-    FlyyFlutterPlugin.setPackageName("com.monexo.lender.app");
+    FlyyFlutterPlugin.setPackageName("co.peerbridge.investor");
     FlyyFlutterPlugin.setThemeColor("#01503A", "#CC9C20");
 
     final stage = Constants.isProd

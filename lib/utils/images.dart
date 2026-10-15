@@ -1,17 +1,17 @@
 class LocalImages {
+  static var peerbridge_logo = "images/peerbridge_logo.png";
+  static var peerbridge_logo_white = "images/peerbridge_logo_white.png";
+  static var peerbridge_mark = "images/peerbridge_mark.png";
   static var onboarding1 = "images/onboarding1.png";
   static var onboarding2 = "images/onboarding2_new.png";
   static var onboarding3 = "images/onboarding3_new.png";
   static var page_selected = "images/page_selected.png";
   static var page_unselected = "images/page_unselected.png";
-  static var monexo_logo = "images/monexo_logo_new.png";
   static var welcome_login_icon = "images/welcome_login_icon.png";
   static var wylth_icon = "images/wylth_icon.png";
-  // "images/monexo_logo.png";
   static var green_circle = "images/green_circle.png";
   static var green_tick = "images/green_tick.png";
   static var pan_dots = "images/pan_dots.png";
-  static var monexo_m = "images/monexo_m.png";
   static var sheild_tick = "images/sheild_tick.png";
   static var ramanathan = "images/RamanathanImg.png";
   static var question_check = "images/question_check.png";
@@ -35,8 +35,6 @@ class LocalImages {
   static var refer_earn = "images/refer_earn.png";
   static var delete_icon = "images/delete_icon.png";
   static var profileImage = "images/profileImage.png";
-  static var monexoIconGreen = "images/monexo_logo_new.png";
-  static var monexoIconBlue = "images/monexoIconBlue.png";
   static var noData = "images/noData.png";
   static var referBanner = "images/referBanner_new.png";
   static var rama = "images/ramaImg.png";

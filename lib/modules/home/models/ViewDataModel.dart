@@ -1,4 +1,4 @@
-import 'package:Monexo/modules/home/models/ViewRiskDataModel.dart';
+import 'package:peerbridge/modules/home/models/ViewRiskDataModel.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class ViewDataModel {

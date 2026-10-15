@@ -1,9 +1,9 @@
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/widgets/loader.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/widgets/loader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -28,7 +28,7 @@ class _SIPMIPIntroScreen extends State<SIPMIPIntroScreen> {
         return false;
       },
       child: Scaffold(
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: _isLoading,
           child: SafeArea(
               child: ResponsiveWidget.isSmallScreen(context)
@@ -215,7 +215,7 @@ List<SIPMIPIntroScreenContent> content = [
     subTitleText:
     'Don’t miss out on investment opportunities and make the most out to compound your returns',
     btnText: 'Setup SIP',
-    descriptionText: 'Automate adding funds to your Monexo Account with our SIP Feature',
+    descriptionText: 'Automate adding funds to your PeerBridge account with our SIP Feature',
   ),
  //before mip screen content
   SIPMIPIntroScreenContent(

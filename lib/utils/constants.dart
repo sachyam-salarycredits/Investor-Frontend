@@ -15,9 +15,9 @@ class Constants {
   static const String appStoreId = '1614462026';
 
   static const String playStoreUrl =
-      "http://play.google.com/store/apps/details?id=com.monexo.lender";
+      "http://play.google.com/store/apps/details?id=co.peerbridge.investor";
   static const String appStoreUrl =
-      "https://apps.apple.com/us/app/monexo-investor/id${appStoreId}";
+      "https://apps.apple.com/us/app/peerbridge-investor/id${appStoreId}";
 
   /// //////////////////////////////////////////////////
   /// ////////Change environment from here  ////////////

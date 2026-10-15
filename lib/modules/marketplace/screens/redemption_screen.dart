@@ -1,19 +1,19 @@
-import 'package:Monexo/language/language_en.dart';
-import 'package:Monexo/modules/marketplace/models/redemption_data.dart';
-import 'package:Monexo/modules/marketplace/widgets/redemption_slider.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/header.dart';
-import 'package:Monexo/widgets/input_widget.dart';
-import 'package:Monexo/widgets/loader.dart';
-import 'package:Monexo/widgets/otp_verification.dart';
-import 'package:Monexo/widgets/title_header.dart';
+import 'package:peerbridge/language/language_en.dart';
+import 'package:peerbridge/modules/marketplace/models/redemption_data.dart';
+import 'package:peerbridge/modules/marketplace/widgets/redemption_slider.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/header.dart';
+import 'package:peerbridge/widgets/input_widget.dart';
+import 'package:peerbridge/widgets/loader.dart';
+import 'package:peerbridge/widgets/otp_verification.dart';
+import 'package:peerbridge/widgets/title_header.dart';
 import 'package:dart_ipify/dart_ipify.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -174,7 +174,7 @@ class _RedemptionScreenState extends State<RedemptionScreen> {
           //     getRedemptionData();
           //   },
           // ),
-          body: MonexoLoader(
+          body: PeerBridgeLoader(
             isLoading: isLoader,
             child: SafeArea(
               child: ResponsiveWidget.isSmallScreen(context)

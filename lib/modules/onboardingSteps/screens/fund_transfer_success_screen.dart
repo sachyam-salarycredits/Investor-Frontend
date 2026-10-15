@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:Monexo/modules/home/screens/home_screen.dart';
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/modules/home/screens/home_screen.dart';
+import 'package:peerbridge/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -52,7 +52,7 @@ class _FundTransferSuccessScreenState extends State<FundTransferSuccessScreen> {
         return false;
       },
       child: Scaffold(
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: _isLoading,
           child: SafeArea(
               child: ResponsiveWidget.isSmallScreen(context)
@@ -227,7 +227,7 @@ class _FundTransferSuccessScreenState extends State<FundTransferSuccessScreen> {
                             fontWeight: FontWeight.w700),
                       ),
                       Text(
-                        'while monexo automatically allocates your funds in the best possible opportunities for you',
+                        'while PeerBridge automatically allocates your funds in the best possible opportunities for you',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.w500,

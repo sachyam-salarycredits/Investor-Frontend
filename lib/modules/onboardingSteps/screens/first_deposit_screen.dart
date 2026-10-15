@@ -1,12 +1,12 @@
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/api_constant.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/widgets/loader.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/api_constant.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/widgets/loader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -92,7 +92,7 @@ class _FirstDepositScreenState extends State<FirstDepositScreen> {
         return false;
       },
       child: Scaffold(
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: _isLoading,
           child: SafeArea(
               child: ResponsiveWidget.isSmallScreen(context)
@@ -326,9 +326,9 @@ class FirstDepositScreenContent {
 List<FirstDepositScreenContent> content = [
   //after otp screen content
   FirstDepositScreenContent(
-    titleText: 'Welcome Monexo Investor',
+    titleText: 'Welcome to PeerBridge',
     subTitleText:
-        'You are now a step closer to making your\nfirst investment with Monexo',
+        'You are now a step closer to making your\nfirst investment with PeerBridge',
     actionText: 'Now lets verify your\nbank account',
     btnText: 'Start Verification',
     descriptionText: '',
@@ -342,7 +342,7 @@ List<FirstDepositScreenContent> content = [
   FirstDepositScreenContent(
     titleText: 'Your Bank Account is Verified!',
     subTitleText:
-        'You are just a step away to making your first\ninvestment with Monexo',
+        'You are just a step away to making your first\ninvestment with PeerBridge',
     actionText: 'Make your First Fund Transfer',
     btnText: 'Deposit Money',
     showShieldText: true,
@@ -368,11 +368,11 @@ List<FirstDepositScreenContent> content = [
   FirstDepositScreenContent(
     titleText: 'Your Bank Account is Verified!',
     subTitleText:
-        'You are just a step away to making your first\ninvestment with Monexo',
+        'You are just a step away to making your first\ninvestment with PeerBridge',
     actionText: 'Make your First Fund Transfer',
     btnText: 'Deposit Money',
     descriptionText:
-        'Automate adding funds to your Monexo Account\nwith our SIP Feature',
+        'Automate adding funds to your PeerBridge account\nwith our SIP Feature',
     showShieldText: true,
     showActionText: false,
     showDescriptionText: true,

@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:Monexo/language/language_en.dart';
+import 'package:peerbridge/language/language_en.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:Monexo/supporting_file/hyperverse_web_sdk.dart';
-import 'package:Monexo/supporting_file/api_calling.dart';
-import 'package:Monexo/utils/api_constant.dart';
-import 'package:Monexo/utils/constants.dart';
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/supporting_file/hyperverse_web_sdk.dart';
+import 'package:peerbridge/supporting_file/api_calling.dart';
+import 'package:peerbridge/utils/api_constant.dart';
+import 'package:peerbridge/utils/constants.dart';
+import 'package:peerbridge/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class HyperVergeData {

@@ -1,11 +1,11 @@
-import 'package:Monexo/modules/marketplace/models/popup_data.dart';
-import 'package:Monexo/modules/marketplace/widgets/view_detail.dart';
-import 'package:Monexo/utils/extensions.dart';
+import 'package:peerbridge/modules/marketplace/models/popup_data.dart';
+import 'package:peerbridge/modules/marketplace/widgets/view_detail.dart';
+import 'package:peerbridge/utils/extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
 
 import 'custom_tooltip.dart';
 

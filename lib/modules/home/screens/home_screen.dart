@@ -1,23 +1,18 @@
-import 'dart:async';
 import 'dart:io';
 
-import 'package:Monexo/modules/home/models/YoutubeVediosModel.dart';
-import 'package:Monexo/modules/home/screens/player_video_page.dart';
-import 'package:Monexo/modules/home/screens/stories_page.dart';
-import 'package:Monexo/modules/marketplace/screens/new_market_place_screen.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/mip_set_up.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/sip_mip_intro_screen.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/supporting_file/appsFlyerSdk.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/constants.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/loader.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:peerbridge/modules/home/models/YoutubeVediosModel.dart';
+import 'package:peerbridge/modules/home/screens/player_video_page.dart';
+import 'package:peerbridge/modules/home/screens/stories_page.dart';
+import 'package:peerbridge/modules/shell/main_shell.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/supporting_file/appsFlyerSdk.dart';
+import 'package:peerbridge/utils/constants.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/loader.dart';
+import 'package:peerbridge/widgets/pb/pb.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flyy_flutter_plugin/flyy_flutter_plugin.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -25,8 +20,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../routes_management/routes_list.dart';
 import '../../../utils/images.dart';
-import '../../../utils/responsive.dart';
-import '../../../widgets/header.dart';
 import '../../profile/widgets/logoWidget.dart';
 import '../models/NewOfferModel.dart';
 
@@ -37,38 +30,14 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-List<String> cardName = ['Go To \nMarketplace', 'My Portfolio \nAnalysis'];
-
-var imageList = [
-  LocalImages.marketplcae_icon,
-  LocalImages.portfolioAnalysis_icon,
-];
-
-void onCardClick(BuildContext context, index) {
-  final provider = Provider.of<AppStateProvider>(context, listen: false);
-
-  switch (cardName[index]) {
-    case 'Go To \nMarketplace':
-      provider.isPrimaryMarketSelected = true;
-      context.pushNamed(RoutesName.NewMarketPlace, queryParams: {
-        "data": Utils.buildTokenJson(
-            context.read<AppStateProvider>().token ?? "",
-            context.read<AppStateProvider>().customerId)
-      });
-      break;
-    case 'My Portfolio \nAnalysis':
-      // Utils.showBasicDialog(context, 'Coming Soon');
-      context.pushNamed(RoutesName.PortfolioAnalysis);
-      break;
-    default:
-  }
-}
-
 class _HomeScreenState extends State<HomeScreen> {
   NewOfferModel? offerModelResponse;
   PageController? _controller;
   int currentIndex = 0;
   List<VideoData>? youtubevideos = [];
+
+  bool loadingAmount = false;
+  bool loading = false;
 
   Future<void> resetOnbaordingScreenStatus() async {
     var pref = await SharedPreferences.getInstance();
@@ -90,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
       await context.read<AppStateProvider>().getStatement();
       context.read<AppStateProvider>().getFlyyWebToken();
       setLoader(false);
+      getPortfolioSummary();
     });
     getFundDetails();
     setOsType();
@@ -98,29 +68,40 @@ class _HomeScreenState extends State<HomeScreen> {
     getYoutubeVideosLocaly();
   }
 
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
   void getFundDetails() async {
     setState(() {
       loadingAmount = true;
     });
     await context.read<AppStateProvider>().getUserFundDetails();
+    if (!mounted) return;
     setState(() {
       loadingAmount = false;
     });
   }
 
+  Future<void> getPortfolioSummary() async {
+    try {
+      await context.read<AppStateProvider>().getPortfolioAnalysisData();
+    } catch (e) {
+      debugPrint('Home portfolio summary failed: $e');
+    }
+  }
+
   setOsType() async {
-    setLoader(true);
+    if (Utils.isWeb) return;
     context
         .read<AppStateProvider>()
         .setOsType(Platform.isIOS ? 'IOS' : 'ANDROID');
-
-    setLoader(false);
   }
 
   setAppsFlyId() async {
-    setLoader(true);
     context.read<AppStateProvider>().setappsFlyIdUpdate(AFSdk.appFlyId);
-    setLoader(false);
   }
 
   getOfferData() async {
@@ -136,242 +117,55 @@ class _HomeScreenState extends State<HomeScreen> {
         .toList();
   }
 
-  bool loadingAmount = false;
-  bool loading = false;
   setLoader(bool value) {
+    if (!mounted) return;
     setState(() {
       loading = value;
     });
   }
 
+  Future<void> _refresh() async {
+    final provider = context.read<AppStateProvider>();
+    await Future.wait([
+      provider.getUserFundDetails(),
+      getPortfolioSummary(),
+    ]);
+    if (mounted) setState(() {});
+  }
+
+  void _openAddFunds() => context.pushNamed(RoutesName.NewFundTransferScreen);
+
+  void _openOffers() {
+    if (Utils.isWeb) {
+      context.pushNamed(RoutesName.SettingsScreen);
+    } else {
+      FlyyFlutterPlugin.openFlyyOffersPage();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    var screenSize = MediaQuery.of(context).size;
-
-    final screenPadding = ResponsiveWidget.isLargeScreen(context)
-        ? 40.0
-        : ResponsiveWidget.isMediumScreen(context)
-            ? 20.0
-            : 8.0;
-    var provider = Provider.of<AppStateProvider>(context);
-    var userData = provider.userDetails;
-
-    return WillPopScope(
-      onWillPop: () async {
-        return false;
-      },
-      child: MonexoLoader(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: PeerBridgeLoader(
         isLoading: loading,
         child: Scaffold(
-          backgroundColor: ColorsUtil.grey,
-          appBar: ResponsiveWidget.isSmallScreen(context)
-              ? AppBar(
-                  centerTitle: false,
-                  title: InkWell(
-                    onTap: () {
-                      context.pushNamed(RoutesName.ProfileScreen);
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${Utils.getCurrentGreetings()}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: CustomFonts.nunito,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w100,
-                          ),
-                          textAlign: TextAlign.left,
-                        ),
-                        Text(
-                          '${context.read<AppStateProvider>().userDetails?.panDetails?.fullName}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: CustomFonts.nunito,
-                            fontSize: 15,
-                          ),
-                          textAlign: TextAlign.left,
-                        ),
-                      ],
-                    ),
-                  ),
-                  toolbarHeight: 70,
-                  backgroundColor: ColorsUtil.blueColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(8),
-                    ),
-                  ),
-                  leadingWidth: 70,
-                  leading: InkWell(
-                    onTap: () {
-                      context.pushNamed(RoutesName.ProfileScreen);
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.all(10.0),
-                      child: LogoWidget(
-                        size: 45,
-                        url: userData?.profileDetails?.profileUrl ?? '',
-                      ),
-                    ),
-                  ),
-                  actions: [
-                    IconButton(
-                      padding: EdgeInsets.only(right: 10),
-                      onPressed: () {
-                        context.pushNamed(RoutesName.SettingsScreen);
-                      },
-                      icon: Image.asset('images/menu.png'),
-                      color: Colors.white,
-                    )
-                  ],
-                )
-              : null,
+          backgroundColor: AppColors.surface,
           body: SafeArea(
-            child: MonexoLoader(
-              child: ResponsiveWidget.isSmallScreen(context)
-                  ? Container(
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-                              child: Container(
-                                margin: EdgeInsets.symmetric(
-                                    horizontal: screenPadding, vertical: 10),
-                                child: mainWidget(context, screenPadding),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    )
-                  : Container(
-                      child: Row(
-                        children: [
-                          Container(
-                            width: screenSize.width * .56,
-                            color: ColorsUtil.white,
-                            child: Column(
-                              children: [
-                                // Header(
-                                //   isBackBtnVisible: false,
-                                //   isMenuVisible: true,
-                                //   // menuOnPressed: () {},
-                                // ),
-
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 10.0, vertical: 10.0),
-                                  height: 70.0,
-                                  decoration: BoxDecoration(
-                                      color: ColorsUtil.blueColor,
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: Radius.circular(14),
-                                        bottomRight: Radius.circular(14),
-                                      )),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      InkWell(
-                                        onTap: () {
-                                          context.pushNamed(
-                                              RoutesName.ProfileScreen);
-                                        },
-                                        child: LogoWidget(
-                                          size: 45,
-                                          url: userData?.profileDetails
-                                                  ?.profileUrl ??
-                                              '',
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10.0),
-                                      InkWell(
-                                        onTap: () {
-                                          context.pushNamed(
-                                              RoutesName.ProfileScreen);
-                                        },
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              '${Utils.getCurrentGreetings()}',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontFamily: CustomFonts.nunito,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w100,
-                                              ),
-                                              textAlign: TextAlign.left,
-                                            ),
-                                            Text(
-                                              '${context.read<AppStateProvider>().userDetails?.panDetails?.fullName}',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontFamily: CustomFonts.nunito,
-                                                fontSize: 12,
-                                              ),
-                                              textAlign: TextAlign.left,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Spacer(),
-                                      IconButton(
-                                        padding: EdgeInsets.only(right: 10),
-                                        onPressed: () {
-                                          context.pushNamed(
-                                              RoutesName.SettingsScreen);
-                                        },
-                                        icon: Image.asset('images/menu.png'),
-                                        color: Colors.white,
-                                      )
-                                    ],
-                                  ),
-                                ),
-
-                                Expanded(
-                                  child: SingleChildScrollView(
-                                    child: Container(
-                                      child: Center(
-                                        child: Container(
-                                          width: screenSize.width * .4,
-                                          constraints:
-                                              BoxConstraints(maxWidth: 500),
-                                          child: Column(
-                                            children: [
-                                              SizedBox(
-                                                height: 20,
-                                              ),
-                                              Container(
-                                                width: screenSize.width * .4,
-                                                constraints: BoxConstraints(
-                                                    maxWidth: 500),
-                                                child: mainWidget(
-                                                    context, screenPadding),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            width: screenSize.width * .44,
-                            color: ColorsUtil.blueColor,
-                          )
-                        ],
-                      ),
-                    ),
+            bottom: false,
+            child: RefreshIndicator(
+              color: AppColors.green,
+              onRefresh: _refresh,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 560),
+                    child: mainWidget(context),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -379,748 +173,492 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Column mainWidget(BuildContext context, double screenPadding) {
-    final userDetails = context.read<AppStateProvider>().userDetails;
+  Widget mainWidget(BuildContext context) {
+    final provider = context.watch<AppStateProvider>();
+    final userDetails = provider.userDetails;
+    final active = provider.portfolioSummary?.active;
+    final closed = provider.portfolioSummary?.closed;
+    final fullName = userDetails?.panDetails?.fullName ?? '';
+    final firstName = fullName.trim().split(' ').first;
+    final kycDone = provider.stepsData?.kyc == '1';
+
+    final available = Utils.availableAmount;
+    final outstanding = active?.principalOutstanding ?? 0;
+    final totalValue = available + outstanding;
+    final earned = active?.interestEarned ?? 0;
+    final percent = active?.percentageEarned ?? 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          height: 10,
+        PbBrandHeader(onBellTap: _openOffers),
+        const SizedBox(height: 22),
+        _greeting(context, firstName, userDetails?.profileDetails?.profileUrl,
+            kycDone),
+        if (!Utils.isWeb && (offerModelResponse?.data?.count ?? 0) > 0) ...[
+          const SizedBox(height: 18),
+          _offersRow(),
+        ],
+        const SizedBox(height: 20),
+        PortfolioValueCard(
+          value: '₹${totalValue.truncate().commaAddedValue()}',
+          changeBadge: percent > 0 ? '+${percent.toStringAsFixed(2)}%' : null,
+          changeNote: earned > 0
+              ? '₹${earned.commaAddedValue()} interest earned'
+              : 'Start earning with your first loan',
+          periodLabel: 'Last 6 months',
+          chartPoints: _chartPoints(provider),
+          onPrimary: () => openShellTab(context, ShellTab.explore),
+          onSecondary: _openAddFunds,
         ),
-        offerModelResponse?.data?.count == 0 || Utils.isWeb
-            ? Container()
-            : Container(
-                height: 115,
-                child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    shrinkWrap: true,
-                    itemCount: offerModelResponse?.data?.count ?? 0,
-                    itemBuilder: (context, index) {
-                      return Column(
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              if (offerModelResponse
-                                          ?.data?.items?[index].fly_vedio_url !=
-                                      '' &&
-                                  offerModelResponse
-                                          ?.data?.items?[index].fly_vedio_url !=
-                                      null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PlayerVideoPage(
-                                      videoURL: offerModelResponse?.data
-                                              ?.items?[index].fly_vedio_url ??
-                                          '',
-                                      validateWatchTime: false,
-                                      id: offerModelResponse
-                                          ?.data?.items?[index].id,
-                                      showNextButton: true,
-                                      type: offerModelResponse?.data
-                                              ?.items?[index].screenCode ??
-                                          '',
-                                    ),
-                                  ),
-                                ).then((value) => {
-                                      if (value == true)
-                                        {
-                                          Utils.getOfferOnTap(
-                                              offerModelResponse
-                                                      ?.data
-                                                      ?.items?[index]
-                                                      .screenCode ??
-                                                  '',
-                                              offerModelResponse
-                                                  ?.data?.items?[index].id)
-                                        }
-                                    });
-                              } else {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute<void>(
-                                      builder: (BuildContext context) =>
-                                          StoriesPage(
-                                        storyUrl: offerModelResponse
-                                                ?.data?.items?[index].gifUrl ??
-                                            '',
-                                        thumbNailUrl: offerModelResponse
-                                                ?.data?.items?[index].iconUrl ??
-                                            '',
-                                        title: offerModelResponse
-                                                ?.data?.items?[index].title ??
-                                            '',
-                                        type: offerModelResponse?.data
-                                                ?.items?[index].screenCode ??
-                                            '',
-                                        id: offerModelResponse
-                                            ?.data?.items?[index].id,
-                                      ),
-                                      fullscreenDialog: true,
-                                    ));
-                              }
-                              // Utils.getOfferOnTap(
-                              //     offerModelResponse
-                              //             ?.data?.items?[index].screenCode ??
-                              //         '',
-                              //     offerModelResponse?.data?.items?[index].id);
-                            },
-                            child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: 8),
-                              child: CircleAvatar(
-                                radius: 34,
-                                backgroundColor: ColorsUtil.lighterGrey,
-                                child: CircleAvatar(
-                                  radius: 33.5,
-                                  backgroundColor: ColorsUtil.white,
-                                  child: CircleAvatar(
-                                    radius: 30,
-                                    backgroundColor: ColorsUtil.lighterGrey,
-                                    child: CircleAvatar(
-                                      radius: 29.5,
-                                      backgroundColor: ColorsUtil.white,
-                                      child: ClipOval(
-                                          child: offerModelResponse?.data
-                                                      ?.items?[index].iconUrl ==
-                                                  null
-                                              // offerModelResponse
-                                              //             ?.data
-                                              //             ?.items?[index]
-                                              //             .showBanner ??
-                                              //         false
-                                              ? Image.asset(
-                                                  LocalImages.offer_icon,
-                                                  // fit: BoxFit.fitHeight,
-                                                )
-                                              : FadeInImage(
-                                                  image: NetworkImage(
-                                                      offerModelResponse
-                                                              ?.data
-                                                              ?.items?[index]
-                                                              .iconUrl ??
-                                                          ''
-                                                      // 'https://ghc.theflyy.com/assets/flyy_offers/default_offer_banner3.png'
-                                                      ),
-                                                  placeholder: AssetImage(
-                                                      LocalImages.offer_icon),
-                                                )
-                                          // : Image.asset(
-                                          //     LocalImages.offer_icon,
-                                          //     // fit: BoxFit.fitHeight,
-                                          //   )
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Container(
-                            // height: 40,
-                            width: 50,
-                            child: Text(
-                                offerModelResponse?.data?.items?[index].title ??
-                                    '',
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                                // 'Offer 1',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: CustomFonts.nunito,
-                                )),
-                          )
-                        ],
-                      );
-                    }),
+        const SizedBox(height: 26),
+        PbSectionTitle(
+          title: 'At a glance',
+          subtitle: (active?.loanCount ?? 0) > 0
+              ? 'Across ${active!.loanCount} active loans'
+              : 'Your money, at work',
+          actionLabel: 'Details',
+          onAction: () => openShellTab(context, ShellTab.portfolio),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: StatCard(
+                icon: Icons.account_balance_wallet_outlined,
+                value: loadingAmount
+                    ? '…'
+                    : '₹${available.truncate().commaAddedValue()}',
+                label: 'Available to invest',
+                onTap: _openAddFunds,
               ),
-        Card(
-          color: Utils.availableAmount == 0.0
-              ? ColorsUtil.redhomeCardColor
-              : ColorsUtil.homeCardContainer,
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  child: Text('Balance Available To Invest',
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontFamily: CustomFonts.nunito,
-                          fontWeight: FontWeight.w700)),
-                ),
-                Container(
-                  width: double.infinity,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      loadingAmount
-                          ? CircularProgressIndicator(
-                              backgroundColor: ColorsUtil.blueColor,
-                              strokeWidth: 2.0,
-                            )
-                          : Text(
-                              Utils.availableAmount == 0.0
-                                  ? '₹  Nil'
-                                  : '₹  ${Utils.availableAmount.truncate().commaAddedValue()}',
-                              // : '₹  ${double.parse(999.98.toStringAsFixed(0)).commaAddedValue(digit: 2)}',
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontFamily: CustomFonts.nunito,
-                                  fontWeight: FontWeight.w700),
-                            ),
-                      Container(
-                          height: 40,
-                          width: 120,
-                          margin: EdgeInsets.all(8),
-                          child: CustomButton(
-                            horizontalMargin: 0,
-                            titleStr: 'Add Money',
-                            onPress: () {
-                              context
-                                  .pushNamed(RoutesName.NewFundTransferScreen);
-                            },
-                          ))
-                    ],
-                  ),
-                ),
-              ],
             ),
-          ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: StatCard(
+                icon: Icons.trending_up_rounded,
+                value: '${active?.loanCount ?? 0}',
+                label: (closed?.loanCount ?? 0) > 0
+                    ? 'Active · ${closed!.loanCount} closed'
+                    : 'Active loans',
+                iconBg: AppColors.goldSoft,
+                iconColor: AppColors.goldDark,
+                onTap: () => openShellTab(context, ShellTab.portfolio),
+              ),
+            ),
+          ],
         ),
-        Container(
-          margin: EdgeInsets.symmetric(horizontal: 3.0, vertical: 9.0),
-          height: Utils.isWeb ? 400.0 : MediaQuery.of(context).size.width * 0.6,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8.0),
-            color: ColorsUtil.homeCardColor,
+        ..._actionBanners(context, userDetails?.enableDialogFiled),
+        const SizedBox(height: 22),
+        _socialImpactCard(context),
+        if ((youtubevideos?.length ?? 0) > 0) ...[
+          const SizedBox(height: 26),
+          const PbSectionTitle(
+            title: 'Learn with PeerBridge',
+            subtitle: 'Short videos on P2P lending',
           ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              InkWell(
-                onTap: () {
-                  if (Utils.isWeb) {
-                    Utils.launchURL(youtubevideos?[currentIndex].videoUrl);
-                  } else {
-                    context.pushNamed(RoutesName.VideoPlayerPage, params: {
-                      Constants.videoUrl:
-                          youtubevideos?[currentIndex].videoUrl ?? '',
-                      Constants.validateWatchTime: 'false'
-                    });
-                  }
-                },
-                child: Container(
-                  child: PageView.builder(
-                      controller: _controller,
-                      itemCount: youtubevideos?.length,
+          const SizedBox(height: 12),
+          _videoCarousel(context),
+        ],
+        const SizedBox(height: 22),
+        ReferCard(
+          title: 'Refer a friend',
+          subtitle: 'Invite friends to PeerBridge and earn rewards.',
+          onTap: () {
+            if (!Utils.isWeb) FlyyFlutterPlugin.openFlyyInviteAndEarnPage(0);
+          },
+        ),
+      ],
+    );
+  }
 
-                      /// Make it Dynamic with API of Viedos
-                      onPageChanged: (int index) {
-                        // PageView Value Changed
-                        setState(() {
-                          currentIndex = index;
-                        });
-                      },
-                      itemBuilder: (_, i) {
-                        return Container(
-                          // decoration: BoxDecoration(
-                          //   borderRadius: BorderRadius.circular(20.0),
-                          //   // color: ColorsUtil.homeCardColor,
-                          // ),
-                          width: double.infinity,
-                          child: Stack(
-                            children: [
-                              ClipRRect(
-                                // borderRadius: BorderRadius.circular(8.0),
-                                child: Image.network(
-                                  youtubevideos?[i].thumbnailUrl ?? '',
-                                  fit: BoxFit.fill,
-                                  height: double.infinity,
-                                  width: double.infinity,
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.center,
-                                child: Image.asset(
-                                  LocalImages.video_icon,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
+  List<double> _chartPoints(AppStateProvider provider) {
+    final earned = provider.portfolioAnalysis?.data?.interestEarned;
+    if (earned == null) return const [];
+    final months = <dynamic>[
+      earned.interestEarned6,
+      earned.interestEarned5,
+      earned.interestEarned4,
+      earned.interestEarned3,
+      earned.interestEarned2,
+      earned.interestEarned1,
+    ];
+    final points = <double>[];
+    for (final month in months) {
+      final double? value = month?.totalInvestement as double?;
+      if (value != null) points.add(value);
+    }
+    final hasSignal = points.where((p) => p > 0).length >= 2;
+    return hasSignal ? points : const [];
+  }
+
+  Widget _greeting(
+      BuildContext context, String firstName, String? avatarUrl, bool kycDone) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                firstName.isEmpty
+                    ? '${Utils.getCurrentGreetings()}'
+                    : '${Utils.getCurrentGreetings()}, $firstName',
+                style: AppTextStyles.medium(13, color: AppColors.muted),
+              ),
+              const SizedBox(height: 4),
+              Text('Make your money move.', style: AppTextStyles.headline),
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: kycDone
+                    ? null
+                    : () => context.pushNamed(RoutesName.AadharVerification),
+                child: StatusPill(
+                  label: kycDone ? 'Verified investor' : 'Complete your KYC',
+                  active: kycDone,
                 ),
               ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  padding: EdgeInsets.only(left: 18.0),
-
-                  /// Make Page View with Page Indicator here
-                  height: 20.0,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      /// Make it Dynamic with API of Videos
-                      for (int i = 0; i < (youtubevideos?.length ?? 0); i++)
-                        if (i == currentIndex)
-                          SlideDots(true)
-                        else
-                          SlideDots(false)
-                    ],
-                  ),
-                ),
-              )
             ],
           ),
         ),
-        Column(
-          children: [
-            SizedBox(
-              height: 5.0,
+        const SizedBox(width: 12),
+        GestureDetector(
+          onTap: () => openShellTab(context, ShellTab.profile),
+          child: Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.sage, width: 2),
             ),
-            InkWell(
-              onTap: () {
-                Utils.showSocialImpactLoans = true;
-                onCardClick(context, 0);
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12.0),
-                  color: ColorsUtil.white,
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Social Impact Loans',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: CustomFonts.nunito,
-                                  fontSize: 18.0,
-                                  color: Colors.black),
-                            ),
-                            SizedBox(
-                              height: 8.0,
-                            ),
-                            Text(
-                              'Invest to change lives and livelihoods ',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontFamily: CustomFonts.nunito,
-                                  fontSize: 12.0,
-                                  color: Colors.black),
-                            ),
-                            SizedBox(
-                              height: 10.0,
-                            ),
-                            Container(
-                              width: 110.0,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20.0),
-                                color: Color(0xff405AA9),
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 20.0, vertical: 10.0),
-                              child: Text(
-                                'Invest Now',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: CustomFonts.nunito,
-                                    fontSize: 12.0,
-                                    color: ColorsUtil.white),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 20.0,
-                    ),
-                    Container(
-                      // color: Colors.pink,
-                      child: Image(
-                        image: AssetImage(LocalImages.socialImpactLoan),
-                        width: 170,
-                        // height: 200,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // SizedBox(
-            //   height: 12.0,
-            // ),
-          ],
-        ),
-        SizedBox(
-          height: 10.0,
-        ),
-        GridView.builder(
-          physics: NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: cardName.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 1.15,
-              crossAxisSpacing: 12.0),
-          itemBuilder: (BuildContext context, int index) {
-            return InkWell(
-              onTap: () {
-                onCardClick(context, index);
-              },
-              child: Container(
-                margin: EdgeInsets.all(3),
-                child: Card(
-                  margin: EdgeInsets.zero,
-                  color: index == 0
-                      ? ColorsUtil.homeCardColor
-                      : ColorsUtil.homeCardColorGreen,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Align(
-                          alignment: Alignment.topLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 8, left: 10),
-                            child: CircleAvatar(
-                              radius: 30,
-                              child: Image.asset(
-                                // image,
-                                imageList[index],
-                                height: 35,
-                                width: 35,
-                              ),
-                              backgroundColor: index == 0
-                                  ? ColorsUtil.blueColor
-                                  : ColorsUtil.greenIconColor,
-                            ),
-                          )
-                          // Container(
-                          //   margin: EdgeInsets.only(top: 12.0, left: 12.0),
-                          //   decoration: BoxDecoration(
-                          //       color: index == 0
-                          //           ? ColorsUtil.blueColor
-                          //           : ColorsUtil.greenIconColor,
-                          //       shape: BoxShape.circle),
-                          //   child: Image.asset(
-                          //     // image,
-                          //     imageList[index],
-                          //     height: 60,
-                          //     width: 60,
-                          //   ),
-                          // ),
-                          ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 12.0, vertical: 10.0),
-                          child: Text(cardName[index],
-                              maxLines: 3,
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: CustomFonts.nunito,
-                                  color: ColorsUtil.blueColor)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-        Visibility(
-            visible: userDetails?.enableDialogFiled == 'E-KYC',
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 12.0,
-                ),
-                InkWell(
-                  onTap: () {
-                    //KYC push
-                    context.pushNamed(RoutesName.AadharVerification);
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12.0),
-                      color: ColorsUtil.blueColor,
-                    ),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Complete Your \nE-KYC',
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: CustomFonts.nunito,
-                                      fontSize: 18.0,
-                                      color: Colors.white),
-                                ),
-                                // SizedBox(
-                                //   height: 8.0,
-                                // ),
-                                // Text(
-                                //   'Monthly Income Plan enables you to receive "Passive income" every month to manage expenses or sign up for Mutual fund SIP',
-                                //   textAlign: TextAlign.left,
-                                //   style: TextStyle(
-                                //       fontWeight: FontWeight.w600,
-                                //       fontFamily: CustomFonts.nunito,
-                                //       fontSize: 12.0,
-                                //       color: Colors.white),
-                                // ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Spacer(),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8.0),
-                            color: Colors.white.withOpacity(0.2),
-                          ),
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 20.0, vertical: 10.0),
-                          child: Text(
-                            'Enable Now',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontFamily: CustomFonts.nunito,
-                                fontSize: 12.0,
-                                color: Colors.white),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                )
-              ],
-            )),
-        Visibility(
-            visible: userDetails?.enableDialogFiled == 'SIP',
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 12.0,
-                ),
-                InkWell(
-                  onTap: () {
-                    context.pushNamed(RoutesName.IntroScreen,
-                        params: {Constants.forSIP: 'true'});
-                    // context.pushNamed(RoutesName.SIP);
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12.0),
-                      color: ColorsUtil.blueColor,
-                    ),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-                    child: Row(
-                      children: [
-                        Image(
-                          image: AssetImage(LocalImages.calender),
-                          width: 35,
-                          height: 35,
-                        ),
-                        SizedBox(
-                          width: 20.0,
-                        ),
-                        Text(
-                          'Enable Your SIP',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontFamily: CustomFonts.nunito,
-                              fontSize: 16.0,
-                              color: Colors.white),
-                        ),
-                        Spacer(),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8.0),
-                            color: Colors.white.withOpacity(0.2),
-                          ),
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 20.0, vertical: 10.0),
-                          child: Text(
-                            'Enable Now',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontFamily: CustomFonts.nunito,
-                                fontSize: 12.0,
-                                color: Colors.white),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                )
-              ],
-            )),
-        Visibility(
-            visible: userDetails?.enableDialogFiled == 'MIP',
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 12.0,
-                ),
-                InkWell(
-                  onTap: () {
-                    context.pushNamed(RoutesName.MIPSetUp);
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12.0),
-                      color: ColorsUtil.blueColor,
-                    ),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Enable Your MIP',
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: CustomFonts.nunito,
-                                      fontSize: 18.0,
-                                      color: Colors.white),
-                                ),
-                                SizedBox(
-                                  height: 8.0,
-                                ),
-                                Text(
-                                  'Monthly Income Plan enables you to receive "Passive income" every month to manage expenses or sign up for Mutual fund SIP',
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      fontFamily: CustomFonts.nunito,
-                                      fontSize: 12.0,
-                                      color: Colors.white),
-                                ),
-                                SizedBox(
-                                  height: 10.0,
-                                ),
-                                Container(
-                                  width: 120.0,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    color: Colors.white,
-                                  ),
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 20.0, vertical: 10.0),
-                                  child: Text(
-                                    'Enable Now',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontFamily: CustomFonts.nunito,
-                                        fontSize: 12.0,
-                                        color: ColorsUtil.blueColor),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 20.0,
-                        ),
-                        Image(
-                          image: AssetImage(LocalImages.coinDrop),
-                          width: 60,
-                          height: 60,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // SizedBox(
-                //   height: 12.0,
-                // ),
-              ],
-            )),
-        Center(
-          child: Visibility(
-            visible: true,
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 12.0,
-                ),
-                InkWell(
-                    onTap: () {
-                      FlyyFlutterPlugin.openFlyyInviteAndEarnPage(0);
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 0),
-                      child: Image.asset(
-                        LocalImages.referBanner,
-                        fit: BoxFit.fill,
-                        height: Utils.isWeb ? 150 : null,
-                        width: MediaQuery.of(context).size.width,
-                      ),
-                    )),
-              ],
-            ),
+            child: LogoWidget(size: 48, url: avatarUrl ?? ''),
           ),
         ),
       ],
     );
   }
+
+  Widget _offersRow() {
+    final items = offerModelResponse?.data?.items ?? [];
+    return SizedBox(
+      height: 96,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: items.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 14),
+        itemBuilder: (context, index) {
+          final item = items[index];
+          return GestureDetector(
+            onTap: () => _openOffer(index),
+            child: SizedBox(
+              width: 64,
+              child: Column(
+                children: [
+                  Container(
+                    width: 62,
+                    height: 62,
+                    padding: const EdgeInsets.all(2.5),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: AppColors.goldGradient,
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.all(2.5),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: ClipOval(
+                        child: item.iconUrl == null
+                            ? Image.asset(LocalImages.offer_icon)
+                            : FadeInImage(
+                                image: NetworkImage(item.iconUrl ?? ''),
+                                placeholder:
+                                    AssetImage(LocalImages.offer_icon),
+                                fit: BoxFit.cover,
+                              ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    item.title ?? '',
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: AppTextStyles.medium(11, color: AppColors.ink),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _openOffer(int index) {
+    final item = offerModelResponse?.data?.items?[index];
+    if (item == null) return;
+    if (item.fly_vedio_url != null && item.fly_vedio_url != '') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PlayerVideoPage(
+            videoURL: item.fly_vedio_url ?? '',
+            validateWatchTime: false,
+            id: item.id,
+            showNextButton: true,
+            type: item.screenCode ?? '',
+          ),
+        ),
+      ).then((value) {
+        if (value == true) {
+          Utils.getOfferOnTap(item.screenCode ?? '', item.id);
+        }
+      });
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => StoriesPage(
+            storyUrl: item.gifUrl ?? '',
+            thumbNailUrl: item.iconUrl ?? '',
+            title: item.title ?? '',
+            type: item.screenCode ?? '',
+            id: item.id,
+          ),
+          fullscreenDialog: true,
+        ),
+      );
+    }
+  }
+
+  List<Widget> _actionBanners(BuildContext context, String? field) {
+    Widget? banner;
+    switch (field) {
+      case 'E-KYC':
+        banner = _ActionBanner(
+          icon: Icons.verified_user_outlined,
+          title: 'Complete your e-KYC',
+          message: 'Verify your identity to start investing.',
+          onTap: () => context.pushNamed(RoutesName.AadharVerification),
+        );
+        break;
+      case 'SIP':
+        banner = _ActionBanner(
+          icon: Icons.event_repeat_rounded,
+          title: 'Enable your SIP',
+          message: 'Invest a fixed amount automatically every month.',
+          onTap: () => context.pushNamed(RoutesName.IntroScreen,
+              params: {Constants.forSIP: 'true'}),
+        );
+        break;
+      case 'MIP':
+        banner = _ActionBanner(
+          icon: Icons.savings_outlined,
+          title: 'Enable your MIP',
+          message:
+              'Monthly Income Plan lets you receive passive income every month.',
+          onTap: () => context.pushNamed(RoutesName.MIPSetUp),
+        );
+        break;
+    }
+    if (banner == null) return const [];
+    return [const SizedBox(height: 16), banner];
+  }
+
+  Widget _socialImpactCard(BuildContext context) {
+    return PbCard(
+      padding: const EdgeInsets.fromLTRB(18, 18, 12, 18),
+      radius: 22,
+      onTap: () {
+        Utils.showSocialImpactLoans = true;
+        openShellTab(context, ShellTab.explore);
+      },
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('SOCIAL IMPACT', style: AppTextStyles.eyebrow),
+                const SizedBox(height: 6),
+                Text('Invest to change lives and livelihoods',
+                    style: AppTextStyles.cardTitle),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Invest now',
+                        style:
+                            AppTextStyles.semiBold(13, color: AppColors.green)),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.arrow_forward_rounded,
+                        size: 16, color: AppColors.green),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Image.asset(LocalImages.socialImpactLoan, width: 120),
+        ],
+      ),
+    );
+  }
+
+  Widget _videoCarousel(BuildContext context) {
+    final videos = youtubevideos ?? [];
+    return Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: PageView.builder(
+              controller: _controller,
+              itemCount: videos.length,
+              onPageChanged: (int index) {
+                setState(() {
+                  currentIndex = index;
+                });
+              },
+              itemBuilder: (_, i) {
+                return GestureDetector(
+                  onTap: () {
+                    if (Utils.isWeb) {
+                      Utils.launchURL(videos[i].videoUrl);
+                    } else {
+                      context.pushNamed(RoutesName.VideoPlayerPage, params: {
+                        Constants.videoUrl: videos[i].videoUrl ?? '',
+                        Constants.validateWatchTime: 'false'
+                      });
+                    }
+                  },
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        videos[i].thumbnailUrl ?? '',
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                            Container(color: AppColors.sage),
+                      ),
+                      Container(color: AppColors.scrim.withOpacity(0.18)),
+                      Center(
+                        child: Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.92),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.play_arrow_rounded,
+                              size: 34, color: AppColors.green),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        if (videos.length > 1) ...[
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (int i = 0; i < videos.length; i++) SlideDots(i == currentIndex)
+            ],
+          ),
+        ],
+      ],
+    );
+  }
 }
 
-/// Silde Dots for Home Video Corousal Container
+class _ActionBanner extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+  final VoidCallback onTap;
+
+  const _ActionBanner({
+    required this.icon,
+    required this.title,
+    required this.message,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: AppColors.greenGradient,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: AppColors.softShadow(0.12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: AppColors.goldLight),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: AppTextStyles.semiBold(15, color: Colors.white)),
+                  const SizedBox(height: 3),
+                  Text(message,
+                      style: AppTextStyles.regular(12,
+                          color: Colors.white.withOpacity(0.72))),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: AppColors.goldGradient,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text('Enable',
+                  style: AppTextStyles.semiBold(12, color: AppColors.ink)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Page indicator dot for the home video carousel.
 class SlideDots extends StatelessWidget {
-  bool isActive;
-  SlideDots(this.isActive);
+  final bool isActive;
+  const SlideDots(this.isActive, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: Duration(milliseconds: 150),
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      height: 8,
-      width: 8,
+      duration: const Duration(milliseconds: 150),
+      margin: const EdgeInsets.symmetric(horizontal: 3),
+      height: 6,
+      width: isActive ? 18 : 6,
       decoration: BoxDecoration(
-        color: isActive ? ColorsUtil.blueColor : Colors.white.withOpacity(0.4),
-        borderRadius: BorderRadius.all(Radius.circular(12)),
+        color: isActive ? AppColors.green : AppColors.sage,
+        borderRadius: BorderRadius.circular(99),
       ),
     );
   }

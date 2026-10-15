@@ -475,7 +475,7 @@
 				DEVELOPMENT_TEAM = P6566YXNHW;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Monexo Investor";
+				INFOPLIST_KEY_CFBundleDisplayName = PeerBridge;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -483,7 +483,7 @@
 				);
 				MARKETING_VERSION = 2.8;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sachyam.investor.dev;
+				PRODUCT_BUNDLE_IDENTIFIER = co.peerbridge.investor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -620,7 +620,7 @@
 				DEVELOPMENT_TEAM = P6566YXNHW;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Monexo Investor";
+				INFOPLIST_KEY_CFBundleDisplayName = PeerBridge;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -628,7 +628,7 @@
 				);
 				MARKETING_VERSION = 2.8;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sachyam.investor.dev;
+				PRODUCT_BUNDLE_IDENTIFIER = co.peerbridge.investor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -655,7 +655,7 @@
 				DEVELOPMENT_TEAM = P6566YXNHW;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Monexo Investor";
+				INFOPLIST_KEY_CFBundleDisplayName = PeerBridge;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -663,7 +663,7 @@
 				);
 				MARKETING_VERSION = 2.8;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sachyam.investor.dev;
+				PRODUCT_BUNDLE_IDENTIFIER = co.peerbridge.investor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -702,7 +702,7 @@
 				MARKETING_VERSION = 2.6;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.sachyam.investor.dev.NotificationService-";
+				PRODUCT_BUNDLE_IDENTIFIER = co.peerbridge.investor.NotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -741,7 +741,7 @@
 				);
 				MARKETING_VERSION = 2.6;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.monexo.lender.NotificationService;
+				PRODUCT_BUNDLE_IDENTIFIER = co.peerbridge.investor.NotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = LenderNotificationService;
 				SKIP_INSTALL = YES;
@@ -778,7 +778,7 @@
 				);
 				MARKETING_VERSION = 2.6;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.monexo.lender.NotificationService;
+				PRODUCT_BUNDLE_IDENTIFIER = co.peerbridge.investor.NotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = LenderNotificationServiceDev;
 				SKIP_INSTALL = YES;

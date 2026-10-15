@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/utils/utils.dart';
 
 SecondaryMarketLoan secondaryMarketLoanFromJson(String str) =>
     SecondaryMarketLoan.fromJson(json.decode(str));

@@ -1,20 +1,20 @@
 import 'dart:async';
 
-import 'package:Monexo/language/language_en.dart';
-import 'package:Monexo/modules/authentication/models/customerId_list.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/app_router.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/modules/marketplace/screens/market_place_screen.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/checkbox_widget.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/header.dart';
-import 'package:Monexo/widgets/loader.dart';
+import 'package:peerbridge/language/language_en.dart';
+import 'package:peerbridge/modules/authentication/models/customerId_list.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/app_router.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/modules/marketplace/screens/market_place_screen.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/checkbox_widget.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/header.dart';
+import 'package:peerbridge/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -86,7 +86,7 @@ class _WelcomeBackScreenState extends State<WelcomeBackScreen> {
         return false;
       },
       child: Scaffold(
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: _isLoading,
           child: SafeArea(
             child: ResponsiveWidget.isSmallScreen(context)

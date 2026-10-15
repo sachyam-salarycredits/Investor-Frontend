@@ -1,14 +1,15 @@
+import 'package:peerbridge/theme/app_colors.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/app_router.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/constants.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/app_router.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/constants.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/utils.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -83,14 +84,14 @@ class _SplashScreenState extends State<SplashScreen> {
       //
       //   }, icon: Icon(Icons.eleven_mp))],
       // ),
-      backgroundColor: ColorsUtil.white,
+      backgroundColor: AppColors.surface,
       body: Center(
         child: Container(
-          color: ColorsUtil.white,
+          color: AppColors.surface,
           child: Image(
-            height: 100,
-            width: double.infinity,
-            image: AssetImage(LocalImages.monexoIconBlue),
+            height: 52,
+            width: 280,
+            image: AssetImage(LocalImages.peerbridge_logo),
             fit: BoxFit.contain,
           ),
         ),

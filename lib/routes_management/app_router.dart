@@ -1,49 +1,49 @@
 import 'dart:convert';
 // import 'dart:html';
 
-import 'package:Monexo/modules/authentication/screens/landing_screen.dart';
-import 'package:Monexo/modules/authentication/screens/login_screen.dart';
-import 'package:Monexo/modules/authentication/screens/onboarding_screen.dart';
-import 'package:Monexo/modules/authentication/screens/otp_varification.dart';
-import 'package:Monexo/modules/authentication/screens/pan_varification.dart';
-import 'package:Monexo/modules/authentication/screens/personal_detail.dart';
-import 'package:Monexo/modules/authentication/screens/splash_screen.dart';
-import 'package:Monexo/modules/authentication/screens/term_condtion_screen.dart';
-import 'package:Monexo/modules/authentication/screens/welcome_back_screen.dart';
-import 'package:Monexo/modules/bankDetails/screens/bank_details.dart';
-import 'package:Monexo/modules/bankDetails/screens/penny_drop_screen.dart';
-import 'package:Monexo/modules/bankDetails/screens/selfie_capture_screen.dart';
-import 'package:Monexo/modules/bankDetails/screens/welcome_screen.dart';
-import 'package:Monexo/modules/home/screens/home_screen.dart';
-import 'package:Monexo/modules/home/screens/player_video_page.dart';
-import 'package:Monexo/modules/home/screens/view_detail_screen.dart';
-import 'package:Monexo/modules/marketplace/screens/market_place_screen.dart';
-import 'package:Monexo/modules/marketplace/screens/redemption_screen.dart';
-import 'package:Monexo/modules/marketplace/screens/my_investments_screen.dart';
-import 'package:Monexo/modules/marketplace/screens/my_investment_detail_screen.dart';
-import 'package:Monexo/modules/marketplace/screens/withdraw_screen.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/aadhaar_verification.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/authorized_signatory_screen.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/auto_investment.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/cheque_Deposite_screen.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/first_deposit_screen.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/fund_transfer_process_screen.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/fund_transfer_screen.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/mip_set_up.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/nominee_detail_screen.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/sip_screen.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/sip_success_screen.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/sip_upi_screen1.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/sip_upi_screen2.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/sip_upi_screen3.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/sip_web_view.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/whats_next_screen.dart';
-import 'package:Monexo/modules/profile/screens/profile_detail_screen.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/constants.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/custom_button.dart';
+import 'package:peerbridge/modules/authentication/screens/landing_screen.dart';
+import 'package:peerbridge/modules/authentication/screens/login_screen.dart';
+import 'package:peerbridge/modules/authentication/screens/onboarding_screen.dart';
+import 'package:peerbridge/modules/authentication/screens/otp_varification.dart';
+import 'package:peerbridge/modules/authentication/screens/pan_varification.dart';
+import 'package:peerbridge/modules/authentication/screens/personal_detail.dart';
+import 'package:peerbridge/modules/authentication/screens/splash_screen.dart';
+import 'package:peerbridge/modules/authentication/screens/term_condtion_screen.dart';
+import 'package:peerbridge/modules/authentication/screens/welcome_back_screen.dart';
+import 'package:peerbridge/modules/bankDetails/screens/bank_details.dart';
+import 'package:peerbridge/modules/bankDetails/screens/penny_drop_screen.dart';
+import 'package:peerbridge/modules/bankDetails/screens/selfie_capture_screen.dart';
+import 'package:peerbridge/modules/bankDetails/screens/welcome_screen.dart';
+import 'package:peerbridge/modules/shell/main_shell.dart';
+import 'package:peerbridge/modules/home/screens/player_video_page.dart';
+import 'package:peerbridge/modules/home/screens/view_detail_screen.dart';
+import 'package:peerbridge/modules/marketplace/screens/market_place_screen.dart';
+import 'package:peerbridge/modules/marketplace/screens/redemption_screen.dart';
+import 'package:peerbridge/modules/marketplace/screens/my_investments_screen.dart';
+import 'package:peerbridge/modules/marketplace/screens/my_investment_detail_screen.dart';
+import 'package:peerbridge/modules/marketplace/screens/withdraw_screen.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/aadhaar_verification.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/authorized_signatory_screen.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/auto_investment.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/cheque_Deposite_screen.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/first_deposit_screen.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/fund_transfer_process_screen.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/fund_transfer_screen.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/mip_set_up.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/nominee_detail_screen.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/sip_screen.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/sip_success_screen.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/sip_upi_screen1.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/sip_upi_screen2.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/sip_upi_screen3.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/sip_web_view.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/whats_next_screen.dart';
+import 'package:peerbridge/modules/profile/screens/profile_detail_screen.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/constants.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -109,7 +109,6 @@ class AppRouter {
                     height: 20,
                   ),
                   CustomButton(
-                    bgColor: Colors.green,
                     titleStr: "Refresh Now",
                     onPress: () {
                       context.push(RoutesName.Splash);
@@ -338,7 +337,11 @@ class AppRouter {
         path: RoutesName.HomeScreen,
         name: RoutesName.HomeScreen,
         pageBuilder: (context, state) {
-          return MaterialPage(key: state.pageKey, child: HomeScreen());
+          return MaterialPage(
+              key: state.pageKey,
+              child: MainShell(
+                initialTab: ShellTab.fromQuery(state.queryParams['tab']),
+              ));
         }),
     GoRoute(
         path: RoutesName.PortfolioAnalysis,

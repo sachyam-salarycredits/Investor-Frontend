@@ -1,5 +1,5 @@
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/loader.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/loader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -77,7 +77,7 @@ class _PlayerVideoPage extends State<PlayerVideoPage> {
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: _isLoading,
           child: SafeArea(
             child: Stack(

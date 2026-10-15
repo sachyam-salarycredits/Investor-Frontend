@@ -1,18 +1,18 @@
 import 'dart:async';
-import 'package:Monexo/modules/authentication/screens/personal_detail.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/app_router.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/constants.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/header.dart';
-import 'package:Monexo/widgets/input_widget.dart';
-import 'package:Monexo/widgets/loader.dart';
+import 'package:peerbridge/modules/authentication/screens/personal_detail.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/app_router.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/constants.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/header.dart';
+import 'package:peerbridge/widgets/input_widget.dart';
+import 'package:peerbridge/widgets/loader.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -143,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
       },
       child: Scaffold(
         body: SafeArea(
-          child: MonexoLoader(
+          child: PeerBridgeLoader(
             isLoading: _isLoading,
             child: ResponsiveWidget.isSmallScreen(context)
                 ? Container(
@@ -216,10 +216,10 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               children: [
                 Image(
-                  image: AssetImage(LocalImages.monexo_logo),
-                  height: 90,
-                  width: 160,
-                ),
+  image: AssetImage(LocalImages.peerbridge_logo),
+  height: 40,
+  width: 240,
+),
                 Image(
                   image: AssetImage(LocalImages.welcome_login_icon),
                 ),
@@ -277,7 +277,7 @@ class _LoginScreenState extends State<LoginScreen> {
         //   height: 60,
         // ),
         // Image(
-        //   image: AssetImage(LocalImages.monexo_m),
+        //   image: AssetImage(LocalImages.peerbridge_mark),
         //   width: 39.29,
         //   height: 29,
         // ),

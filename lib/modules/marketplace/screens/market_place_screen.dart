@@ -1,24 +1,24 @@
 import 'dart:async';
 
-import 'package:Monexo/modules/marketplace/models/filter_data.dart';
-import 'package:Monexo/modules/marketplace/widgets/loan_cart_button.dart';
-import 'package:Monexo/modules/marketplace/widgets/no_data_widget.dart';
-import 'package:Monexo/modules/marketplace/widgets/secondary_loan_details_dialog.dart';
-import 'package:Monexo/modules/marketplace/widgets/secondary_market_card.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/supporting_file/web_utils.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/header.dart';
-import 'package:Monexo/modules/marketplace/widgets/loan_cart_popup.dart';
-import 'package:Monexo/modules/marketplace/widgets/market_place_grid_cards.dart';
-import 'package:Monexo/modules/marketplace/widgets/marketplace_filter.dart';
-import 'package:Monexo/modules/marketplace/widgets/view_detail.dart';
-import 'package:Monexo/widgets/loader.dart';
-import 'package:Monexo/widgets/shimmer_widget.dart';
+import 'package:peerbridge/modules/marketplace/models/filter_data.dart';
+import 'package:peerbridge/modules/marketplace/widgets/loan_cart_button.dart';
+import 'package:peerbridge/modules/marketplace/widgets/no_data_widget.dart';
+import 'package:peerbridge/modules/marketplace/widgets/secondary_loan_details_dialog.dart';
+import 'package:peerbridge/modules/marketplace/widgets/secondary_market_card.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/supporting_file/web_utils.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/header.dart';
+import 'package:peerbridge/modules/marketplace/widgets/loan_cart_popup.dart';
+import 'package:peerbridge/modules/marketplace/widgets/market_place_grid_cards.dart';
+import 'package:peerbridge/modules/marketplace/widgets/marketplace_filter.dart';
+import 'package:peerbridge/modules/marketplace/widgets/view_detail.dart';
+import 'package:peerbridge/widgets/loader.dart';
+import 'package:peerbridge/widgets/shimmer_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -140,7 +140,7 @@ class _MarketPlaceState extends State<MarketPlace> {
         child: Scaffold(
           backgroundColor: ColorsUtil.circleGrey,
           floatingActionButton: getFloatingWidget(),
-          body: MonexoLoader(
+          body: PeerBridgeLoader(
             isLoading: isLoader || provider.isMarketPlaceLoading.value,
             child: SafeArea(
               child: RefreshIndicator(
@@ -383,7 +383,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                                                     height: 8,
                                                     decoration: BoxDecoration(
                                                         shape: BoxShape.circle,
-                                                        color: Colors.green),
+                                                        color: ColorsUtil.green),
                                                   ),
                                                 ),
                                               )

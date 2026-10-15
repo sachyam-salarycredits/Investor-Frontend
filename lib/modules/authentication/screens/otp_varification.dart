@@ -1,21 +1,21 @@
 import 'dart:async';
 
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/app_router.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/app_router.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
 
-import 'package:Monexo/modules/authentication/screens/personal_detail.dart';
-import 'package:Monexo/modules/profile/screens/profile_detail_screen.dart';
-import 'package:Monexo/supporting_file/appsFlyerSdk.dart';
-import 'package:Monexo/supporting_file/otp_auto_detect.dart';
-import 'package:Monexo/utils/api_constant.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/header.dart';
-import 'package:Monexo/widgets/loader.dart';
+import 'package:peerbridge/modules/authentication/screens/personal_detail.dart';
+import 'package:peerbridge/modules/profile/screens/profile_detail_screen.dart';
+import 'package:peerbridge/supporting_file/appsFlyerSdk.dart';
+import 'package:peerbridge/supporting_file/otp_auto_detect.dart';
+import 'package:peerbridge/utils/api_constant.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/header.dart';
+import 'package:peerbridge/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:otp_autofill/otp_autofill.dart';
@@ -303,7 +303,7 @@ class _OTPVarificationScreenState extends State<OTPVarificationScreen> {
                 ),
               )
             : null,
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: _isLoading,
           child: SafeArea(
             child: ResponsiveWidget.isSmallScreen(context)
@@ -404,7 +404,7 @@ class _OTPVarificationScreenState extends State<OTPVarificationScreen> {
       child: Column(
         children: [
           // Image(
-          //   image: AssetImage(LocalImages.monexo_m),
+          //   image: AssetImage(LocalImages.peerbridge_mark),
           //   width: 50,
           //   height: 50,
           // ),

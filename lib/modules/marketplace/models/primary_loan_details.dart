@@ -1,4 +1,4 @@
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/utils/utils.dart';
 
 class PrimaryLoanDetails {
   FinancialDetails? financialDetails;

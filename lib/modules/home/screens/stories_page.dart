@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:Monexo/utils/fonts.dart';
+import 'package:peerbridge/utils/fonts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 

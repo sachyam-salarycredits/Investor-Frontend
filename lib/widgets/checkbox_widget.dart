@@ -1,5 +1,7 @@
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
+import 'package:peerbridge/theme/app_colors.dart';
+import 'package:peerbridge/theme/app_text_styles.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
 import 'package:flutter/material.dart';
 
 class CheckBoxWidget extends StatefulWidget {
@@ -32,17 +34,12 @@ class _CheckBoxWidgetState extends State<CheckBoxWidget> {
           child: Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                    color:
-                        // widget.isSelected
-                        //     ? ColorsUtil.blueColor
-                        //     :
-                        ColorsUtil.lightestGrey),
-                borderRadius: BorderRadius.all(Radius.circular(5)),
-                color:
-                    // widget.isSelected
-                    //     ? Colors.blue.shade50
-                    //     :
-                    ColorsUtil.lightestGrey,
+                    color: widget.isSelected
+                        ? AppColors.green
+                        : AppColors.line,
+                    width: widget.isSelected ? 1.4 : 1),
+                borderRadius: BorderRadius.all(Radius.circular(14)),
+                color: widget.isSelected ? AppColors.mintSurface : Colors.white,
               ),
               height:
                   ((widget.isUPIBox ?? false) && widget.isSelected) ? 130 : 56,
@@ -79,11 +76,9 @@ class _CheckBoxWidgetState extends State<CheckBoxWidget> {
                               decoration: BoxDecoration(
                                   color: widget.isSelected
                                       ? ColorsUtil.blueColor
-                                      : ColorsUtil.lightestGrey,
+                                      : Colors.white,
                                   border: Border.all(
-                                      color: widget.isSelected
-                                          ? ColorsUtil.white
-                                          : ColorsUtil.lightestGrey,
+                                      color: Colors.white,
                                       width: 1),
                                   borderRadius: BorderRadius.circular(60)),
                             ),
@@ -100,14 +95,10 @@ class _CheckBoxWidgetState extends State<CheckBoxWidget> {
                             Text(
                               widget.titleStr,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontFamily: CustomFonts.nunito,
-                                fontSize: 15,
-                                color: widget.isSelected
-                                    ? ColorsUtil.blueColor
-                                    : ColorsUtil.black,fontWeight:widget.isSelected
-                                  ?FontWeight.w700:FontWeight.normal,
-                              ),
+                              style: widget.isSelected
+                                  ? AppTextStyles.semiBold(14,
+                                      color: AppColors.greenDeep)
+                                  : AppTextStyles.regular(14),
                             ),
                             (widget.isUPIBox ?? false)
                                 ? Padding(

@@ -41,8 +41,8 @@ class NotificationService {
     }
 
     AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails('Monexo', 'Monexo investor',
-            channelDescription: 'Upadted of loan application',
+        AndroidNotificationDetails('Monexo', 'PeerBridge',
+            channelDescription: 'Updates on your investments',
             styleInformation: isImage ? bigPictureStyleInformation : null,
             importance: Importance.max,
             priority: Priority.high,

@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:Monexo/modules/marketplace/models/primary_market_loan.dart';
+import 'package:peerbridge/modules/marketplace/models/primary_market_loan.dart';
 
 PrimaryMarketLoanResponse primaryMarketLoanResponseFromJson(String str) =>
     PrimaryMarketLoanResponse.fromJson(json.decode(str));

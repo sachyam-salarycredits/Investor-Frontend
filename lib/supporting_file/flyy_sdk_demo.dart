@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:Monexo/supporting_file/fly_sdk.dart';
+import 'package:peerbridge/supporting_file/fly_sdk.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +30,7 @@ class _FlyySdkDemoState extends State<FlyySdkDemo> {
   }
 
   void initFlySdk(){
-    FlyyFlutterPlugin.setPackageName("com.monexo.lender.app");
+    FlyyFlutterPlugin.setPackageName("co.peerbridge.investor");
 
     FlyyFlutterPlugin.initFlyySDK(
         "68946ae3ce3f0c438a0e", FlyyFlutterPlugin.STAGE);

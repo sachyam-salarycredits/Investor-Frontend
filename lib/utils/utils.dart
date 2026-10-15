@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io' show File, Platform;
 import 'dart:typed_data';
 import 'dart:ui';
-import 'package:Monexo/language/language_en.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/enums.dart';
+import 'package:peerbridge/language/language_en.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/enums.dart';
 import 'package:dart_ipify/dart_ipify.dart';
 import 'package:device_information/device_information.dart';
 import 'package:file_picker/file_picker.dart';
@@ -216,7 +216,7 @@ class Utils {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-            title == null ? "Monexo" : title,
+            title == null ? "PeerBridge" : title,
             style: TextStyle(
               fontSize: 22,
               color: ColorsUtil.blueColor,
@@ -256,7 +256,7 @@ class Utils {
 
   static Future<void> showAlert(
       {required BuildContext context,
-      String title = "Monexo",
+      String title = "PeerBridge",
       required String msg,
       Function? onTap,
       String buttonTitle = "ok"}) async {
@@ -323,7 +323,7 @@ class Utils {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-            "Rate Monexo App",
+            "Rate PeerBridge App",
             style: TextStyle(
               fontSize: 22,
               color: ColorsUtil.blueColor,
@@ -333,7 +333,7 @@ class Utils {
             child: ListBody(
               children: <Widget>[
                 Text(
-                  "If you enjoy using Monexo Investor App, would you mind taking a moment to rate it? It won't take more then a minute. Thanks for your support!",
+                  "If you enjoy using the PeerBridge app, would you mind taking a moment to rate it? It won't take more then a minute. Thanks for your support!",
                   style: TextStyle(
                     fontSize: 14,
                   ),
@@ -343,7 +343,7 @@ class Utils {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text("Rate Monexo App"),
+              child: Text("Rate PeerBridge App"),
               onPressed: () async {
                 final InAppReview inAppReview = InAppReview.instance;
                 if (await inAppReview.isAvailable()) {

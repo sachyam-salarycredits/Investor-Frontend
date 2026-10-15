@@ -1,25 +1,27 @@
-import 'package:Monexo/language/language_en.dart';
-import 'package:Monexo/modules/marketplace/models/market_place_card_data.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/supporting_file/otp_auto_detect.dart';
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/language/language_en.dart';
+import 'package:peerbridge/modules/marketplace/models/common_loan_cart.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/supporting_file/otp_auto_detect.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/pb/pb.dart';
 import 'package:flutter/material.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
 import 'package:otp_autofill/otp_autofill.dart';
 import 'package:provider/provider.dart';
 
-import '../../../widgets/custom_button.dart';
-import '../models/primary_market_loan.dart';
-import 'custom_tooltip.dart';
-
+/// Funding summary sheet: cart lines, expected returns, OTP confirmation and
+/// a success state once the checkout completes.
 class loanCartPopupDialog extends StatefulWidget {
   final Function? onUpdate;
   final Function? refreshData;
-  const loanCartPopupDialog({Key? key, this.onUpdate, this.refreshData})
-      : super(key: key);
+  final VoidCallback? onViewPortfolio;
+
+  const loanCartPopupDialog({
+    Key? key,
+    this.onUpdate,
+    this.refreshData,
+    this.onViewPortfolio,
+  }) : super(key: key);
 
   @override
   State<loanCartPopupDialog> createState() => _loanCartPopupDialogState();
@@ -27,16 +29,18 @@ class loanCartPopupDialog extends StatefulWidget {
 
 class _loanCartPopupDialogState extends State<loanCartPopupDialog> {
   String otp = "";
-  var loanReturn = [];
-  var expectedReturn = 0.0;
-  var isLoading = ValueNotifier(false);
   final formKey = GlobalKey<FormState>();
+  late OTPTextEditController otpController;
+  bool _submitting = false;
+
+  bool _success = false;
+  int _fundedTotal = 0;
+  int _fundedCount = 0;
 
   @override
   void initState() {
     super.initState();
-    initAutoDetectOtp();
-    expectedReturn = addLoanReturned();
+    otpController = AutoDetectOtp().getOtpController();
   }
 
   @override
@@ -45,32 +49,21 @@ class _loanCartPopupDialogState extends State<loanCartPopupDialog> {
     super.dispose();
   }
 
-  double addLoanReturned() {
-    final provider = Provider.of<AppStateProvider>(context, listen: false);
-    final cartList = provider.isPrimaryMarketSelected
-        ? provider.primaryCartList
-        : provider.secondaryCartList;
-    double sumLoanReturned = 0.0;
+  List<CommonLoanCart> _cart(AppStateProvider provider) =>
+      provider.isPrimaryMarketSelected
+          ? provider.primaryCartList
+          : provider.secondaryCartList;
 
-    for (int index = 0; index < cartList.length; index++) {
-      loanReturn.add(cartList[index].fundedAmount +
-          (((cartList[index].lenderXIRR / 100) * cartList[index].fundedAmount) /
-                  12) *
-              cartList[index].tenor);
-      sumLoanReturned += loanReturn[index];
+  double _expectedReturn(List<CommonLoanCart> cart) {
+    double sum = 0.0;
+    for (final loan in cart) {
+      sum += loan.fundedAmount +
+          (((loan.lenderXIRR / 100) * loan.fundedAmount) / 12) * loan.tenor;
     }
-
-    print('loanReturn List::${loanReturn} ${sumLoanReturned}');
-    return sumLoanReturned;
+    return sum;
   }
 
-  late OTPTextEditController otpController;
-
-  initAutoDetectOtp() {
-    otpController = AutoDetectOtp().getOtpController();
-  }
-
-  verifyOtp() async {
+  Future<void> _confirm() async {
     final state = context.read<AppStateProvider>();
     final availableBalance = state.userFundTransferDetails?.withdrawableBalance ??
         state
@@ -84,547 +77,266 @@ class _loanCartPopupDialogState extends State<loanCartPopupDialog> {
       return;
     }
 
-    if (otp.length != 6) {
+    if (!formKey.currentState!.validate() || otp.length != 6) return;
+
+    setState(() => _submitting = true);
+    final verified = await state.loginVerifyOTP(
+        state.userDetails!.profileDetails!.phoneNumber, otp);
+    if (!mounted) return;
+    if (!verified) {
+      setState(() => _submitting = false);
+      otpController.clear();
+      otp = '';
+      Utils.showToast(msg: LanguageHelper.textValidOtp);
       return;
     }
-    if (formKey.currentState!.validate()) {
-      isLoading.value = true;
 
-      var result = await state.loginVerifyOTP(
-          state.userDetails!.profileDetails!.phoneNumber, otp);
-      isLoading.value = false;
-      if (result) {
-        await showDialog(
-          context: context,
-          builder: (BuildContext context) => ProceedPopUpDialog(
-            refreshData: () {
-              if (widget.refreshData != null) {
-                widget.refreshData!();
-              }
-            },
-          ),
-        );
-        Navigator.pop(context);
-      } else {
-        Utils.showToast(msg: LanguageHelper.textValidOtp);
-        Navigator.pop(context);
+    final count = _cart(state).length;
+    final status = await state.checkoutItems();
+    if (!mounted) return;
+    setState(() {
+      _submitting = false;
+      if (status) {
+        _success = true;
+        _fundedTotal = totalAmount;
+        _fundedCount = count;
       }
+    });
+    if (!status) {
+      Utils.showToast(msg: 'We could not complete your investment. Please try again.');
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final provider = Provider.of<AppStateProvider>(context);
-    final cartList = provider.isPrimaryMarketSelected
-        ? provider.primaryCartList
-        : provider.secondaryCartList;
-    var _crossAxisSpacing = 0;
-    var _screenWidth = MediaQuery.of(context).size.width;
-    var _screenHeight = MediaQuery.of(context).size.height;
-    var _crossAxisCount = 1;
-    var _width = (_screenWidth - ((_crossAxisCount - 1) * _crossAxisSpacing)) /
-        _crossAxisCount;
-    var cellHeight = MediaQuery.of(context).size.height / 6;
-    var _aspectRatio = _width / cellHeight;
-    final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-
-    final otpField = TextFormField(
-      controller: otpController,
-      autocorrect: false,
-      enableSuggestions: false,
-      maxLength: 6,
-      validator: (val) =>
-          val!.isEmpty || val.length != 6 ? "enter valid otp" : null,
-      onChanged: (otpText) async {
-        otp = otpText;
-      },
-      keyboardType: TextInputType.phone,
-      decoration: InputDecoration(
-        hintText: 'Enter OTP',
-        hintStyle: TextStyle(
-            fontFamily: CustomFonts.nunito,
-            fontWeight: FontWeight.w600,
-            fontSize: 16),
-        isDense: true,
-        border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            borderSide: BorderSide(
-              color: Colors.green,
-            )),
-        counterText: '',
-        counterStyle: TextStyle(fontSize: 0),
-      ),
-      style: TextStyle(
-          fontSize: 16,
-          fontFamily: CustomFonts.nunito,
-          fontWeight: FontWeight.w600,
-          color: ColorsUtil.blackish),
-    );
-    print(
-        'height${keyboardHeight > 0 ? MediaQuery.of(context).size.height - (keyboardHeight * 0.5) : MediaQuery.of(context).size.height / 1.3}');
-    return Form(
-      key: formKey,
-      child: Container(
-          padding: EdgeInsets.fromLTRB(
-              14, 14, 14, MediaQuery.of(context).viewInsets.bottom),
-          // padding: EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          // height: keyboardHeight > 0
-          //     ? MediaQuery.of(context).size.height - (keyboardHeight *1.2)
-          //     : Utils.isWeb
-          //     ? MediaQuery.of(context).size.height / 1.3
-          //     : Media ,
-          // constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 1.6),
-          width: ResponsiveWidget.isSmallScreen(context)
-              ? MediaQuery.of(context).size.width
-              : 400,
-          child: Wrap(
-            children: [
-              ListTile(
-                title: Text(
-                  'Funding Summary',
-                  style: TextStyle(
-                      fontFamily: CustomFonts.nunito,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.w700),
-                ),
-                trailing: InkWell(
-                  highlightColor: Colors.transparent,
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Icon(
-                    Icons.close,
-                    size: 30.0,
-                  ),
-                ),
-              ),
-              // Divider(
-              //   thickness: 1,
-              //   height: 1,
-              //   color: ColorsUtil.lighterGrey,
-              // ),
-              Container(
-                constraints: BoxConstraints(
-                    maxHeight: keyboardHeight > 0 ? 230 : _screenHeight / 2.8),
-                margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    //physics: NeverScrollableScrollPhysics(),
-                    itemCount: cartList.length,
-                    // gridDelegate:
-                    //     SliverGridDelegateWithFixedCrossAxisCount(
-                    //         crossAxisCount: _crossAxisCount,
-                    //         childAspectRatio: _aspectRatio),
-                    itemBuilder: (context, index) {
-                      return LoanCartCard(
-                        cartIndex: index,
-                        onUpdate: () {
-                          setState(() {
-                            if (widget.onUpdate != null) {
-                              widget.onUpdate!();
-                              loanReturn = [];
-                              expectedReturn = addLoanReturned();
-                            }
-                          });
-                        },
-                      );
-                    }),
-              ),
-              Divider(
-                thickness: 1,
-                height: 1,
-                color: ColorsUtil.lighterGrey,
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    loanReturn == null
-                        ? CircularProgressIndicator()
-                        : Text(
-                            // 'Expected Returns : ₹${provider.getTotalCartAmount() }':
-                            'Expected Returns : ₹${expectedReturn.round().toInt()}',
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontFamily: CustomFonts.nunito,
-                                color: Color(0xff888888),
-                                fontSize: 13),
-                          ),
-                    Text(
-                      'Total : ₹ ${provider.getTotalCartAmount()}',
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontFamily: CustomFonts.nunito,
-                          color: ColorsUtil.blueColorCart,
-                          fontSize: 18),
-                    )
-                  ],
-                ),
-              ),
-
-              Container(
-                height: 70,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Container(
-                          // margin: EdgeInsets.all(8),
-
-                          // padding:
-                          //     EdgeInsets.only(left: 16, top: 16, bottom: 16),
-                          //
-                          // decoration: BoxDecoration(
-                          //   borderRadius:
-                          //       BorderRadius.all(Radius.circular(8)),
-                          //   border: Border.all(color: ColorsUtil.greenText),
-                          // ),
-                          child: otpField),
-                    ),
-                    Expanded(
-                      child: InkWell(
-                        highlightColor: Colors.transparent,
-                        focusColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        onTap: () async {
-                          verifyOtp();
-                        },
-                        child: Container(
-                            margin: EdgeInsets.all(9),
-                            decoration: BoxDecoration(
-                              color: ColorsUtil.blueColorCart,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                              border:
-                                  Border.all(color: ColorsUtil.blueColorCart),
-                            ),
-                            child: Center(
-                              child: ValueListenableBuilder<bool>(
-                                valueListenable: isLoading,
-                                builder: (context, loading, child) {
-                                  if (loading) {
-                                    return Align(
-                                        alignment: Alignment.center,
-                                        child: SizedBox(
-                                          width: 28,
-                                          height: 28,
-                                          child: CircularProgressIndicator(
-                                            valueColor: AlwaysStoppedAnimation(
-                                                Colors.white),
-                                          ),
-                                        ));
-                                  } else {
-                                    return Text(
-                                      'Proceed',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontFamily: CustomFonts.nunito,
-                                          fontWeight: FontWeight.w600,
-                                          color: ColorsUtil.white),
-                                    );
-                                  }
-                                },
-                              ),
-                            )),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ],
-          )),
-    );
+  void _finish({bool openPortfolio = false}) {
+    Navigator.of(context).pop();
+    widget.refreshData?.call();
+    if (openPortfolio) widget.onViewPortfolio?.call();
   }
-}
 
-class LoanCartCard extends StatefulWidget {
-  final int cartIndex;
-  final Function onUpdate;
-  const LoanCartCard({required this.cartIndex, required this.onUpdate});
-
-  @override
-  _LoanCartCardState createState() => _LoanCartCardState();
-}
-
-class _LoanCartCardState extends State<LoanCartCard> {
-  GlobalKey<CustomTooltipState> _toolTipKey = GlobalKey<CustomTooltipState>();
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<AppStateProvider>(context);
-
-    final cartList = provider.isPrimaryMarketSelected
-        ? provider.primaryCartList
-        : provider.secondaryCartList;
-    final cardData = cartList[widget.cartIndex];
-    final onUpdate = widget.onUpdate;
-    return Card(
-      color: ColorsUtil.marketCardContainer1,
-      child: ListTile(
-        contentPadding: EdgeInsets.all(10),
-        title: Text(
-          '${cardData.productName} (${cardData.customerName})',
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-              fontSize: 14,
-              color: ColorsUtil.blueColorCart,
-              fontFamily: CustomFonts.nunito,
-              fontWeight: FontWeight.w600),
-        ),
-        subtitle: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    if (_success) {
+      return SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 10,
-                ),
-                Text('Loan Amount',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 10,
-                        fontFamily: CustomFonts.nunito,
-                        fontWeight: FontWeight.w500)),
-                Text('₹${cardData.loanAmount.round()}',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 15,
-                        color: ColorsUtil.blueColorCart,
-                        fontFamily: CustomFonts.nunito,
-                        fontWeight: FontWeight.w600)),
-              ],
+            SuccessSheet(
+              title: 'Investment confirmed',
+              message:
+                  'You funded $_fundedCount ${_fundedCount == 1 ? 'loan' : 'loans'} worth ₹${_fundedTotal.commaAddedValue()}. ${LanguageHelper.textInvestedSuccessfully}',
+              buttonLabel: 'Done',
+              onDone: () => _finish(),
             ),
-            // Container(
-            //   height: 42,
-            //   decoration: BoxDecoration(
-            //       borderRadius: BorderRadius.circular(6),
-            //       color: ColorsUtil.white),
-            //   child: Row(
-            //     children: [
-            //       IconButton(
-            //           onPressed: () {
-            //             if (cardData.fundedAmount.round() > 1000) {
-            //               cardData.fundedAmount -= 1000;
-            //               provider.updateMarketPlaceCardData();
-            //             } else {
-            //               provider
-            //                   .removeItemFromCard(cardData.contract);
-            //               onUpdate();
-            //
-            //               // _toolTipKey.currentState!.showMessage(
-            //               //     "Amount Cannot be less than 1000");
-            //             }
-            //           },
-            //           icon: Icon(
-            //             Icons.remove,
-            //             color: ColorsUtil.blueColorCart,
-            //             size: 20,
-            //           )),
-            //       Container(
-            //         height: 42,
-            //         padding: EdgeInsets.symmetric(
-            //             horizontal: 4, vertical: 0),
-            //         decoration: BoxDecoration(
-            //           border: Border.symmetric(
-            //               vertical:
-            //               BorderSide(color: ColorsUtil.circleGrey)),
-            //           color: ColorsUtil.white,
-            //         ),
-            //         child: Center(
-            //           child: Text(
-            //             "${cardData.fundedAmount.round()}",
-            //             textAlign: TextAlign.center,
-            //             style: TextStyle(
-            //                 fontWeight: FontWeight.w600,
-            //                 fontSize: 14,
-            //                 fontFamily: CustomFonts.nunito),
-            //           ),
-            //         ),
-            //       ),
-            //       IconButton(
-            //           onPressed: () {
-            //             // addToCart(cardData, context);
-            //             onUpdate();
-            //             //   print(provider.getTotalCartAmount()+cardData.fundedAmount);
-            //           },
-            //           icon: Icon(
-            //             Icons.add,
-            //             color: ColorsUtil.blueColorCart,
-            //             size: 20,
-            //           )),
-            //     ],
-            //   ),
-            // )
-
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Chip(
-                  backgroundColor: ColorsUtil.blueColorCart,
-                  label: Text(
-                    '₹ ${cardData.fundedAmount.round()}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        color: ColorsUtil.white,
-                        fontFamily: CustomFonts.nunito),
-                  ),
+            if (widget.onViewPortfolio != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: TextButton(
+                  onPressed: () => _finish(openPortfolio: true),
+                  child: Text('View portfolio',
+                      style: AppTextStyles.semiBold(14, color: AppColors.green)),
                 ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () {
-                    provider.removeItemFromCard(cardData.toString());
-                    setState(() {
-                      provider.getTotalCartAmount() == 0
-                          ? Navigator.pop(context)
-                          : onUpdate();
-                    });
-                  },
-                ),
-              ],
-            ),
+              ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class ProceedPopUpDialog extends StatelessWidget {
-  final Function refreshData;
-  ProceedPopUpDialog({Key? key, required this.refreshData}) : super(key: key);
-
-  final isLoading = ValueNotifier(false);
-
-  Future<void> checkoutBtnTap(provider, context) async {
-    isLoading.value = true;
-    final loansIdList = provider.primaryCartList.map((a) => a.contract);
-    var status = await provider.checkoutItems();
-    isLoading.value = false;
-    if (status) {
-      Utils.showAlert(
-          context: context,
-          title: "Congratulations!",
-          msg: LanguageHelper.textInvestedSuccessfully,
-          onTap: () {
-            Navigator.pop(context);
-            refreshData();
-          });
+      );
     }
-  }
 
-  @override
-  Widget build(BuildContext context) {
     final provider = Provider.of<AppStateProvider>(context);
-    final cartList = provider.isPrimaryMarketSelected
-        ? provider.primaryCartList
-        : provider.secondaryCartList;
+    final cartList = _cart(provider);
+    final total = provider.getTotalCartAmount();
+    final expected = _expectedReturn(cartList);
+    final interest = (expected - total).clamp(0, double.infinity);
 
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5.0),
-      ),
-      title: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            InkWell(
-              hoverColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              splashColor: Colors.transparent,
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child:
-                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Icon(
-                  Icons.arrow_back,
-                  color: ColorsUtil.lighterGrey,
-                  size: 20,
-                ),
-                SizedBox(
-                  width: 10.0,
-                ),
-                Text(
-                  "Go Back",
-                  style: TextStyle(
-                    color: ColorsUtil.lighterGrey,
-                    fontFamily: CustomFonts.nunito,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16.0,
-                  ),
-                ),
-              ]),
+    return Form(
+      key: formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 8, 8),
+            child: PbSheetTitle(
+              eyebrow:
+                  '${cartList.length} ${cartList.length == 1 ? 'loan' : 'loans'} selected',
+              title: 'Funding summary',
             ),
-            SizedBox(
-              height: 24,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: RichText(
-                    text: TextSpan(
-                      text: "TOTAL ",
-                      style: TextStyle(
-                        fontFamily: CustomFonts.nunito,
-                        color: ColorsUtil.blueColorCart,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16.0,
-                      ),
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: ' ₹${provider.getTotalCartAmount()}',
-                          style: TextStyle(
-                            color: ColorsUtil.blueColorCart,
-                            fontFamily: CustomFonts.nunito,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20.0,
-                          ),
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < cartList.length; i++) ...[
+                    LoanCartCard(
+                      cartIndex: i,
+                      onUpdate: () {
+                        setState(() {});
+                        widget.onUpdate?.call();
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.mintSurface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.line),
+                    ),
+                    child: Column(
+                      children: [
+                        SummaryLine(
+                            label: 'Investment amount',
+                            value: '₹${total.commaAddedValue()}'),
+                        SummaryLine(
+                            label: 'Expected interest',
+                            value: '₹${interest.round().commaAddedValue()}'),
+                        const Divider(height: 12, color: AppColors.line),
+                        SummaryLine(
+                          label: 'Expected returns',
+                          value: '₹${expected.round().commaAddedValue()}',
+                          total: true,
                         ),
                       ],
                     ),
                   ),
-                ),
-                Text(
-                  '${cartList.length} Loans',
-                  style: TextStyle(
-                    color: ColorsUtil.lighterGrey,
-                    fontFamily: CustomFonts.nunito,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16.0,
+                  const SizedBox(height: 18),
+                  Text('Confirm with OTP', style: AppTextStyles.cardTitle),
+                  const SizedBox(height: 4),
+                  Text('Enter the 6-digit code sent to your registered mobile.',
+                      style: AppTextStyles.caption),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: otpController,
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    maxLength: 6,
+                    keyboardType: TextInputType.number,
+                    validator: (val) => val == null || val.length != 6
+                        ? 'Enter a valid 6-digit OTP'
+                        : null,
+                    onChanged: (value) => otp = value,
+                    style: AppTextStyles.semiBold(18)
+                        .copyWith(letterSpacing: 8),
+                    decoration: InputDecoration(
+                      hintText: '••••••',
+                      counterText: '',
+                      isDense: true,
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.line),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            const BorderSide(color: AppColors.green, width: 1.4),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.error),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.error),
+                      ),
+                    ),
                   ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+            child: PbPrimaryButton(
+              label: 'Confirm & invest ₹${total.commaAddedValue()}',
+              isLoading: _submitting,
+              onPressed: _submitting ? null : _confirm,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class LoanCartCard extends StatelessWidget {
+  final int cartIndex;
+  final Function onUpdate;
+
+  const LoanCartCard({Key? key, required this.cartIndex, required this.onUpdate})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = Provider.of<AppStateProvider>(context);
+    final cartList = provider.isPrimaryMarketSelected
+        ? provider.primaryCartList
+        : provider.secondaryCartList;
+    final cardData = cartList[cartIndex];
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.line),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  cardData.productName.isEmpty
+                      ? cardData.customerName
+                      : cardData.productName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.semiBold(13.5),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${cardData.customerName} · ${cardData.lenderXIRR}% p.a.',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.caption,
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.mint,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              '₹${cardData.fundedAmount.round().commaAddedValue()}',
+              style: AppTextStyles.semiBold(13, color: AppColors.greenDeep),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Remove',
+            icon: const Icon(Icons.delete_outline_rounded,
+                color: AppColors.muted, size: 21),
+            onPressed: () {
+              provider.removeItemFromCard(cardData.toString());
+              if (provider.getTotalCartAmount() == 0) {
+                Navigator.pop(context);
+              }
+              onUpdate();
+            },
+          ),
+        ],
       ),
-      actions: <Widget>[
-        ValueListenableBuilder<bool>(
-          valueListenable: isLoading,
-          builder: (context, loading, child) {
-            return CustomButton(
-              isLoader: loading,
-              titleStr: loading ? "wait" : 'Confirm',
-              onPress: loading
-                  ? () {}
-                  : () {
-                      checkoutBtnTap(provider, context);
-                      //for checking out items
-                    },
-            );
-          },
-        )
-      ],
     );
   }
 }

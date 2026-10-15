@@ -1,10 +1,10 @@
-import 'package:Monexo/modules/profile/screens/profile_detail_screen.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/utils/fonts.dart';
+import 'package:peerbridge/modules/profile/screens/profile_detail_screen.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/utils/fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';

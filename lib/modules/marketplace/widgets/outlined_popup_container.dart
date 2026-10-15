@@ -1,8 +1,8 @@
-import 'package:Monexo/modules/marketplace/models/fundTransferDetails.dart';
-import 'package:Monexo/modules/marketplace/models/popup_data.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/fonts.dart';
+import 'package:peerbridge/modules/marketplace/models/fundTransferDetails.dart';
+import 'package:peerbridge/modules/marketplace/models/popup_data.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/fonts.dart';
 import 'package:flutter/material.dart';
 
 class OutlinePopupContainer extends StatelessWidget {

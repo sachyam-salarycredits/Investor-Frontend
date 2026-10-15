@@ -1,4 +1,4 @@
-import 'package:Monexo/utils/extensions.dart';
+import 'package:peerbridge/utils/extensions.dart';
 
 class StepsData {
   String kyc;

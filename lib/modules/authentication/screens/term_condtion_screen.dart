@@ -1,6 +1,6 @@
-import 'package:Monexo/utils/api_constant.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/utils/api_constant.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webviewx/webviewx.dart';

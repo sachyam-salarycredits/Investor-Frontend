@@ -1,14 +1,14 @@
-import 'package:Monexo/modules/onboardingSteps/models/steps_data.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/whats_next_screen.dart';
-import 'package:Monexo/modules/profile/widgets/logoWidget.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/modules/onboardingSteps/models/steps_data.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/whats_next_screen.dart';
+import 'package:peerbridge/modules/profile/widgets/logoWidget.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/utils/utils.dart';
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +18,7 @@ import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
-import '../modules/home/screens/home_screen.dart';
+import 'pb/pb.dart';
 import '../utils/constants.dart';
 import 'custom_button.dart';
 import 'header.dart';
@@ -94,33 +94,14 @@ class _NavBarWidgetState extends State<NavBarWidget> {
         return true;
       },
       child: Scaffold(
-        backgroundColor: ColorsUtil.white,
+        backgroundColor: AppColors.surface,
         appBar: ResponsiveWidget.isSmallScreen(context)
-            ? AppBar(
-                title: Text(
-                  'Account',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontFamily: CustomFonts.nunito,
-                    color: ColorsUtil.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                toolbarHeight: 70,
-                backgroundColor: ColorsUtil.blueColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(8),
-                  ),
-                ),
-                leading: BackButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
+            ? PbPageHeader(
+                title: 'Account settings',
+                onBack: () => Navigator.pop(context),
               )
             : null,
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: isLoading,
           child: SafeArea(
             child: ResponsiveWidget.isSmallScreen(context)
@@ -258,23 +239,14 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                                           children: [
                                             Text(
                                               'Complete your account',
-                                              style: TextStyle(
-                                                  fontFamily:
-                                                      CustomFonts.nunito,
-                                                  fontSize: 18,
-                                                  color: ColorsUtil.blueColor,
-                                                  fontWeight: FontWeight.w600),
+                                              style: AppTextStyles.headline,
                                             ),
                                             SizedBox(
                                               height: 7,
                                             ),
                                             Text(
                                               'Please take a moment to complete the few remaining steps.',
-                                              style: TextStyle(
-                                                  fontFamily:
-                                                      CustomFonts.nunito,
-                                                  fontSize: 14,
-                                                  color: ColorsUtil.blueColor),
+                                              style: AppTextStyles.bodyMuted,
                                             ),
                                             SizedBox(
                                               height: 7,
@@ -314,7 +286,7 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                                                           context) {
                                                         return AlertDialog(
                                                           title: Text(
-                                                            'Monexo',
+                                                            'PeerBridge',
                                                             style: TextStyle(
                                                               fontSize: 22,
                                                               color: ColorsUtil
@@ -353,11 +325,11 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                                                                             // height:
                                                                             //     1.9,
                                                                             color:
-                                                                                Colors.blue,
+                                                                                ColorsUtil.green,
                                                                             decoration:
                                                                                 TextDecoration.underline,
                                                                             decorationColor:
-                                                                                Colors.blue,
+                                                                                ColorsUtil.green,
                                                                             decorationThickness:
                                                                                 1.5,
                                                                             height:
@@ -438,11 +410,7 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                                             Text(
                                               'Advanced Settings',
                                               textAlign: TextAlign.start,
-                                              style: TextStyle(
-                                                fontFamily: CustomFonts.nunito,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18,
-                                              ),
+                                              style: AppTextStyles.sectionTitle,
                                             ),
                                             FlutterSwitch(
                                               activeColor: ColorsUtil.blueColor,
@@ -527,11 +495,7 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                                           titleStr: 'Back to Home',
                                           horizontalMargin: 16,
                                           onPress: () {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        HomeScreen()));
+                                            context.goNamed(RoutesName.HomeScreen);
                                           }),
 
                                       // ListTile(
@@ -1243,29 +1207,14 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                                                       children: [
                                                         Text(
                                                           'Complete your account',
-                                                          style: TextStyle(
-                                                              fontFamily:
-                                                                  CustomFonts
-                                                                      .nunito,
-                                                              fontSize: 18,
-                                                              color: ColorsUtil
-                                                                  .blueColor,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600),
+                                                          style: AppTextStyles.headline,
                                                         ),
                                                         SizedBox(
                                                           height: 7,
                                                         ),
                                                         Text(
                                                           'Please take a moment to complete the few remaining steps.',
-                                                          style: TextStyle(
-                                                              fontFamily:
-                                                                  CustomFonts
-                                                                      .nunito,
-                                                              fontSize: 14,
-                                                              color: ColorsUtil
-                                                                  .blueColor),
+                                                          style: AppTextStyles.bodyMuted,
                                                         ),
                                                         SizedBox(
                                                           height: 7,
@@ -1335,14 +1284,7 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                                                           'Advanced Settings',
                                                           textAlign:
                                                               TextAlign.start,
-                                                          style: TextStyle(
-                                                            fontFamily:
-                                                                CustomFonts
-                                                                    .nunito,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 18,
-                                                          ),
+                                                          style: AppTextStyles.sectionTitle,
                                                         ),
                                                         FlutterSwitch(
                                                           activeColor:
@@ -1445,12 +1387,7 @@ class _NavBarWidgetState extends State<NavBarWidget> {
                                                       titleStr: 'Back to Home',
                                                       horizontalMargin: 16,
                                                       onPress: () {
-                                                        Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                                builder:
-                                                                    (context) =>
-                                                                        HomeScreen()));
+                                                        context.goNamed(RoutesName.HomeScreen);
                                                       }),
 
                                                   // ListTile(

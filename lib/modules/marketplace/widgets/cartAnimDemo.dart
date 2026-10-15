@@ -1,8 +1,8 @@
-import 'package:Monexo/modules/marketplace/widgets/market_place_grid_cards.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
+import 'package:peerbridge/modules/marketplace/widgets/market_place_grid_cards.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
@@ -71,7 +71,7 @@ class _AddToCardAnimPageState extends State<AddToCardAnimPage>
     final size = MediaQuery.of(context).size;
 
 
-    final bgColor = ColorTween(begin: Colors.white, end: Colors.green)
+    final bgColor = ColorTween(begin: Colors.white, end: ColorsUtil.green)
         .animate(CurvedAnimation(
         parent: animationController,
         curve: Interval(0, 0.7, curve: Curves.decelerate)));

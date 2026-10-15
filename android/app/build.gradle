@@ -73,7 +73,7 @@ android {
     lint {
         disable 'InvalidPackage'
     }
-    namespace 'com.monexo.lender.app'
+    namespace 'co.peerbridge.investor.app'
 }
 
 flutter {

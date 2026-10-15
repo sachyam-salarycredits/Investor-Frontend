@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:Monexo/utils/colours_util.dart';
+import 'package:peerbridge/utils/colours_util.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';

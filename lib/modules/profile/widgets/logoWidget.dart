@@ -1,5 +1,5 @@
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/images.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/images.dart';
 import 'package:flutter/material.dart';
 
 class LogoWidget extends StatelessWidget {

@@ -1,25 +1,25 @@
 import 'dart:async';
 
-import 'package:Monexo/language/language_en.dart';
-import 'package:Monexo/modules/onboardingSteps/models/steps_data.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/aadhaar_verification.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/auto_investment.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/fund_transfer_screen.dart';
-import 'package:Monexo/modules/marketplace/screens/market_place_screen.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/sip_screen.dart';
-import 'package:Monexo/utils/api_constant.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/header.dart';
-import 'package:Monexo/widgets/loader.dart';
-import 'package:Monexo/widgets/steps_widget.dart';
-import 'package:Monexo/modules/onboardingSteps/widgets/whats_next_widget.dart';
+import 'package:peerbridge/language/language_en.dart';
+import 'package:peerbridge/modules/onboardingSteps/models/steps_data.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/aadhaar_verification.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/auto_investment.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/fund_transfer_screen.dart';
+import 'package:peerbridge/modules/marketplace/screens/market_place_screen.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/sip_screen.dart';
+import 'package:peerbridge/utils/api_constant.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/header.dart';
+import 'package:peerbridge/widgets/loader.dart';
+import 'package:peerbridge/widgets/steps_widget.dart';
+import 'package:peerbridge/modules/onboardingSteps/widgets/whats_next_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
@@ -80,7 +80,7 @@ class _WhatsNextScreenState extends State<WhatsNextScreen> {
       onWillPop: () async {
         return false;
       },
-      child: MonexoLoader(
+      child: PeerBridgeLoader(
         isLoading: loading,
         child: Scaffold(
           body: SafeArea(

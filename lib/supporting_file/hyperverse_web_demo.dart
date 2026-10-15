@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:Monexo/supporting_file/api_calling.dart';
-import 'package:Monexo/utils/constants.dart';
+import 'package:peerbridge/supporting_file/api_calling.dart';
+import 'package:peerbridge/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'dummy_js.dart' if (dart.library.js) 'dart:js' as js;
 

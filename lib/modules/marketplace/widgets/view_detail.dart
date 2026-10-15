@@ -1,14 +1,14 @@
-import 'package:Monexo/modules/marketplace/models/popup_data.dart';
-import 'package:Monexo/modules/marketplace/widgets/outlined_popup_container.dart';
-import 'package:Monexo/modules/profile/widgets/logoWidget.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/modules/marketplace/models/popup_data.dart';
+import 'package:peerbridge/modules/marketplace/widgets/outlined_popup_container.dart';
+import 'package:peerbridge/modules/profile/widgets/logoWidget.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 

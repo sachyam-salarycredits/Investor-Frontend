@@ -1,4 +1,4 @@
-import 'package:Monexo/utils/colours_util.dart';
+import 'package:peerbridge/utils/colours_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 

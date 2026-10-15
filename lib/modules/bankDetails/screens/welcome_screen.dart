@@ -1,18 +1,18 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:Monexo/modules/home/screens/home_screen.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/first_deposit_screen.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/whats_next_screen.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/custom_button.dart';
+import 'package:peerbridge/modules/home/screens/home_screen.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/first_deposit_screen.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/whats_next_screen.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
 
-import 'package:Monexo/widgets/header.dart';
+import 'package:peerbridge/widgets/header.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -90,7 +90,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             height: 30.0,
                           ),
                           Text(
-                            'Welcome to Monexo',
+                            'Welcome to PeerBridge',
                             maxLines: 1,
                             softWrap: true,
                             textAlign: TextAlign.center,
@@ -222,7 +222,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               //             height: 30.0,
               //           ),
               //           Text(
-              //             'Welcome to Monexo',
+              //             'Welcome to PeerBridge',
               //             maxLines: 1,
               //             softWrap: true,
               //             textAlign: TextAlign.center,
@@ -382,13 +382,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             ),
 
             //no of headers
-            buildSingleExpansion("How does Monexo work?",
+            buildSingleExpansion("How does PeerBridge work?",
                 "'The entire process is online, using technology to lower the cost of borrowing and pass the savings back in the form of lower rates for borrowers and solid returns for lenders.'"),
             buildSingleExpansion(
-                "Why is it safe to lend or borrow money online at Monexo's marketplace?",
+                "Why is it safe to lend or borrow money online at PeerBridge's marketplace?",
                 "'The entire process is online, using technology to lower the cost of borrowing and pass the savings back in the form of lower rates for borrowers and solid returns for lenders.'"),
             buildSingleExpansion(
-                "is my personal/financial information safe with Monexo?",
+                "is my personal/financial information safe with PeerBridge?",
                 "'The entire process is online, using technology to lower the cost of borrowing and pass the savings back in the form of lower rates for borrowers and solid returns for lenders.'"),
 
             SizedBox(

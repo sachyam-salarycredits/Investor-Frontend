@@ -1,24 +1,24 @@
 import 'dart:math';
 
-import 'package:Monexo/language/language_en.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/utils/api_constant.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/header.dart';
-import 'package:Monexo/widgets/input_widget.dart';
-import 'package:Monexo/widgets/loader.dart';
-import 'package:Monexo/widgets/otp_verification.dart';
-import 'package:Monexo/widgets/title_header.dart';
+import 'package:peerbridge/language/language_en.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/utils/api_constant.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/header.dart';
+import 'package:peerbridge/widgets/input_widget.dart';
+import 'package:peerbridge/widgets/loader.dart';
+import 'package:peerbridge/widgets/otp_verification.dart';
+import 'package:peerbridge/widgets/title_header.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/src/provider.dart';
-import 'package:Monexo/utils/extensions.dart';
+import 'package:peerbridge/utils/extensions.dart';
 
 import '../../../supporting_file/appsFlyerSdk.dart';
 import '../../home/screens/home_screen.dart';
@@ -200,7 +200,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                 ),
               )
             : null,
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: isLoading,
           child: SafeArea(
               child: ResponsiveWidget.isSmallScreen(context)

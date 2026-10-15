@@ -1,11 +1,13 @@
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/utils/colours_util.dart';
+import 'package:peerbridge/modules/shell/main_shell.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/widgets/pb/pb.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../utils/responsive.dart';
 import 'loan_cart_popup.dart';
 
+/// Floating cart bar shown on the marketplace while loans are selected.
 class LoanCartButton extends StatefulWidget {
   final Function onUpdate;
   final Function refreshData;
@@ -13,9 +15,7 @@ class LoanCartButton extends StatefulWidget {
     Key? key,
     required this.onUpdate,
     required this.refreshData,
-  }) : super(
-          key: key,
-        );
+  }) : super(key: key);
 
   @override
   LoanCartButtonState createState() => LoanCartButtonState();
@@ -24,171 +24,139 @@ class LoanCartButton extends StatefulWidget {
 class LoanCartButtonState extends State<LoanCartButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
+  late Animation<double> _scale;
 
   animate() {
-    _animationController.forward();
+    _animationController.forward(from: 0);
   }
 
   @override
   void initState() {
-    _animationController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 1700));
-
-    _animationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _animationController.reset();
-      }
-    });
-
-    _animationController.addListener(() {
-      setState(() {});
-    });
     super.initState();
+    _animationController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+    _scale = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.06), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 1.06, end: 1.0), weight: 1),
+    ]).animate(CurvedAnimation(
+        parent: _animationController, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _openSummary(AppStateProvider provider) {
+    provider.sendOtpForUser();
+    provider.getUserFundDetails();
+    showPbBottomSheet<void>(
+      context: context,
+      builder: (_) => loanCartPopupDialog(
+        onUpdate: widget.onUpdate,
+        refreshData: widget.refreshData,
+        onViewPortfolio: () {
+          if (mounted) openShellTab(context, ShellTab.portfolio);
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AppStateProvider>(context);
+    final cart = provider.getCurrentCart();
 
-    var userCartList = provider.getCurrentCart();
-
-    if (userCartList.isEmpty) {
-      return SizedBox();
+    if (cart.isEmpty) {
+      return const SizedBox();
     }
 
-    var startPos = 6.0;
-    var endPos = 170.0;
-    TweenSequence<double> sequence = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: startPos, end: endPos), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: endPos, end: startPos), weight: 1),
-    ]);
+    final total = provider.getTotalCartAmount();
 
-    final position = sequence.animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(0.0, 0.6, curve: Curves.easeIn)));
-
-    TweenSequence<double> scaleSequence = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1, end: .5), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: .5, end: 1), weight: 1),
-    ]);
-
-    TweenSequence<double> scaleBadgeSequence = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.6), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 1.6, end: 1), weight: 1),
-    ]);
-
-    var colorSequence = TweenSequence([
-      TweenSequenceItem(
-          tween: ColorTween(begin: ColorsUtil.blueColorText, end: Colors.white),
-          weight: 1),
-      TweenSequenceItem(
-          tween: ColorTween(begin: Colors.white, end: ColorsUtil.blueColorText),
-          weight: 1),
-    ]);
-
-    var colorBadgeSequence = TweenSequence([
-      TweenSequenceItem(
-          tween: ColorTween(begin: Colors.white, end: Colors.black), weight: 1),
-      TweenSequenceItem(
-          tween: ColorTween(begin: Colors.black, end: Colors.white), weight: 1),
-    ]);
-
-    var colorCartSequnce = TweenSequence([
-      TweenSequenceItem(
-          tween: ColorTween(begin: Colors.white, end: ColorsUtil.blueColorText),
-          weight: 1),
-      TweenSequenceItem(
-          tween: ColorTween(begin: ColorsUtil.blueColorText, end: Colors.white),
-          weight: 1),
-    ]);
-
-    final scale = scaleSequence.animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(.6, 1, curve: Curves.bounceInOut)));
-
-    final contColor = colorSequence.animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(0, 1, curve: Curves.bounceInOut)));
-
-    final badgeColor = colorBadgeSequence.animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(0, 1, curve: Curves.bounceInOut)));
-
-    final cartColor = colorCartSequnce.animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(0, 1, curve: Curves.bounceInOut)));
-
-    final scaleBadge = scaleBadgeSequence.animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Interval(0, 1, curve: Curves.bounceInOut)));
-
-    return Transform.scale(
-      scale: scale.value,
-      child: GestureDetector(
-        onTap: () {
-          provider.sendOtpForUser();
-          provider.getUserFundDetails();
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            shape: const RoundedRectangleBorder(
-              // <-- SEE HERE
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(15.0),
+    return ScaleTransition(
+      scale: _scale,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: () => _openSummary(provider),
+            child: Ink(
+              height: 58,
+              decoration: BoxDecoration(
+                gradient: AppColors.greenGradient,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.greenDeep.withOpacity(0.28),
+                    blurRadius: 24,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Row(
+                  children: [
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.shopping_bag_outlined,
+                              color: Colors.white, size: 20),
+                        ),
+                        Positioned(
+                          right: -6,
+                          top: -6,
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: const BoxDecoration(
+                              gradient: AppColors.goldGradient,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text('${cart.length}',
+                                style: AppTextStyles.bold(10,
+                                    color: AppColors.ink)),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${cart.length} ${cart.length == 1 ? 'loan' : 'loans'} selected',
+                            style: AppTextStyles.medium(11,
+                                color: Colors.white.withOpacity(0.72)),
+                          ),
+                          Text('₹${total.commaAddedValue()}',
+                              style: AppTextStyles.semiBold(16,
+                                  color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                    Text('Review',
+                        style: AppTextStyles.semiBold(13,
+                            color: AppColors.goldLight)),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.arrow_forward_rounded,
+                        color: AppColors.goldLight, size: 18),
+                  ],
+                ),
               ),
             ),
-            constraints: BoxConstraints(
-              maxWidth: ResponsiveWidget.isSmallScreen(context)
-                  ? MediaQuery.of(context).size.width
-                  : MediaQuery.of(context).size.width * .35,
-            ),
-            builder: (BuildContext context) => loanCartPopupDialog(
-              onUpdate: widget.onUpdate,
-              refreshData: widget.refreshData,
-            ),
-          );
-          // showDialog(
-          //   context: context,
-          //   builder: (BuildContext context) => loanCartPopupDialog(
-          //     onUpdate: widget.onUpdate,
-          //     refreshData: widget.refreshData,
-          //   ),
-          // );
-        },
-        child: Container(
-          height: 48,
-          width: 48,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                  right: -4,
-                  top: -position.value,
-                  child: Transform.scale(
-                    scale: scaleBadge.value,
-                    child: Container(
-                      padding: EdgeInsets.all(5),
-                      child: Text(
-                        "${userCartList.length}",
-                        style: TextStyle(
-                            fontSize: 12, color: ColorsUtil.blueColor),
-                      ),
-                      decoration: BoxDecoration(
-                          color: badgeColor.value, shape: BoxShape.circle),
-                    ),
-                  )),
-              Align(
-                child: Center(
-                  child: Icon(
-                    Icons.shopping_cart_outlined,
-                    color: cartColor.value,
-                  ),
-                ),
-              )
-            ],
           ),
-          decoration: BoxDecoration(
-              color: ColorsUtil.blueColorCart, shape: BoxShape.circle),
         ),
       ),
     );

@@ -1,15 +1,15 @@
 import 'dart:io';
 
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/constants.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/image_picker.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/header.dart';
-import 'package:Monexo/widgets/loader.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/constants.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/image_picker.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/header.dart';
+import 'package:peerbridge/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -79,7 +79,7 @@ class _SelfieCaptureScreenState extends State<SelfieCaptureScreen> {
       onWillPop: () async => !_isUploading,
       child: Scaffold(
         backgroundColor: ColorsUtil.offWhite,
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: _isUploading,
           child: SafeArea(
             child: Column(

@@ -1,4 +1,4 @@
-import 'package:Monexo/modules/onboardingSteps/models/auto_invest_category_model.dart';
+import 'package:peerbridge/modules/onboardingSteps/models/auto_invest_category_model.dart';
 
 class AutoInvestDetail {
   String? customerId;

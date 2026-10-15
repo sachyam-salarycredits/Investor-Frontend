@@ -1,31 +1,31 @@
 import 'dart:io';
 
-import 'package:Monexo/language/language_en.dart';
-import 'package:Monexo/modules/onboardingSteps/models/cashFree_details.dart';
-import 'package:Monexo/modules/onboardingSteps/models/cashfree_web_token_response.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/fund_transfer_process_screen.dart';
-import 'package:Monexo/supporting_file/cashfree_api.dart';
-import 'package:Monexo/supporting_file/api_calling.dart';
-import 'package:Monexo/utils/api_constant.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/enums.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/image_picker.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/user_preferences.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/checkbox_widget.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/header.dart';
-import 'package:Monexo/widgets/input_widget.dart';
-import 'package:Monexo/widgets/loader.dart';
-import 'package:Monexo/widgets/title_header.dart';
-import 'package:Monexo/widgets/tpv_registered_bank_banner.dart';
-import 'package:Monexo/modules/profile/models/user_details.dart';
+import 'package:peerbridge/language/language_en.dart';
+import 'package:peerbridge/modules/onboardingSteps/models/cashFree_details.dart';
+import 'package:peerbridge/modules/onboardingSteps/models/cashfree_web_token_response.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/fund_transfer_process_screen.dart';
+import 'package:peerbridge/supporting_file/cashfree_api.dart';
+import 'package:peerbridge/supporting_file/api_calling.dart';
+import 'package:peerbridge/utils/api_constant.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/enums.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/image_picker.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/utils/user_preferences.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/checkbox_widget.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/header.dart';
+import 'package:peerbridge/widgets/input_widget.dart';
+import 'package:peerbridge/widgets/loader.dart';
+import 'package:peerbridge/widgets/title_header.dart';
+import 'package:peerbridge/widgets/tpv_registered_bank_banner.dart';
+import 'package:peerbridge/modules/profile/models/user_details.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
@@ -414,7 +414,7 @@ class _FundTransferScreenState extends State<FundTransferScreen> {
         return false;
       },
       child: Scaffold(
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: _isLoading,
           child: SafeArea(
             child: ResponsiveWidget.isSmallScreen(context)

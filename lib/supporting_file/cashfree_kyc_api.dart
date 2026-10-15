@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:Monexo/supporting_file/api_calling.dart';
-import 'package:Monexo/utils/api_constant.dart';
+import 'package:peerbridge/supporting_file/api_calling.dart';
+import 'package:peerbridge/utils/api_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 

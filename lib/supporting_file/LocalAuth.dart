@@ -17,7 +17,7 @@ class LocalAuth {
   static Future<bool> authenticate() async {
     try {
       final bool didAuthenticate = await auth.authenticate(
-          localizedReason: 'Please authenticate to use Monexo app',
+          localizedReason: 'Please authenticate to use PeerBridge',
           options: const AuthenticationOptions(useErrorDialogs: false));
       return didAuthenticate;
     } on PlatformException catch (e) {

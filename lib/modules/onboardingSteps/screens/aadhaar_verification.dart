@@ -1,19 +1,19 @@
-import 'package:Monexo/language/language_en.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/supporting_file/appsFlyerSdk.dart';
-import 'package:Monexo/supporting_file/cashfree_kyc_api.dart';
-import 'package:Monexo/supporting_file/digilocker_kyc_api.dart';
-import 'package:Monexo/supporting_file/api_calling.dart';
-import 'package:Monexo/utils/api_constant.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/user_preferences.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/header.dart';
-import 'package:Monexo/widgets/loader.dart';
+import 'package:peerbridge/language/language_en.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/supporting_file/appsFlyerSdk.dart';
+import 'package:peerbridge/supporting_file/cashfree_kyc_api.dart';
+import 'package:peerbridge/supporting_file/digilocker_kyc_api.dart';
+import 'package:peerbridge/supporting_file/api_calling.dart';
+import 'package:peerbridge/utils/api_constant.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/utils/user_preferences.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/header.dart';
+import 'package:peerbridge/widgets/loader.dart';
 import 'package:dart_ipify/dart_ipify.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
@@ -202,7 +202,7 @@ class _AadhaarVerificationScreenState extends State<AadhaarVerificationScreen> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text(
-                'Monexo',
+                'PeerBridge',
                 style: TextStyle(
                   fontSize: 22,
                   color: ColorsUtil.blueColor,
@@ -229,9 +229,9 @@ class _AadhaarVerificationScreenState extends State<AadhaarVerificationScreen> {
                               style: TextStyle(
                                 // height:
                                 //     1.9,
-                                color: Colors.blue,
+                                color: ColorsUtil.green,
                                 decoration: TextDecoration.underline,
-                                decorationColor: Colors.blue,
+                                decorationColor: ColorsUtil.green,
                                 decorationThickness: 1.5,
                                 height: 1.5,
                               ),
@@ -294,7 +294,7 @@ class _AadhaarVerificationScreenState extends State<AadhaarVerificationScreen> {
         return false;
       },
       child: Scaffold(
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: _isLoading,
           child: SafeArea(
             child: ResponsiveWidget.isSmallScreen(context)
@@ -324,9 +324,9 @@ class _AadhaarVerificationScreenState extends State<AadhaarVerificationScreen> {
                               TextSpan(
                                   text: 'lend@monexo.co',
                                   style: TextStyle(
-                                    color: Colors.blue,
+                                    color: ColorsUtil.green,
                                     decoration: TextDecoration.underline,
-                                    decorationColor: Colors.blue,
+                                    decorationColor: ColorsUtil.green,
                                     decorationThickness: 1.5,
                                     height: 1.5,
                                   ),
@@ -390,12 +390,12 @@ class _AadhaarVerificationScreenState extends State<AadhaarVerificationScreen> {
                                                     TextSpan(
                                                         text: 'lend@monexo.co',
                                                         style: TextStyle(
-                                                          color: Colors.blue,
+                                                          color: ColorsUtil.green,
                                                           decoration:
                                                               TextDecoration
                                                                   .underline,
                                                           decorationColor:
-                                                              Colors.blue,
+                                                              ColorsUtil.green,
                                                           decorationThickness:
                                                               1.5,
                                                           height: 1.5,

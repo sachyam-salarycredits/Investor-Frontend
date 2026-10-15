@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:Monexo/modules/authentication/models/pan_details.dart';
-import 'package:Monexo/modules/bankDetails/models/user_bank_detail.dart';
-import 'package:Monexo/utils/extensions.dart';
+import 'package:peerbridge/modules/authentication/models/pan_details.dart';
+import 'package:peerbridge/modules/bankDetails/models/user_bank_detail.dart';
+import 'package:peerbridge/utils/extensions.dart';
 
 class UserDetails {
   int userStage;

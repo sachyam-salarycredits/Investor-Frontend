@@ -1,14 +1,14 @@
 import 'dart:io';
 
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/app_router.dart';
-import 'package:Monexo/supporting_file/appsFlyerSdk.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/app_router.dart';
+import 'package:peerbridge/supporting_file/appsFlyerSdk.dart';
 
-import 'package:Monexo/supporting_file/fly_sdk.dart';
-import 'package:Monexo/supporting_file/notificationService.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/constants.dart';
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/supporting_file/fly_sdk.dart';
+import 'package:peerbridge/supporting_file/notificationService.dart';
+import 'package:peerbridge/theme/app_theme.dart';
+import 'package:peerbridge/utils/constants.dart';
+import 'package:peerbridge/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flyy_flutter_plugin/flyy_flutter_plugin.dart';
@@ -100,10 +100,8 @@ class _MyAppState extends State<MyApp> {
             routerDelegate: appRouter.router.routerDelegate,
             routeInformationParser: appRouter.router.routeInformationParser,
 
-            theme: ThemeData(
-                primaryColor: ColorsUtil.blueColor,
-                accentColor: ColorsUtil.arrowColor,
-                visualDensity: VisualDensity.compact),
+            title: 'PeerBridge',
+            theme: AppTheme.light,
             debugShowCheckedModeBanner: false,
             // home: PaymentWebScreen(cashFreeResponse: CashFreeResponse(data: Data(
             //   url: "https://sandbox.cashfree.com/pg/view/gateway/nkUFT2yf1tgFalP4Q3ZTe96eb11e89663ffef0e957c1f4a3981f"

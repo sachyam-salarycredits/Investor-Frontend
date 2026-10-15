@@ -2,17 +2,17 @@
 
 import 'dart:io';
 
-import 'package:Monexo/modules/home/models/ViewRiskDataModel.dart';
-import 'package:Monexo/modules/home/screens/portfolio_analysis_screen.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/header.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/widgets/loader.dart';
+import 'package:peerbridge/modules/home/models/ViewRiskDataModel.dart';
+import 'package:peerbridge/modules/home/screens/portfolio_analysis_screen.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/header.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/widgets/loader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -459,7 +459,7 @@ class _ViewDetailPortfolioAnalysisState
                 ),
               )
             : null,
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: _isLoading,
           child: SafeArea(
               child: ResponsiveWidget.isSmallScreen(context)

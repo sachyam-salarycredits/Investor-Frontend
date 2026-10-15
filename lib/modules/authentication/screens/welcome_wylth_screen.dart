@@ -1,17 +1,17 @@
-import 'package:Monexo/routes_management/app_router.dart';
+import 'package:peerbridge/routes_management/app_router.dart';
 // import 'dart:html' as html;
-import 'package:Monexo/supporting_file/flyy_web_sdk.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/loader.dart';
+import 'package:peerbridge/supporting_file/flyy_web_sdk.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/loader.dart';
 import 'package:flutter/material.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/loader.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -58,7 +58,7 @@ class _WelcomeWylthScreenState extends State<WelcomeWylthScreen> {
         return false;
       },
       child: Scaffold(
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: isLoading,
           child: SafeArea(
               child: ResponsiveWidget.isSmallScreen(context)
@@ -112,12 +112,10 @@ class _WelcomeWylthScreenState extends State<WelcomeWylthScreen> {
                                       CrossAxisAlignment.center,
                                       children: [
                                         Image(
-                                          width: 80,
-                                          height: 66,
-                                          color: ColorsUtil.white,
-                                          image: AssetImage(
-                                              LocalImages.monexo_m),
-                                        ),
+  width: 200,
+  height: 33,
+  image: AssetImage(LocalImages.peerbridge_logo_white),
+),
                                         SizedBox(height: 50),
                                         Row(
                                           mainAxisAlignment:
@@ -267,11 +265,11 @@ class _WelcomeWylthScreenState extends State<WelcomeWylthScreen> {
                   ),
                   Center(
                     child: Image(
-                      fit: BoxFit.cover,
-                      image: AssetImage(
-                        LocalImages.monexo_logo,
-                      ),
-                    ),
+  width: 220,
+  height: 36,
+  fit: BoxFit.contain,
+  image: AssetImage(LocalImages.peerbridge_logo),
+),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 18, vertical: 24.0),

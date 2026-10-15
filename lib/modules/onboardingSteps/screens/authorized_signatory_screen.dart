@@ -1,22 +1,22 @@
 import 'dart:typed_data';
 
-import 'package:Monexo/language/language_en.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/supporting_file/api_calling.dart';
-import 'package:Monexo/utils/api_constant.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/utils/user_preferences.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/date_picker/custom_date_picker.dart';
-import 'package:Monexo/widgets/header.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/widgets/input_widget.dart';
-import 'package:Monexo/widgets/loader.dart';
-import 'package:Monexo/widgets/title_header.dart';
+import 'package:peerbridge/language/language_en.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/supporting_file/api_calling.dart';
+import 'package:peerbridge/utils/api_constant.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/utils/user_preferences.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/date_picker/custom_date_picker.dart';
+import 'package:peerbridge/widgets/header.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/widgets/input_widget.dart';
+import 'package:peerbridge/widgets/loader.dart';
+import 'package:peerbridge/widgets/title_header.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -196,7 +196,7 @@ class _AuthorizedSignatoryScreenState extends State<AuthorizedSignatoryScreen> {
                 ),
               )
             : null,
-        body: MonexoLoader(
+        body: PeerBridgeLoader(
           isLoading: _isLoading,
           child: SafeArea(
             child: ResponsiveWidget.isSmallScreen(context)
@@ -554,7 +554,7 @@ class _AuthorizedSignatoryScreenState extends State<AuthorizedSignatoryScreen> {
                     ),
                   ],
                 ),
-                tileColor: selectedIndex == index ? Colors.blue : null,
+                tileColor: selectedIndex == index ? ColorsUtil.lightGreen : null,
                 onTap: () {
                   selectedIndex = index;
                   // setState((){

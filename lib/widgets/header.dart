@@ -1,24 +1,26 @@
 import 'dart:io';
 
-import 'package:Monexo/modules/onboardingSteps/models/steps_data.dart';
-import 'package:Monexo/modules/profile/widgets/logoWidget.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/routes_management/routes_list.dart';
-import 'package:Monexo/modules/profile/screens/profile_detail_screen.dart';
-import 'package:Monexo/modules/marketplace/screens/redemption_screen.dart';
-import 'package:Monexo/modules/onboardingSteps/screens/whats_next_screen.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/constants.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/modules/onboardingSteps/widgets/whats_next_widget.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/widgets/profile_end_nav_bar.dart';
+import 'package:peerbridge/modules/onboardingSteps/models/steps_data.dart';
+import 'package:peerbridge/modules/profile/widgets/logoWidget.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/routes_management/routes_list.dart';
+import 'package:peerbridge/modules/profile/screens/profile_detail_screen.dart';
+import 'package:peerbridge/modules/marketplace/screens/redemption_screen.dart';
+import 'package:peerbridge/modules/onboardingSteps/screens/whats_next_screen.dart';
+import 'package:peerbridge/theme/app_colors.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/constants.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/modules/onboardingSteps/widgets/whats_next_widget.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/widgets/profile_end_nav_bar.dart';
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flyy_flutter_plugin/flyy_flutter_plugin.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -80,7 +82,9 @@ class Header extends StatelessWidget {
       children: [
         AppBar(
           elevation: 0,
-          iconTheme: IconThemeData(color: Colors.black),
+          iconTheme: IconThemeData(color: AppColors.greenDeep),
+          foregroundColor: AppColors.greenDeep,
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
           backgroundColor: ColorsUtil.headerGray,
           leading: getLeading(),
           leadingWidth: isReload ? 88 : null,
@@ -126,9 +130,9 @@ class Header extends StatelessWidget {
           title: Visibility(
             visible: isLogoVisible,
             child: Image(
-              image: AssetImage(LocalImages.monexo_logo),
-              height: 90,
-              width: 160,
+              image: AssetImage(LocalImages.peerbridge_logo),
+              height: 28,
+              fit: BoxFit.contain,
             ),
           ),
         ),
@@ -154,7 +158,7 @@ class Header extends StatelessWidget {
                                 ),
                               ),
                               title: Text(
-                                "Download Monexo Investor Application. ",
+                                "Download the PeerBridge app",
                                 style: Theme.of(context).textTheme.headline6,
                               )),
                           content: Column(
@@ -164,7 +168,7 @@ class Header extends StatelessWidget {
                                 height: 12,
                               ),
                               CustomButton(
-                                bgColor: Colors.green,
+                                bgColor: AppColors.greenDeep,
                                 titleStr: "IOS",
                                 onPress: () {
                                   launch(Constants.appStoreUrl);
@@ -174,7 +178,7 @@ class Header extends StatelessWidget {
                                 height: 8,
                               ),
                               CustomButton(
-                                bgColor: Colors.green,
+                                bgColor: AppColors.greenDeep,
                                 titleStr: "ANDROID",
                                 onPress: () {
                                   launch(Constants.playStoreUrl);
@@ -185,9 +189,9 @@ class Header extends StatelessWidget {
                           actions: [],
                         ));
               },
-              tileColor: Colors.green,
+              tileColor: AppColors.greenDeep,
               textColor: Colors.white,
-              title: Text("Download Monexo Investor Mobile App"),
+              title: Text("Download the PeerBridge mobile app"),
               trailing: Icon(
                 Icons.download,
                 color: Colors.white,

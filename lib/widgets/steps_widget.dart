@@ -1,7 +1,7 @@
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-import 'package:Monexo/widgets/doted_line.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+import 'package:peerbridge/widgets/doted_line.dart';
 import 'package:flutter/material.dart';
 
 class StepsWidget extends StatelessWidget {

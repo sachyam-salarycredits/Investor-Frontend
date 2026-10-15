@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:Monexo/supporting_file/hyperverge_api.dart';
+import 'package:peerbridge/supporting_file/hyperverge_api.dart';
 import 'package:flutter/foundation.dart';
 import 'dummy_js.dart' if (dart.library.js) 'package:js/js.dart';
 import 'dummy_js.dart' if (dart.library.js) 'package:js/js_util.dart';

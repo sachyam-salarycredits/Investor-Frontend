@@ -1,6 +1,8 @@
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/fonts.dart';
+import 'package:peerbridge/theme/app_colors.dart';
+import 'package:peerbridge/theme/app_text_styles.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/fonts.dart';
 import 'package:flutter/material.dart';
 
 class NavBarBoxWidget extends StatelessWidget {
@@ -45,13 +47,10 @@ class NavBarBoxWidget extends StatelessWidget {
                     maxLines: 1,
                     softWrap: true,
                     textAlign: TextAlign.left,
-                    style: TextStyle(
-                        fontFamily: CustomFonts.nunito,
+                    style: AppTextStyles.medium(13.5,
                         color: swithValue
                             ? ColorsUtil.greyDisable
-                            : ColorsUtil.blueColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700),
+                            : AppColors.ink),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 0),
@@ -72,13 +71,10 @@ class NavBarBoxWidget extends StatelessWidget {
                                 fit: BoxFit.scaleDown,
                                 child: Text(
                                   status.getStatusStr(),
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontFamily: CustomFonts.nunito,
+                                  style: AppTextStyles.medium(10.5,
                                     color: status
                                         .getStatusColor()
-                                        .withAlpha(swithValue ? 50 : 255),
-                                  ),
+                                        .withAlpha(swithValue ? 50 : 255)),
                                 ),
                               ),
                             ),

@@ -1,14 +1,14 @@
-import 'package:Monexo/language/language_en.dart';
-import 'package:Monexo/modules/profile/models/user_details.dart';
-import 'package:Monexo/modules/profile/screens/profile_detail_screen.dart';
-import 'package:Monexo/modules/profile/widgets/editTextWidget.dart';
-import 'package:Monexo/providers/app_state_provider.dart';
-import 'package:Monexo/utils/api_constant.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/utils.dart';
-import 'package:Monexo/widgets/otp_verification.dart';
+import 'package:peerbridge/language/language_en.dart';
+import 'package:peerbridge/modules/profile/models/user_details.dart';
+import 'package:peerbridge/modules/profile/screens/profile_detail_screen.dart';
+import 'package:peerbridge/modules/profile/widgets/editTextWidget.dart';
+import 'package:peerbridge/providers/app_state_provider.dart';
+import 'package:peerbridge/utils/api_constant.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/utils.dart';
+import 'package:peerbridge/widgets/otp_verification.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

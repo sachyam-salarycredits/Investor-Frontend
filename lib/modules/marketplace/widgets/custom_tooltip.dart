@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
+import 'package:peerbridge/theme/app_colors.dart';
+import 'package:peerbridge/theme/app_text_styles.dart';
 
 class CustomTooltip extends StatefulWidget {
   final String message;
@@ -18,7 +16,7 @@ class CustomTooltip extends StatefulWidget {
 
 class CustomTooltipState extends State<CustomTooltip>
     with TickerProviderStateMixin {
-  final color = Colors.redAccent;
+  final color = AppColors.ink;
   late GlobalKey key;
   late Offset _offset;
   late Size _size;
@@ -54,38 +52,46 @@ class CustomTooltipState extends State<CustomTooltip>
   }
 
   OverlayEntry makeOverlay() {
+    final screen = MediaQuery.of(context).size;
+    const bubbleWidth = 260.0;
+    final anchorRight = _offset.dx + _size.width;
+    final left = (anchorRight - bubbleWidth)
+        .clamp(12.0, screen.width - bubbleWidth - 12.0)
+        .toDouble();
     return OverlayEntry(
       builder: (context) => Positioned(
-        top: _offset.dy - _size.longestSide,
-        left: _offset.dx*0.9,
-        width: _size.width*1.2,
+        bottom: screen.height - _offset.dy + 4,
+        left: left,
+        width: bubbleWidth,
         child: ScaleTransition(
+          alignment: Alignment.bottomRight,
           scale: Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
               parent: _controller,
               curve: Interval(0, 0.4, curve: Curves.decelerate))),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Material(
                 color: Colors.transparent,
                 child: Container(
                   decoration: BoxDecoration(
                     color: color,
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     message,
-                    style: TextStyle(
-                        fontFamily: CustomFonts.nunito,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        color: Colors.white),
+                    style: AppTextStyles.medium(12.5, color: Colors.white),
                   ),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
                 ),
               ),
-              Align(
-                alignment: Alignment.center,
+              Padding(
+                padding: EdgeInsets.only(
+                    right: (anchorRight - left - bubbleWidth).abs() < 1
+                        ? _size.width / 2 - 7
+                        : 18),
                 child: RotatedBox(
                   quarterTurns: 2,
                   child: ClipPath(
@@ -108,6 +114,7 @@ class CustomTooltipState extends State<CustomTooltip>
   }
 
   showMessage(String m) {
+    if (_controller.isAnimating || _controller.value > 0) return;
     message = m;
     getWidgetDetails();
     overlayEntry = makeOverlay();

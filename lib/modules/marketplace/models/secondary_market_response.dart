@@ -4,8 +4,8 @@
 
 import 'dart:convert';
 
-import 'package:Monexo/modules/marketplace/models/primary_market_loan.dart';
-import 'package:Monexo/modules/marketplace/models/secondary_market_loan.dart';
+import 'package:peerbridge/modules/marketplace/models/primary_market_loan.dart';
+import 'package:peerbridge/modules/marketplace/models/secondary_market_loan.dart';
 
 SecondaryMarketResponse secondaryMarketResponseFromJson(String str) =>
     SecondaryMarketResponse.fromJson(json.decode(str));

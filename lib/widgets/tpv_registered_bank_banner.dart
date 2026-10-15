@@ -1,7 +1,7 @@
-import 'package:Monexo/language/language_en.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/utils/fonts.dart';
-import 'package:Monexo/utils/tpv_utils.dart';
+import 'package:peerbridge/language/language_en.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/utils/fonts.dart';
+import 'package:peerbridge/utils/tpv_utils.dart';
 import 'package:flutter/material.dart';
 
 class TpvRegisteredBankBanner extends StatelessWidget {

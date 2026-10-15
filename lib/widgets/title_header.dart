@@ -1,12 +1,13 @@
-import 'package:Monexo/utils/fonts.dart';
+import 'package:peerbridge/theme/app_colors.dart';
+import 'package:peerbridge/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:Monexo/utils/colours_util.dart';
-import 'package:Monexo/widgets/custom_button.dart';
-import 'package:Monexo/utils/images.dart';
-import 'package:Monexo/utils/responsive.dart';
-// import 'package:Monexo/routes_management/app_router.dart';
-// import 'package:Monexo/routes_management/routes_list.dart';
+import 'package:peerbridge/utils/colours_util.dart';
+import 'package:peerbridge/widgets/custom_button.dart';
+import 'package:peerbridge/utils/images.dart';
+import 'package:peerbridge/utils/responsive.dart';
+// import 'package:peerbridge/routes_management/app_router.dart';
+// import 'package:peerbridge/routes_management/routes_list.dart';
 
 class TitleHeader extends StatelessWidget {
   Color bgColor;
@@ -38,13 +39,11 @@ class TitleHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                titleStr,
-                textAlign: TextAlign.start,
-                style: TextStyle(
-                  fontFamily: CustomFonts.nunito,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25,
+              Flexible(
+                child: Text(
+                  titleStr,
+                  textAlign: TextAlign.start,
+                  style: AppTextStyles.headline,
                 ),
               ),
               if (isVisibleSwitch ?? false)
@@ -69,10 +68,8 @@ class TitleHeader extends StatelessWidget {
           SizedBox(height: 10),
           Text(
             desStr,
-            style: TextStyle(
-              fontFamily: CustomFonts.nunito,
-              fontSize: 14,
-            ),
+            style: AppTextStyles.regular(13.5, color: AppColors.muted)
+                .copyWith(height: 1.5),
           ),
         ],
       ),

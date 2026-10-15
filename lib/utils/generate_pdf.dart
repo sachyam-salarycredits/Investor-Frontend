@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
 // import 'package:makepdfs/models/invoice.dart';
-import 'package:Monexo/modules/home/models/ViewRiskDataModel.dart';
-import 'package:Monexo/supporting_file/dummy_js.dart';
-import 'package:Monexo/utils/extensions.dart';
-import 'package:Monexo/utils/utils.dart';
+import 'package:peerbridge/modules/home/models/ViewRiskDataModel.dart';
+import 'package:peerbridge/supporting_file/dummy_js.dart';
+import 'package:peerbridge/utils/extensions.dart';
+import 'package:peerbridge/utils/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file_safe/open_file_safe.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,7 +20,7 @@ Future<void> makePdf(
     List orderList, String cid, String name, String pdfType) async {
   final pdf = Document();
   final imageLogo = MemoryImage(
-      (await rootBundle.load('images/monexo_logo_new.png'))
+      (await rootBundle.load('images/peerbridge_logo.png'))
           .buffer
           .asUint8List());
   pdf.addPage(Page(
@@ -32,8 +32,8 @@ Future<void> makePdf(
         children: [
           Expanded(
             child: SizedBox(
-              // Image Logo Monexo
-              child: Image(imageLogo, width: 350, height: 350),
+              // Image Logo PeerBridge
+              child: Image(imageLogo, width: 350, height: 57),
             ),
           ),
           SizedBox(height: 100),
