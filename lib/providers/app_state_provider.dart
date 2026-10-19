@@ -20,6 +20,7 @@ import 'package:peerbridge/modules/marketplace/models/my_investments_data.dart';
 import 'package:peerbridge/modules/marketplace/models/secondary_market_loan.dart';
 import 'package:peerbridge/modules/marketplace/models/secondary_market_loan_detail.dart';
 import 'package:peerbridge/modules/marketplace/models/secondary_market_response.dart';
+import 'package:peerbridge/modules/marketplace/models/account_transactions.dart';
 import 'package:peerbridge/modules/marketplace/models/statement_data.dart';
 import 'package:peerbridge/modules/marketplace/widgets/loan_cart_button.dart';
 import 'package:peerbridge/modules/onboardingSteps/models/BankDetailSIPModel.dart';
@@ -1876,6 +1877,42 @@ class AppStateProvider with ChangeNotifier {
       return list;
     } else {
       return null;
+    }
+  }
+
+  Future<AccountTransactions?> getAccountTransactions() async {
+    var url = APIUrls.getAccountTransactions + "?customerId=$customerId";
+    try {
+      var resp = await apiCalling.getRequest(url: url, headers: null);
+      var response = json.decode(resp);
+      if (response["statusCode"] == "200" && response["data"] is Map) {
+        return AccountTransactions.fromJson(
+            Map<String, dynamic>.from(response["data"]));
+      }
+    } catch (e) {
+      debugPrint("getAccountTransactions error: $e");
+    }
+    return null;
+  }
+
+  /// Returns the server message; [success] is true only when the email was sent.
+  Future<StatementEmailResult> emailStatement({int? year}) async {
+    final param = <String, dynamic>{"customerId": customerId};
+    if (year != null) param["year"] = year;
+    try {
+      var resp = await apiCalling.postRequest(
+          url: APIUrls.emailStatement,
+          headers: null,
+          parameters: param,
+          isAlert: false);
+      var response = json.decode(resp);
+      return StatementEmailResult(
+        success: response["statusCode"] == "200",
+        message: response["message"]?.toString() ?? '',
+      );
+    } catch (e) {
+      debugPrint("emailStatement error: $e");
+      return StatementEmailResult(success: false, message: '');
     }
   }
 

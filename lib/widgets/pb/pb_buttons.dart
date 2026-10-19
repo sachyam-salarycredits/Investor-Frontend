@@ -182,6 +182,42 @@ class PbGhostButton extends StatelessWidget {
   }
 }
 
+/// Square icon-only variant of [PbGhostButton].
+class PbGhostIconButton extends StatelessWidget {
+  final IconData icon;
+  final String semanticLabel;
+  final VoidCallback? onPressed;
+
+  const PbGhostIconButton({
+    Key? key,
+    required this.icon,
+    required this.semanticLabel,
+    this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: GestureDetector(
+        onTap: onPressed,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.10),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withOpacity(0.14)),
+          ),
+          child: Icon(icon, size: 20, color: Colors.white),
+        ),
+      ),
+    );
+  }
+}
+
 /// Compact dark green button, e.g. "Add funds" in the balance strip.
 class PbDarkButton extends StatelessWidget {
   final String label;

@@ -81,7 +81,7 @@ class _MarketPlaceCardState extends State<MarketPlaceCard> {
     final funded = loan.alreadyFunded();
 
     return LoanCard(
-      category: loan.productName,
+      category: loan.contract.isNotEmpty ? loan.contract : loan.productName,
       title: loan.customerName,
       riskTag: loan.category != '' ? RiskTag.fromCategory(loan.category) : null,
       metrics: [
@@ -105,7 +105,7 @@ class _MarketPlaceCardState extends State<MarketPlaceCard> {
         child: loan.isAddedToCart
             ? AmountStepper(
                 compact: true,
-                height: 38,
+                height: 32,
                 value: '₹${loan.fundedAmount.round().commaAddedValue()}',
                 onDecrease: () {
                   if (loan.fundedAmount.round() > 1000) {
@@ -201,19 +201,19 @@ class _FundButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 38,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           color: light ? Colors.white : null,
           gradient: light ? null : AppColors.goldGradient,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 16, color: AppColors.ink),
-            const SizedBox(width: 6),
-            Text(label, style: AppTextStyles.semiBold(12.5, color: AppColors.ink)),
+            Icon(icon, size: 15, color: AppColors.ink),
+            const SizedBox(width: 5),
+            Text(label, style: AppTextStyles.semiBold(12, color: AppColors.ink)),
           ],
         ),
       ),

@@ -13,6 +13,7 @@ class AppColors {
   static const green = Color(0xff006B4C);
   static const greenDeep = Color(0xff004936);
   static const greenLink = Color(0xff72D8B8);
+  static const forest = Color(0xff234D3C);
   static const mint = Color(0xffE5F2EC);
   static const mintSurface = Color(0xffF1F7F3);
   static const sage = Color(0xffDBE9DF);
@@ -43,6 +44,16 @@ class AppColors {
     end: Alignment.bottomRight,
     colors: [green, greenDeep],
     stops: [0.0, 0.8],
+  );
+
+  static const screenTop = Color(0xffF4F1E6);
+  static const screenBottom = Color(0xffF8F9F4);
+
+  static const screenGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [screenTop, screenBottom],
+    stops: [0.0, 0.45],
   );
 
   static const goldGradient = LinearGradient(

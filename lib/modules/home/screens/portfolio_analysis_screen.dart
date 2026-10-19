@@ -89,21 +89,6 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
         .toList();
   }
 
-  Color _healthColor(String health) {
-    switch (health.toUpperCase()) {
-      case 'GOOD':
-      case 'COMPLETED':
-        return AppColors.green;
-      case 'MODERATE':
-      case 'REDEEMED':
-        return AppColors.goldDark;
-      case 'CLOSED':
-        return AppColors.greenDeep;
-      default:
-        return AppColors.muted;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AppStateProvider>(context);
@@ -119,7 +104,8 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
       child: PeerBridgeLoader(
         isLoading: _isLoading,
         child: Scaffold(
-          backgroundColor: AppColors.surface,
+          backgroundColor:
+              widget.embedded ? Colors.transparent : AppColors.surface,
           appBar: widget.embedded
               ? null
               : PbPageHeader(
@@ -143,10 +129,9 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           if (widget.embedded) ...[
-                            Text('PORTFOLIO', style: AppTextStyles.eyebrow),
-                            const SizedBox(height: 4),
-                            Text('Your investments',
-                                style: AppTextStyles.headline),
+                            Text('Your portfolio',
+                                style: AppTextStyles.medium(28).copyWith(
+                                    height: 1.2, letterSpacing: -0.5)),
                             const SizedBox(height: 18),
                           ],
                           SegmentedTabs(
@@ -164,7 +149,15 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
                                 ? _PortfolioBookSection.active
                                 : _PortfolioBookSection.closed),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 24),
+                          PbSectionTitle(
+                            title: 'Loan summary',
+                            subtitle: _selectedBook ==
+                                    _PortfolioBookSection.active
+                                ? 'Returns from active loans only'
+                                : 'Returns from closed loans only',
+                          ),
+                          const SizedBox(height: 14),
                           if (selected != null && selected.loanCount > 0)
                             _summarySection(selected)
                           else
@@ -175,12 +168,13 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
                                   ? 'No active loans in your portfolio yet.'
                                   : 'No closed loans in your portfolio yet.',
                             ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 28),
                           PbSectionTitle(
                             title: _selectedBook == _PortfolioBookSection.active
                                 ? 'Active loans'
                                 : 'Closed loans',
-                            subtitle: 'Tap a loan to see its repayments',
+                            subtitle: _loansSubtitle(selected?.loanCount ??
+                                _visibleInvestments.length),
                           ),
                           const SizedBox(height: 12),
                           _investmentsSection(),
@@ -200,43 +194,35 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
     return WillPopScope(onWillPop: () async => true, child: scaffold);
   }
 
+  String _loansSubtitle(int count) {
+    final kind =
+        _selectedBook == _PortfolioBookSection.active ? 'active' : 'closed';
+    return '$count $kind ${count == 1 ? 'loan' : 'loans'}';
+  }
+
+  /// Interest earned as a share of the amount invested.
+  double _absoluteReturn(PortfolioSectionSummary section) {
+    if (section.totalInvested <= 0) return 0;
+    return section.interestEarned / section.totalInvested * 100;
+  }
+
+  /// Annualised net return: the invested-amount weighted rate of the loans
+  /// in the selected tab.
+  double _anrEarned() {
+    var invested = 0.0;
+    var weighted = 0.0;
+    for (final loan in _visibleInvestments) {
+      final amount = (loan.investedAmount ?? 0).toDouble();
+      invested += amount;
+      weighted += amount * (loan.interestRate ?? 0);
+    }
+    return invested > 0 ? weighted / invested : 0;
+  }
+
   Widget _summarySection(PortfolioSectionSummary section) {
-    final isActive = _selectedBook == _PortfolioBookSection.active;
-    final healthColor = _healthColor(section.health);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: healthColor.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: healthColor.withOpacity(0.25)),
-          ),
-          child: Row(
-            children: [
-              PbIconTile(
-                icon: Icons.health_and_safety_outlined,
-                background: healthColor.withOpacity(0.14),
-                color: healthColor,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Portfolio health', style: AppTextStyles.caption),
-                    Text(section.healthLabel,
-                        style: AppTextStyles.semiBold(14, color: healthColor)),
-                  ],
-                ),
-              ),
-              Text('${section.loanCount} loans',
-                  style: AppTextStyles.semiBold(12, color: AppColors.ink)),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
@@ -250,7 +236,6 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
               child: SummaryTile(
                 label: 'Total return',
                 value: '₹${section.totalReturn.commaAddedValue()}',
-                positive: section.totalReturn > 0,
               ),
             ),
           ],
@@ -260,21 +245,29 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
           children: [
             Expanded(
               child: SummaryTile(
-                label: '% earned',
-                value: '${section.percentageEarned.toStringAsFixed(2)}%',
-                highlight: true,
+                label: 'Absolute return',
+                value: '${_absoluteReturn(section).toStringAsFixed(2)}%',
+                positive: true,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: SummaryTile(
-                label: isActive ? 'Principal outstanding' : 'Interest earned',
-                value: isActive
-                    ? '₹${section.principalOutstanding.commaAddedValue()}'
-                    : '₹${section.interestEarned.commaAddedValue()}',
+                label: 'ANR earned',
+                value: _investmentsLoading
+                    ? '…'
+                    : '${_anrEarned().toStringAsFixed(2)}%',
+                positive: true,
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 12),
+        SummaryTile(
+          label: 'Interest earned',
+          value: '+₹${section.interestEarned.commaAddedValue()}',
+          positive: true,
+          highlight: true,
         ),
       ],
     );

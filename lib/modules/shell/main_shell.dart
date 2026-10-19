@@ -149,13 +149,19 @@ class _MainShellState extends State<MainShell> {
         currentIndex: _index,
         switchTab: _switchTab,
         child: Scaffold(
-          backgroundColor: AppColors.surface,
-          body: IndexedStack(
-            index: _index,
-            children: [
-              for (var i = 0; i < pbNavItems.length; i++)
-                _visited.contains(i) ? _buildTab(i) : const SizedBox.shrink(),
-            ],
+          backgroundColor: AppColors.screenBottom,
+          body: DecoratedBox(
+            decoration:
+                const BoxDecoration(gradient: AppColors.screenGradient),
+            child: IndexedStack(
+              index: _index,
+              children: [
+                for (var i = 0; i < pbNavItems.length; i++)
+                  _visited.contains(i)
+                      ? _buildTab(i)
+                      : const SizedBox.shrink(),
+              ],
+            ),
           ),
           bottomNavigationBar: PbBottomNav(
             currentIndex: _index,

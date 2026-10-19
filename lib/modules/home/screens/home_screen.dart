@@ -20,7 +20,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../routes_management/routes_list.dart';
 import '../../../utils/images.dart';
-import '../../profile/widgets/logoWidget.dart';
 import '../models/NewOfferModel.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -150,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: PeerBridgeLoader(
         isLoading: loading,
         child: Scaffold(
-          backgroundColor: AppColors.surface,
+          backgroundColor: Colors.transparent,
           body: SafeArea(
             bottom: false,
             child: RefreshIndicator(
@@ -193,8 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         PbBrandHeader(onBellTap: _openOffers),
         const SizedBox(height: 22),
-        _greeting(context, firstName, userDetails?.profileDetails?.profileUrl,
-            kycDone),
+        _greeting(context, firstName, kycDone),
         if (!Utils.isWeb && (offerModelResponse?.data?.count ?? 0) > 0) ...[
           const SizedBox(height: 18),
           _offersRow(),
@@ -292,45 +290,33 @@ class _HomeScreenState extends State<HomeScreen> {
     return hasSignal ? points : const [];
   }
 
-  Widget _greeting(
-      BuildContext context, String firstName, String? avatarUrl, bool kycDone) {
-    return Row(
+  Widget _greeting(BuildContext context, String firstName, bool kycDone) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        Text(
+          firstName.isEmpty
+              ? '${Utils.getCurrentGreetings()}'
+              : '${Utils.getCurrentGreetings()}, $firstName',
+          style: AppTextStyles.regular(14, color: AppColors.muted),
+        ),
+        const SizedBox(height: 6),
+        Text.rich(
+          TextSpan(
+            text: 'Make your money move. ',
+            style: AppTextStyles.medium(28)
+                .copyWith(height: 1.3, letterSpacing: -0.5),
             children: [
-              Text(
-                firstName.isEmpty
-                    ? '${Utils.getCurrentGreetings()}'
-                    : '${Utils.getCurrentGreetings()}, $firstName',
-                style: AppTextStyles.medium(13, color: AppColors.muted),
-              ),
-              const SizedBox(height: 4),
-              Text('Make your money move.', style: AppTextStyles.headline),
-              const SizedBox(height: 10),
-              GestureDetector(
-                onTap: kycDone
-                    ? null
-                    : () => context.pushNamed(RoutesName.AadharVerification),
-                child: StatusPill(
-                  label: kycDone ? 'Verified investor' : 'Complete your KYC',
-                  active: kycDone,
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: GestureDetector(
+                  onTap: kycDone
+                      ? null
+                      : () => context.pushNamed(RoutesName.AadharVerification),
+                  child: _KycPill(verified: kycDone),
                 ),
               ),
             ],
-          ),
-        ),
-        const SizedBox(width: 12),
-        GestureDetector(
-          onTap: () => openShellTab(context, ShellTab.profile),
-          child: Container(
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.sage, width: 2),
-            ),
-            child: LogoWidget(size: 48, url: avatarUrl ?? ''),
           ),
         ),
       ],
@@ -639,6 +625,39 @@ class _ActionBanner extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _KycPill extends StatelessWidget {
+  final bool verified;
+
+  const _KycPill({required this.verified});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = verified ? AppColors.green : AppColors.goldDark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: verified ? AppColors.mint : AppColors.goldSoft,
+        borderRadius: BorderRadius.circular(99),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            verified ? Icons.verified_user_outlined : Icons.info_outline_rounded,
+            size: 14,
+            color: color,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            verified ? 'Verified' : 'Complete KYC',
+            style: AppTextStyles.medium(13, color: color),
+          ),
+        ],
       ),
     );
   }

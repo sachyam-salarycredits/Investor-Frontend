@@ -275,9 +275,9 @@ class PortfolioValueCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    PbGhostButton(
-                      label: secondaryLabel,
+                    PbGhostIconButton(
                       icon: Icons.account_balance_wallet_outlined,
+                      semanticLabel: secondaryLabel,
                       onPressed: onSecondary,
                     ),
                   ],

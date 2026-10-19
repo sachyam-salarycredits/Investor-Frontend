@@ -50,6 +50,7 @@ import 'package:provider/provider.dart';
 
 import '../modules/authentication/screens/welcome_wylth_screen.dart';
 import '../modules/home/screens/portfolio_analysis_screen.dart';
+import '../modules/home/screens/account_statement_screen.dart';
 import '../modules/home/screens/profile_screen.dart';
 import '../modules/marketplace/screens/new_market_place_screen.dart';
 import '../modules/onboardingSteps/screens/fund_transfer_success_screen.dart';
@@ -449,6 +450,13 @@ class AppRouter {
         name: RoutesName.Redemption,
         pageBuilder: (context, state) {
           return MaterialPage(key: state.pageKey, child: RedemptionScreen());
+        }),
+    GoRoute(
+        path: RoutesName.AccountStatement,
+        name: RoutesName.AccountStatement,
+        pageBuilder: (context, state) {
+          return MaterialPage(
+              key: state.pageKey, child: const AccountStatementScreen());
         }),
     GoRoute(
         path: RoutesName.MyInvestments,

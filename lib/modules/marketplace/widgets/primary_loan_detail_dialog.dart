@@ -56,7 +56,9 @@ class _PrimaryLoanDetailsDialogState extends State<PrimaryLoanDetailsDialog> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 8, 6),
               child: PbSheetTitle(
-                eyebrow: loan.productName,
+                eyebrow: loan.contract.isNotEmpty
+                    ? loan.contract
+                    : loan.productName,
                 title: loan.customerName,
               ),
             ),

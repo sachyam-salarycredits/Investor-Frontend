@@ -163,7 +163,8 @@ class _NewMarketPlaceState extends State<NewMarketPlace> {
             ? SystemUiOverlayStyle.dark
             : SystemUiOverlayStyle.light,
         child: Scaffold(
-          backgroundColor: AppColors.surface,
+          backgroundColor:
+              widget.embedded ? Colors.transparent : AppColors.surface,
           appBar: widget.embedded
               ? null
               : PbPageHeader(
@@ -369,7 +370,7 @@ class _NewMarketPlaceState extends State<NewMarketPlace> {
           : width > 640
               ? 2
               : 1;
-      const gap = 14.0;
+      const gap = 10.0;
       final cardWidth = (width - gap * (columns - 1)) / columns;
       return Wrap(
         spacing: gap,

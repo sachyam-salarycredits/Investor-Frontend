@@ -44,7 +44,7 @@ class LoanCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -56,49 +56,50 @@ class LoanCard extends StatelessWidget {
                         category.toUpperCase(),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.semiBold(10.5,
+                        style: AppTextStyles.semiBold(10,
                                 color: AppColors.green)
-                            .copyWith(letterSpacing: 0.8),
+                            .copyWith(letterSpacing: 0.7),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         title,
-                        maxLines: 2,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.semiBold(15),
+                        style: AppTextStyles.semiBold(14),
                       ),
                     ],
                   ),
                 ),
                 if (riskTag != null) ...[
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   riskTag!,
                 ],
               ],
             ),
           ),
           const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             child: Divider(height: 1, thickness: 1, color: AppColors.line),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
             child: Row(
               children: [
                 for (final metric in metrics)
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.only(right: 6),
                       child: metric,
                     ),
                   ),
-                if (fundedPercent != null) ProgressRing(percent: fundedPercent!),
+                if (fundedPercent != null)
+                  ProgressRing(percent: fundedPercent!, size: 36),
               ],
             ),
           ),
           Container(
             color: dimmed ? AppColors.sage : AppColors.greenDeep,
-            padding: const EdgeInsets.fromLTRB(16, 10, 12, 10),
+            padding: const EdgeInsets.fromLTRB(14, 6, 8, 6),
             child: Row(
               children: [
                 Expanded(
@@ -106,7 +107,7 @@ class LoanCard extends StatelessWidget {
                     onTap: onDetails,
                     behavior: HitTestBehavior.opaque,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Text(
                         detailLabel,
                         style: AppTextStyles.semiBold(

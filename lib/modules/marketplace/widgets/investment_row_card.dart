@@ -23,13 +23,27 @@ class InvestmentRowCard extends StatelessWidget {
     return value[0].toUpperCase() + value.substring(1).toLowerCase();
   }
 
+  IconData _productIcon(String? product) {
+    final value = (product ?? '').toLowerCase();
+    if (value.contains('property') || value.contains('home')) {
+      return Icons.apartment_rounded;
+    }
+    if (value.contains('business')) {
+      return Icons.account_balance_wallet_outlined;
+    }
+    return Icons.receipt_long_outlined;
+  }
+
   @override
   Widget build(BuildContext context) {
     final active = !isClosedInvestmentStatus(loan.status);
+    final contract = loan.contractId ?? '';
+    final title = contract.isNotEmpty
+        ? contract
+        : (loan.borrowerName?.isNotEmpty == true ? loan.borrowerName! : '-');
     return PbCard(
       radius: 18,
       onTap: () {
-        final contract = loan.contractId ?? '';
         if (contract.isEmpty) return;
         context.pushNamed(
           RoutesName.MyInvestmentDetail,
@@ -40,39 +54,40 @@ class InvestmentRowCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              PbIconTile(icon: _productIcon(loan.productName), size: 38),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if ((loan.productName ?? '').isNotEmpty)
-                      Text(
-                        loan.productName!.toUpperCase(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.semiBold(10.5,
-                                color: AppColors.green)
-                            .copyWith(letterSpacing: 0.8),
-                      ),
-                    const SizedBox(height: 3),
                     Text(
-                      loan.borrowerName?.isNotEmpty == true
-                          ? loan.borrowerName!
-                          : (loan.contractId ?? '-'),
+                      title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.semiBold(15),
+                      style: AppTextStyles.medium(15),
                     ),
+                    if ((loan.productName ?? '').isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        loan.productName!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.caption,
+                      ),
+                    ],
                   ],
                 ),
               ),
               const SizedBox(width: 10),
               StatusPill(label: _statusLabel(loan.status), active: active),
+              const SizedBox(width: 10),
+              const Icon(Icons.arrow_forward_rounded,
+                  size: 18, color: AppColors.green),
             ],
           ),
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
+            padding: EdgeInsets.symmetric(vertical: 14),
             child: Divider(height: 1, color: AppColors.line),
           ),
           Row(
@@ -92,26 +107,10 @@ class InvestmentRowCard extends StatelessWidget {
               ),
               Expanded(
                 child: PbMetric(
-                  label: 'Rate',
+                  label: 'ANR',
                   value: '${loan.interestRate ?? 0}%',
-                  alignment: CrossAxisAlignment.end,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Invested on ${loan.investedDate ?? '-'}',
-                  style: AppTextStyles.caption,
-                ),
-              ),
-              Text('Details',
-                  style: AppTextStyles.semiBold(12, color: AppColors.green)),
-              const Icon(Icons.chevron_right_rounded,
-                  size: 18, color: AppColors.green),
             ],
           ),
         ],

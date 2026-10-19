@@ -96,6 +96,8 @@ class APIUrls {
   static final getMyInvestments = '${baseURL}getMyInvestments';
   static final getMyInvestmentDetail = '${baseURL}getMyInvestmentDetail';
   static final getStatement = '${baseURL}getStatement';
+  static final getAccountTransactions = '${baseURL}getAccountTransactions';
+  static final emailStatement = '${baseURL}emailStatement';
   static final getAutoinvestDate = '${baseURL}getAutoinvestDate';
   static final getAppVersion = '${baseURL}getAppVersion';
   static final autoInvestSwitch = '${baseURL}autoTongle';

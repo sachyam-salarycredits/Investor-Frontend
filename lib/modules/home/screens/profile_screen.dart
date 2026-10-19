@@ -1,5 +1,4 @@
 import 'package:peerbridge/modules/profile/models/user_details.dart';
-import 'package:peerbridge/modules/profile/widgets/logoWidget.dart';
 import 'package:peerbridge/modules/shell/main_shell.dart';
 import 'package:peerbridge/providers/app_state_provider.dart';
 import 'package:peerbridge/routes_management/routes_list.dart';
@@ -27,7 +26,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool isLoading = false;
   bool loadingAmount = false;
-  bool _showStatements = false;
 
   @override
   void initState() {
@@ -58,14 +56,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
   }
 
+  void _openOffers() {
+    if (Utils.isWeb) {
+      context.pushNamed(RoutesName.SettingsScreen);
+    } else {
+      FlyyFlutterPlugin.openFlyyOffersPage();
+    }
+  }
+
+  String _initials(String name) {
+    final parts =
+        name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '';
+    final first = parts.first[0];
+    final last = parts.length > 1 ? parts.last[0] : '';
+    return (first + last).toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AppStateProvider>(context);
     final userData = provider.userDetails;
+    final background = widget.embedded ? Colors.transparent : AppColors.surface;
     if (userData == null) {
-      return const Scaffold(
-        backgroundColor: AppColors.surface,
-        body: Center(child: CircularProgressIndicator(color: AppColors.green)),
+      return Scaffold(
+        backgroundColor: background,
+        body: const Center(
+            child: CircularProgressIndicator(color: AppColors.green)),
       );
     }
 
@@ -74,7 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: PeerBridgeLoader(
         isLoading: isLoading,
         child: Scaffold(
-          backgroundColor: AppColors.surface,
+          backgroundColor: background,
           body: SafeArea(
             bottom: false,
             child: RefreshIndicator(
@@ -85,15 +102,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   provider.getCustomerDetails(),
                 ]);
               },
-              child: ListView(
+              child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 28),
-                children: [
-                  Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 560),
-                      child: mainWidget(context, userData, provider),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: _centered(_topSection(userData)),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Container(
+                      color: AppColors.forest,
+                      child: _centered(_panel(provider)),
                     ),
+                  ),
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Container(color: AppColors.forest),
                   ),
                 ],
               ),
@@ -104,408 +127,270 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget mainWidget(
-      BuildContext context, UserDetails userData, AppStateProvider provider) {
-    final kycDone = provider.stepsData?.kyc == '1';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            if (!widget.embedded) ...[
-              PbIconButton(
-                icon: Icons.arrow_back_rounded,
-                onTap: () => context.pop(),
-              ),
-              const SizedBox(width: 12),
-            ],
-            Expanded(child: Text('Profile', style: AppTextStyles.headline)),
-            PbIconButton(
-              icon: Icons.settings_outlined,
-              onTap: () => context.pushNamed(RoutesName.SettingsScreen),
-            ),
-          ],
+  Widget _centered(Widget child) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 560),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: child,
         ),
-        const SizedBox(height: 18),
-        _identityPanel(userData, kycDone),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _QuickAction(
-                icon: Icons.account_balance_outlined,
-                label: 'Withdraw funds',
-                onTap: () => context.pushNamed(RoutesName.Withdraw),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _QuickAction(
-                icon: Icons.currency_exchange_rounded,
-                label: 'Redemption',
-                onTap: () => context.pushNamed(RoutesName.Redemption),
-              ),
-            ),
-          ],
-        ),
-        if (!Utils.isWeb) ...[
-          const SizedBox(height: 22),
-          const PbSectionTitle(
-            title: 'Rewards & offers',
-            subtitle: 'Earn while you invest',
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _RewardTile(
-                  icon: Icons.emoji_events_outlined,
-                  label: 'Rewards',
-                  onTap: () => FlyyFlutterPlugin.openFlyyRewardsPage(),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _RewardTile(
-                  icon: Icons.local_offer_outlined,
-                  label: 'Offers',
-                  onTap: () => FlyyFlutterPlugin.openFlyyOffersPage(),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _RewardTile(
-                  icon: Icons.quiz_outlined,
-                  label: 'Quiz',
-                  onTap: () => FlyyFlutterPlugin.openFlyyQuizListPage(),
-                ),
-              ),
-            ],
-          ),
-        ],
-        const SizedBox(height: 22),
-        const PbSectionTitle(title: 'Account'),
-        const SizedBox(height: 12),
-        PbCard(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Column(
-            children: [
-              _LinkRow(
-                icon: Icons.pie_chart_outline_rounded,
-                label: 'My investments',
-                onTap: () => openShellTab(context, ShellTab.portfolio),
-              ),
-              const _LinkDivider(),
-              _LinkRow(
-                icon: Icons.receipt_long_outlined,
-                label: 'Account statement',
-                trailing: AnimatedRotation(
-                  turns: _showStatements ? 0.25 : 0,
-                  duration: const Duration(milliseconds: 180),
-                  child: const Icon(Icons.chevron_right_rounded,
-                      color: AppColors.muted),
-                ),
-                onTap: () =>
-                    setState(() => _showStatements = !_showStatements),
-              ),
-              AnimatedCrossFade(
-                firstChild: const SizedBox(width: double.infinity),
-                secondChild: getStatement(),
-                crossFadeState: _showStatements
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
-                duration: const Duration(milliseconds: 180),
-              ),
-              const _LinkDivider(),
-              _LinkRow(
-                icon: Icons.manage_accounts_outlined,
-                label: 'Account settings',
-                onTap: () => context.pushNamed(RoutesName.SettingsScreen),
-              ),
-              const _LinkDivider(),
-              _LinkRow(
-                icon: Icons.support_agent_rounded,
-                label: 'Call support',
-                onTap: () => Utils.launchSupportCall(),
-              ),
-              const _LinkDivider(),
-              _LinkRow(
-                icon: Icons.logout_rounded,
-                label: 'Log out',
-                color: AppColors.error,
-                showChevron: false,
-                onTap: logOutTap,
-              ),
-            ],
-          ),
-        ),
-        if (!Utils.isWeb) ...[
-          const SizedBox(height: 18),
-          ReferCard(
-            title: 'Invite friends, earn rewards',
-            subtitle: 'Share PeerBridge with people you trust.',
-            onTap: () =>
-                FlyyFlutterPlugin.openFlyyCustomInviteAndEarnPage(0, '#ffffff'),
-          ),
-        ],
-        const SizedBox(height: 22),
-        Center(
-          child: Text(
-            'PeerBridge · Version ${provider.appVersion}',
-            style: AppTextStyles.caption,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _identityPanel(UserDetails userData, bool kycDone) {
+  Widget _topSection(UserDetails userData) {
     final profile = userData.profileDetails;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: AppColors.greenGradient,
-        borderRadius: BorderRadius.circular(26),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.greenDeep.withOpacity(0.2),
-            blurRadius: 34,
-            offset: const Offset(0, 16),
-          ),
-        ],
-      ),
+    final name = profile?.fullName ?? '';
+    return Padding(
+      padding: const EdgeInsets.only(top: 14, bottom: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 4, 4, 16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: AppColors.goldGradient,
-                  ),
-                  child: LogoWidget(size: 60, url: profile?.profileUrl ?? ''),
+          Row(
+            children: [
+              if (!widget.embedded) ...[
+                PbIconButton(
+                  icon: Icons.arrow_back_rounded,
+                  onTap: () => context.pop(),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(width: 12),
+              ],
+              Expanded(child: PbBrandHeader(onBellTap: _openOffers)),
+            ],
+          ),
+          const SizedBox(height: 28),
+          Row(
+            children: [
+              _Avatar(
+                initials: _initials(name),
+                url: profile?.profileUrl ?? '',
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.medium(22)
+                          .copyWith(letterSpacing: -0.3),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      profile?.email ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.regular(13, color: AppColors.muted),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => context.pushNamed(RoutesName.ProfileDetail),
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        profile?.fullName ?? '',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.semiBold(18, color: Colors.white),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        profile?.email ?? '',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.regular(12,
-                            color: Colors.white.withOpacity(0.7)),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
-                            kycDone
-                                ? Icons.verified_rounded
-                                : Icons.error_outline_rounded,
-                            size: 14,
-                            color:
-                                kycDone ? AppColors.greenLink : AppColors.goldLight,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            kycDone ? 'KYC verified' : 'KYC pending',
-                            style: AppTextStyles.medium(11,
-                                color: kycDone
-                                    ? AppColors.greenLink
-                                    : AppColors.goldLight),
-                          ),
-                        ],
-                      ),
+                      const Icon(Icons.edit_outlined,
+                          size: 15, color: AppColors.green),
+                      const SizedBox(width: 5),
+                      Text('Edit',
+                          style: AppTextStyles.semiBold(13,
+                              color: AppColors.green)),
                     ],
                   ),
                 ),
-                GestureDetector(
-                  onTap: () => context.pushNamed(RoutesName.ProfileDetail),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(12),
-                      border:
-                          Border.all(color: Colors.white.withOpacity(0.18)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.edit_outlined,
-                            size: 14, color: Colors.white),
-                        const SizedBox(width: 4),
-                        Text('Edit',
-                            style: AppTextStyles.semiBold(12,
-                                color: Colors.white)),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _panel(AppStateProvider provider) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20, bottom: 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           BalanceStrip(
             amount: loadingAmount
                 ? '…'
                 : '₹${Utils.availableAmount.truncate().commaAddedValue()}',
             onAdd: () => context.pushNamed(RoutesName.NewFundTransferScreen),
           ),
+          const SizedBox(height: 18),
+          _PanelLink(
+            label: 'Account statement',
+            onTap: () => context.pushNamed(RoutesName.AccountStatement),
+          ),
+          const SizedBox(height: 10),
+          _PanelLink(
+            label: 'My investments',
+            onTap: () => openShellTab(context, ShellTab.portfolio),
+          ),
+          const SizedBox(height: 10),
+          _PanelLink(
+            label: 'Redemptions',
+            onTap: () => context.pushNamed(RoutesName.Redemption),
+          ),
+          const SizedBox(height: 10),
+          _PanelLink(
+            label: 'Withdraw funds',
+            onTap: () => context.pushNamed(RoutesName.Withdraw),
+          ),
+          const SizedBox(height: 10),
+          _PanelLink(
+            label: 'Account settings',
+            onTap: () => context.pushNamed(RoutesName.SettingsScreen),
+          ),
+          const SizedBox(height: 10),
+          _PanelLink(
+            label: 'Call support',
+            onTap: () => Utils.launchSupportCall(),
+          ),
+          if (!Utils.isWeb) ...[
+            const SizedBox(height: 22),
+            Row(
+              children: [
+                Expanded(
+                  child: _PanelTile(
+                    icon: Icons.emoji_events_outlined,
+                    label: 'Rewards',
+                    onTap: () => FlyyFlutterPlugin.openFlyyRewardsPage(),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _PanelTile(
+                    icon: Icons.local_offer_outlined,
+                    label: 'Offers',
+                    onTap: () => FlyyFlutterPlugin.openFlyyOffersPage(),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _PanelTile(
+                    icon: Icons.quiz_outlined,
+                    label: 'Quiz',
+                    onTap: () => FlyyFlutterPlugin.openFlyyQuizListPage(),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _ReferBanner(
+              onTap: () => FlyyFlutterPlugin.openFlyyCustomInviteAndEarnPage(
+                  0, '#ffffff'),
+            ),
+          ],
+          const SizedBox(height: 22),
+          _PanelLink(
+            label: 'Log out',
+            color: const Color(0xffFFB4A8),
+            trailing: const Icon(Icons.logout_rounded,
+                size: 18, color: Color(0xffFFB4A8)),
+            onTap: logOutTap,
+          ),
+          const SizedBox(height: 22),
+          Center(
+            child: Text(
+              'PeerBridge · Version ${provider.appVersion}',
+              style: AppTextStyles.regular(11,
+                  color: Colors.white.withOpacity(0.5)),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget getStatement() {
-    final provider = Provider.of<AppStateProvider>(context);
-    final rows = <Widget>[];
-    for (final statement in provider.statementList) {
-      final currentYear = int.tryParse(statement.year.trim()) ?? 0;
-      if (currentYear == 0) continue;
-      rows.add(InkWell(
-        onTap: () {
-          if (statement.statementUrl != null && statement.statementUrl != '') {
-            Utils.launchURL(statement.statementUrl);
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
-            children: [
-              const SizedBox(width: 42),
-              Expanded(
-                child: Text('Financial year ${currentYear - 1}–$currentYear',
-                    style: AppTextStyles.medium(13)),
-              ),
-              const Icon(Icons.download_rounded,
-                  size: 18, color: AppColors.green),
-            ],
-          ),
-        ),
-      ));
-    }
-    if (rows.isEmpty) {
-      rows.add(Padding(
-        padding: const EdgeInsets.fromLTRB(58, 4, 16, 12),
-        child: Text('No statements available yet.',
-            style: AppTextStyles.caption),
-      ));
-    }
-    return Column(children: rows);
-  }
 }
 
-class _QuickAction extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
+class _Avatar extends StatelessWidget {
+  final String initials;
+  final String url;
 
-  const _QuickAction(
-      {required this.icon, required this.label, required this.onTap});
+  const _Avatar({required this.initials, required this.url});
 
   @override
   Widget build(BuildContext context) {
-    return PbCard(
-      onTap: onTap,
-      padding: const EdgeInsets.all(14),
-      child: Row(
-        children: [
-          PbIconTile(icon: icon),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(label,
-                maxLines: 2, style: AppTextStyles.semiBold(13)),
+    final hasPhoto = url.startsWith('http://') || url.startsWith('https://');
+    final fallback = Center(
+      child: Text(
+        initials,
+        style: AppTextStyles.medium(20, color: Colors.white),
+      ),
+    );
+    return Container(
+      width: 72,
+      height: 72,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: AppColors.greenGradient,
+        border: Border.all(color: Colors.white, width: 3),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.greenDeep.withOpacity(0.22),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
           ),
         ],
+      ),
+      child: ClipOval(
+        child: hasPhoto
+            ? Image.network(
+                url,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => fallback,
+              )
+            : fallback,
       ),
     );
   }
 }
 
-class _RewardTile extends StatelessWidget {
-  final IconData icon;
+class _PanelLink extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
-
-  const _RewardTile(
-      {required this.icon, required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return PbCard(
-      onTap: onTap,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      child: Column(
-        children: [
-          PbIconTile(
-            icon: icon,
-            size: 40,
-            background: AppColors.goldSoft,
-            color: AppColors.goldDark,
-          ),
-          const SizedBox(height: 8),
-          Text(label, style: AppTextStyles.semiBold(12.5)),
-        ],
-      ),
-    );
-  }
-}
-
-class _LinkRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final Color? color;
   final Widget? trailing;
-  final bool showChevron;
+  final Color color;
 
-  const _LinkRow({
-    required this.icon,
+  const _PanelLink({
     required this.label,
     required this.onTap,
-    this.color,
     this.trailing,
-    this.showChevron = true,
+    this.color = Colors.white,
   });
 
   @override
   Widget build(BuildContext context) {
-    final tint = color ?? AppColors.green;
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        height: 54,
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.07),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white.withOpacity(0.10)),
+        ),
         child: Row(
           children: [
-            PbIconTile(
-              icon: icon,
-              background: tint.withOpacity(0.1),
-              color: tint,
-            ),
-            const SizedBox(width: 12),
             Expanded(
               child: Text(label,
-                  style: AppTextStyles.medium(14,
-                      color: color ?? AppColors.ink)),
+                  style: AppTextStyles.medium(13.5, color: color)),
             ),
-            if (trailing != null)
-              trailing!
-            else if (showChevron)
-              const Icon(Icons.chevron_right_rounded, color: AppColors.muted),
+            trailing ??
+                Icon(Icons.arrow_forward_rounded, size: 18, color: color),
           ],
         ),
       ),
@@ -513,10 +398,97 @@ class _LinkRow extends StatelessWidget {
   }
 }
 
-class _LinkDivider extends StatelessWidget {
-  const _LinkDivider();
+class _PanelTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _PanelTile(
+      {required this.icon, required this.label, required this.onTap});
 
   @override
-  Widget build(BuildContext context) =>
-      const Divider(height: 1, indent: 60, color: AppColors.line);
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.07),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.10)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: AppColors.goldLight.withOpacity(0.14),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, size: 20, color: AppColors.goldLight),
+            ),
+            const SizedBox(height: 8),
+            Text(label,
+                style: AppTextStyles.medium(12.5, color: Colors.white)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReferBanner extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _ReferBanner({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          gradient: AppColors.goldGradient,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppColors.greenDeep.withOpacity(0.10),
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: const Icon(Icons.card_giftcard_rounded,
+                  color: AppColors.greenDeep, size: 22),
+            ),
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Invite friends, earn rewards',
+                      style: AppTextStyles.semiBold(13,
+                          color: AppColors.greenDeep)),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Share PeerBridge with people you trust.',
+                    style: AppTextStyles.regular(10.5,
+                        color: AppColors.greenDeep.withOpacity(0.75)),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_rounded,
+                color: AppColors.greenDeep, size: 18),
+          ],
+        ),
+      ),
+    );
+  }
 }
