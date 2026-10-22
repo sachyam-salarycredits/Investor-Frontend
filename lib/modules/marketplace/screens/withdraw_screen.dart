@@ -171,7 +171,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-        return false;
+        return true;
       },
       child: Scaffold(
         backgroundColor: ColorsUtil.white,

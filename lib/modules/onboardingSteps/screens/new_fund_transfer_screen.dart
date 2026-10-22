@@ -420,7 +420,7 @@ class _NewFundTransferScreenState extends State<NewFundTransferScreen> {
     var screenSize = MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: () async {
-        return false;
+        return true;
       },
       child: Scaffold(
         appBar: ResponsiveWidget.isSmallScreen(context)
@@ -679,36 +679,7 @@ class _NewFundTransferScreenState extends State<NewFundTransferScreen> {
                   //       isAmountValid = false;
                   //     });
                   //   },
-                  // ),
-                  SizedBox(height: 10),
-                  Center(
-                    child: Text(
-                      'OR',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontFamily: CustomFonts.nunito,
-                        color: ColorsUtil.blueColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Center(
-                    child: InkWell(
-                      onTap: () {
-                        context.pushNamed(RoutesName.ChequeDepositScreen);
-                      },
-                      child: Text(
-                        'Do a Cheque Deposit Instead',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontFamily: CustomFonts.nunito,
-                          color: ColorsUtil.greenText,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
+                  //                   ),
                   Visibility(
                     visible: isFundExceeded,
                     child: Container(
@@ -806,7 +777,7 @@ class _NewFundTransferScreenState extends State<NewFundTransferScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Your bank account is not supported for Online Transaction. Kindly do Cheque deposit',
+                                  'Your bank account is not supported for UPI or net banking.',
                                   maxLines: 3,
                                   softWrap: true,
                                   style: TextStyle(

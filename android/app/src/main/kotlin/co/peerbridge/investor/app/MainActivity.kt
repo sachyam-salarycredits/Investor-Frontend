@@ -1,11 +1,15 @@
 package co.peerbridge.investor.app
 
 import android.Manifest
-import io.flutter.embedding.android.FlutterActivity
+import android.app.Activity
 import android.app.Application
+import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -28,6 +32,27 @@ import io.flutter.embedding.android.FlutterFragment
 import io.flutter.embedding.android.FlutterFragmentActivity
 
 class MainActivity : FlutterFragmentActivity() {
+
+    private var pendingPick: MethodChannel.Result? = null
+
+    private val pickFileLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val pending = pendingPick
+            pendingPick = null
+            if (pending == null) return@registerForActivityResult
+            val uri = result.data?.data
+            if (result.resultCode != Activity.RESULT_OK || uri == null) {
+                pending.success(null)
+                return@registerForActivityResult
+            }
+            try {
+                pending.success(readPickedFile(uri))
+            } catch (error: IllegalArgumentException) {
+                pending.error("too_large", "Choose a file up to 2 MB.", null)
+            } catch (error: Exception) {
+                pending.error("pick_failed", "Could not read the selected file.", null)
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,6 +108,61 @@ class MainActivity : FlutterFragmentActivity() {
 
             handle(call, result);
         }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "peerbridge/files").setMethodCallHandler { call, result ->
+            if (call.method != "pickFile") {
+                result.notImplemented()
+                return@setMethodCallHandler
+            }
+            if (pendingPick != null) {
+                result.error("already_active", "File picker is already open.", null)
+                return@setMethodCallHandler
+            }
+            pendingPick = result
+            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "*/*"
+                putExtra(
+                    Intent.EXTRA_MIME_TYPES,
+                    arrayOf("application/pdf", "image/jpeg", "image/png")
+                )
+            }
+            try {
+                pickFileLauncher.launch(intent)
+            } catch (error: Exception) {
+                pendingPick = null
+                result.error("pick_failed", "Could not open the file picker.", null)
+            }
+        }
+    }
+
+    private fun readPickedFile(uri: Uri): HashMap<String, Any> {
+        var name = "certificate"
+        contentResolver.query(
+            uri,
+            arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE),
+            null,
+            null,
+            null
+        )?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (nameIndex >= 0) {
+                    name = cursor.getString(nameIndex) ?: name
+                }
+                val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                if (sizeIndex >= 0 && !cursor.isNull(sizeIndex) &&
+                    cursor.getLong(sizeIndex) > 2L * 1024 * 1024
+                ) {
+                    throw IllegalArgumentException("too_large")
+                }
+            }
+        }
+        val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+            ?: throw IllegalStateException("empty")
+        if (bytes.isEmpty() || bytes.size > 2 * 1024 * 1024) {
+            throw IllegalArgumentException("too_large")
+        }
+        return hashMapOf("name" to name, "bytes" to bytes, "size" to bytes.size)
     }
 
     fun handle(@NonNull call: MethodCall, @NonNull result: MethodChannel.Result) {

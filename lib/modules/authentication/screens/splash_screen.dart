@@ -64,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen> {
       var showOnbaordingStatus = await pref.getBool('show_onboarding') ?? true;
       print('showonboarding:$showOnbaordingStatus');
       if (showOnbaordingStatus) {
-        context.goNamed(RoutesName.OnboardingScreen);
+        context.goNamed(RoutesName.LandingScreen);
       } else {
         context.goNamed(RoutesName.Login);
       }

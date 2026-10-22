@@ -8,6 +8,7 @@ class PrimaryMarketLoan {
   String productName;
   double loanAmount;
   double lenderXIRR;
+  double interestRate;
   String frequency;
   String contract;
   String category;
@@ -24,6 +25,7 @@ class PrimaryMarketLoan {
       this.productName = "",
       this.loanAmount = 0,
       this.lenderXIRR = 0,
+      this.interestRate = 0,
       this.frequency = "",
       this.contract = "",
       this.category = "",
@@ -48,6 +50,17 @@ class PrimaryMarketLoan {
     return amount;
   }
 
+  /// Rate shown on Explore. Borrower rate when the loan has one.
+  double get listedRate => interestRate > 0 ? interestRate : lenderXIRR;
+
+  String get listedRateLabel {
+    final rate = listedRate;
+    final shown = rate == rate.roundToDouble()
+        ? rate.toStringAsFixed(0)
+        : rate.toString();
+    return '$shown% p.a.';
+  }
+
   factory PrimaryMarketLoan.fromJson(Map<String, dynamic> json) {
     return PrimaryMarketLoan(
       tenor: json['tenor'] ?? 0,
@@ -55,6 +68,7 @@ class PrimaryMarketLoan {
       productName: json['productName'] ?? "",
       loanAmount: json['loanAmount'] ?? 0,
       lenderXIRR: json['lenderXIRR'] ?? 0,
+      interestRate: json['interestRate'] ?? 0,
       frequency: json['frequency'] ?? "",
       contract: json['contract'] ?? "",
       category: Utils.getLoanCategory(json['category'] ?? ""),
@@ -72,6 +86,7 @@ class PrimaryMarketLoan {
     data['productName'] = this.productName;
     data['loanAmount'] = this.loanAmount;
     data['lenderXIRR'] = this.lenderXIRR;
+    data['interestRate'] = this.interestRate;
     data['frequency'] = this.frequency;
     data['contract'] = this.contract;
     data['category'] = this.category;

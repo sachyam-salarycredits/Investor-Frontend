@@ -52,11 +52,21 @@ class _MyInvestmentDetailScreenState extends State<MyInvestmentDetailScreen> {
   double _num(Map<String, dynamic>? map, String key) =>
       double.tryParse(_v(map, key, '0').replaceAll(',', '')) ?? 0;
 
-  String _labelize(String key) {
-    final spaced = key.replaceAllMapped(
-        RegExp(r'(?<=[a-z])([A-Z])'), (m) => ' ${m.group(1)}');
-    if (spaced.isEmpty) return key;
-    return spaced[0].toUpperCase() + spaced.substring(1).toLowerCase();
+  String _salary(Map<String, dynamic>? map) {
+    final value = _v(map, 'currentNetSalary', _v(map, 'current_net_salary', ''));
+    if (value.isEmpty || value == '-') return '-';
+    return value.startsWith('₹') ? value : '₹$value';
+  }
+
+  String _money(Map<String, dynamic>? map, String key) =>
+      _num(map, key).toStringAsFixed(2);
+
+  String _rate(Map<String, dynamic>? map, String key) {
+    final rate = _num(map, key);
+    final shown = rate == rate.roundToDouble()
+        ? rate.toStringAsFixed(0)
+        : rate.toStringAsFixed(2);
+    return '$shown% p.a.';
   }
 
   @override
@@ -140,7 +150,12 @@ class _MyInvestmentDetailScreenState extends State<MyInvestmentDetailScreen> {
             MapEntry('Contract', detail?.contractId ?? widget.contractId),
             MapEntry('Invested on', detail?.investedDate ?? '-'),
             MapEntry('Interest received',
-                '₹${_v(about, 'interestReceived', '0')}'),
+                '₹${_money(about, 'interestReceived')}'),
+            MapEntry('Borrower interest', _rate(about, 'borrowerInterestRate')),
+            MapEntry('Investor interest', _rate(about, 'investorInterestRate')),
+            MapEntry('Platform fee', '₹${_money(about, 'platformFee')}'),
+            MapEntry('ANR earned',
+                '${_num(about, 'annualizedNetReturn').toStringAsFixed(2)}% p.a.'),
             MapEntry('Principal received',
                 '₹${_v(about, 'principalReceived', '0')}'),
             MapEntry('Principal outstanding',
@@ -156,20 +171,15 @@ class _MyInvestmentDetailScreenState extends State<MyInvestmentDetailScreen> {
             MapEntry('Gender', _v(borrower, 'gender')),
             MapEntry('State', _v(borrower, 'state')),
             MapEntry('Employment', _v(borrower, 'employementType')),
-            MapEntry('Role', _v(borrower, 'role')),
           ],
         ),
-        if (financial != null && financial.isNotEmpty) ...[
-          const SizedBox(height: 14),
-          DetailListCard(
-            title: 'Financial details',
-            rows: financial.entries
-                .take(12)
-                .map((e) => MapEntry(_labelize(e.key).replaceAll('Monexo', 'PeerBridge'),
-                    e.value?.toString() ?? '-'))
-                .toList(),
-          ),
-        ],
+        const SizedBox(height: 14),
+        DetailListCard(
+          title: 'Financial details',
+          rows: [
+            MapEntry('Current net salary', _salary(financial)),
+          ],
+        ),
         const SizedBox(height: 14),
         _repayments(),
       ],
@@ -263,10 +273,22 @@ class _MyInvestmentDetailScreenState extends State<MyInvestmentDetailScreen> {
           const SizedBox(height: 16),
           Row(
             children: [
-              _heroMetric('Interest rate', '${_v(about, 'interestRate')}%'),
-              _heroMetric('Tenor', '${_v(about, 'tenor')} mo'),
               _heroMetric(
-                  'Interest earned', '₹${_v(about, 'interestReceived', '0')}'),
+                  'Borrower interest', _rate(about, 'borrowerInterestRate')),
+              _heroMetric(
+                  'Investor interest', _rate(about, 'investorInterestRate')),
+              _heroMetric('Tenor', '${_v(about, 'tenor')} mo'),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _heroMetric(
+                  'Interest earned', '₹${_money(about, 'interestReceived')}'),
+              _heroMetric('Platform fee', '₹${_money(about, 'platformFee')}'),
+              _heroMetric(
+                  'ANR earned',
+                  '${_num(about, 'annualizedNetReturn').toStringAsFixed(2)}%'),
             ],
           ),
         ],

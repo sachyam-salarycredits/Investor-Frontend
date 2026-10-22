@@ -167,6 +167,7 @@ class _OTPVarificationScreenState extends State<OTPVarificationScreen> {
       param[ApiParams.fullName] = personalDetail?.fullName ?? "";
       param[ApiParams.email] = personalDetail?.email ?? "";
       param[ApiParams.phoneNo] = widget.mobileNumber;
+      param[ApiParams.aadharNumber] = personalDetail?.aadharNo ?? "";
       setState(() {
         _isLoading = true;
       });

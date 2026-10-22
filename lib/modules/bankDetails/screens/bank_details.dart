@@ -197,7 +197,7 @@ class _BankDetailScreenState extends State<BankDetailScreen> {
         context.read<AppStateProvider>().userDetails?.userStage ?? 1;
     return WillPopScope(
       onWillPop: () async {
-        return false;
+        return true;
       },
       child: Scaffold(
         appBar: ResponsiveWidget.isSmallScreen(context)

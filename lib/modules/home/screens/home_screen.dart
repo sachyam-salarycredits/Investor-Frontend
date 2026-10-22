@@ -1,8 +1,5 @@
 import 'dart:io';
 
-import 'package:peerbridge/modules/home/models/YoutubeVediosModel.dart';
-import 'package:peerbridge/modules/home/screens/player_video_page.dart';
-import 'package:peerbridge/modules/home/screens/stories_page.dart';
 import 'package:peerbridge/modules/shell/main_shell.dart';
 import 'package:peerbridge/providers/app_state_provider.dart';
 import 'package:peerbridge/supporting_file/appsFlyerSdk.dart';
@@ -21,6 +18,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../routes_management/routes_list.dart';
 import '../../../utils/images.dart';
 import '../models/NewOfferModel.dart';
+import 'player_video_page.dart';
+import 'stories_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -31,9 +30,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   NewOfferModel? offerModelResponse;
-  PageController? _controller;
-  int currentIndex = 0;
-  List<VideoData>? youtubevideos = [];
 
   bool loadingAmount = false;
   bool loading = false;
@@ -46,7 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = PageController(initialPage: 0);
     Utils.isFirstDepositVideoValidate = false;
     resetOnbaordingScreenStatus();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
@@ -64,13 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setOsType();
     setAppsFlyId();
     getOfferData();
-    getYoutubeVideosLocaly();
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
   }
 
   void getFundDetails() async {
@@ -107,13 +95,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setLoader(true);
     offerModelResponse = (await context.read<AppStateProvider>().getOffer());
     setLoader(false);
-  }
-
-  getYoutubeVideosLocaly() async {
-    final youtubeVideo = context.read<AppStateProvider>().youtubeVideos;
-    youtubevideos = youtubeVideo?.data
-        ?.where((element) => element.videoType == Constants.homeScreenKey)
-        .toList();
   }
 
   setLoader(bool value) {
@@ -247,25 +228,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         ..._actionBanners(context, userDetails?.enableDialogFiled),
-        const SizedBox(height: 22),
-        _socialImpactCard(context),
-        if ((youtubevideos?.length ?? 0) > 0) ...[
-          const SizedBox(height: 26),
-          const PbSectionTitle(
-            title: 'Learn with PeerBridge',
-            subtitle: 'Short videos on P2P lending',
-          ),
-          const SizedBox(height: 12),
-          _videoCarousel(context),
-        ],
-        const SizedBox(height: 22),
-        ReferCard(
-          title: 'Refer a friend',
-          subtitle: 'Invite friends to PeerBridge and earn rewards.',
-          onTap: () {
-            if (!Utils.isWeb) FlyyFlutterPlugin.openFlyyInviteAndEarnPage(0);
-          },
-        ),
       ],
     );
   }
@@ -452,116 +414,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (banner == null) return const [];
     return [const SizedBox(height: 16), banner];
   }
-
-  Widget _socialImpactCard(BuildContext context) {
-    return PbCard(
-      padding: const EdgeInsets.fromLTRB(18, 18, 12, 18),
-      radius: 22,
-      onTap: () {
-        Utils.showSocialImpactLoans = true;
-        openShellTab(context, ShellTab.explore);
-      },
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('SOCIAL IMPACT', style: AppTextStyles.eyebrow),
-                const SizedBox(height: 6),
-                Text('Invest to change lives and livelihoods',
-                    style: AppTextStyles.cardTitle),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Invest now',
-                        style:
-                            AppTextStyles.semiBold(13, color: AppColors.green)),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.arrow_forward_rounded,
-                        size: 16, color: AppColors.green),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          Image.asset(LocalImages.socialImpactLoan, width: 120),
-        ],
-      ),
-    );
-  }
-
-  Widget _videoCarousel(BuildContext context) {
-    final videos = youtubevideos ?? [];
-    return Column(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(22),
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: PageView.builder(
-              controller: _controller,
-              itemCount: videos.length,
-              onPageChanged: (int index) {
-                setState(() {
-                  currentIndex = index;
-                });
-              },
-              itemBuilder: (_, i) {
-                return GestureDetector(
-                  onTap: () {
-                    if (Utils.isWeb) {
-                      Utils.launchURL(videos[i].videoUrl);
-                    } else {
-                      context.pushNamed(RoutesName.VideoPlayerPage, params: {
-                        Constants.videoUrl: videos[i].videoUrl ?? '',
-                        Constants.validateWatchTime: 'false'
-                      });
-                    }
-                  },
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.network(
-                        videos[i].thumbnailUrl ?? '',
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            Container(color: AppColors.sage),
-                      ),
-                      Container(color: AppColors.scrim.withOpacity(0.18)),
-                      Center(
-                        child: Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.92),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.play_arrow_rounded,
-                              size: 34, color: AppColors.green),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-        if (videos.length > 1) ...[
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              for (int i = 0; i < videos.length; i++) SlideDots(i == currentIndex)
-            ],
-          ),
-        ],
-      ],
-    );
-  }
 }
 
 class _ActionBanner extends StatelessWidget {
@@ -658,26 +510,6 @@ class _KycPill extends StatelessWidget {
             style: AppTextStyles.medium(13, color: color),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Page indicator dot for the home video carousel.
-class SlideDots extends StatelessWidget {
-  final bool isActive;
-  const SlideDots(this.isActive, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
-      margin: const EdgeInsets.symmetric(horizontal: 3),
-      height: 6,
-      width: isActive ? 18 : 6,
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.green : AppColors.sage,
-        borderRadius: BorderRadius.circular(99),
       ),
     );
   }

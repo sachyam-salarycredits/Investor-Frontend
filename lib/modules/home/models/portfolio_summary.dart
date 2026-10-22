@@ -29,6 +29,10 @@ class PortfolioSectionSummary {
     this.principalReceived = 0,
     this.principalOutstanding = 0,
     this.percentageEarned = 0,
+    this.platformFee = 0,
+    this.interestSpread = 0,
+    this.absoluteReturnPercent = 0,
+    this.annualizedNetReturn = 0,
     this.health = 'NO_DATA',
     this.healthLabel = 'No loans',
   });
@@ -40,6 +44,10 @@ class PortfolioSectionSummary {
   int principalReceived;
   int principalOutstanding;
   double percentageEarned;
+  double platformFee;
+  double interestSpread;
+  double absoluteReturnPercent;
+  double annualizedNetReturn;
   String health;
   String healthLabel;
 
@@ -52,6 +60,10 @@ class PortfolioSectionSummary {
       principalReceived: _asInt(json['principalReceived']),
       principalOutstanding: _asInt(json['principalOutstanding']),
       percentageEarned: _asDouble(json['percentageEarned']),
+      platformFee: _asDouble(json['platformFee']),
+      interestSpread: _asDouble(json['interestSpread']),
+      absoluteReturnPercent: _asDouble(json['absoluteReturnPercent']),
+      annualizedNetReturn: _asDouble(json['annualizedNetReturn']),
       health: json['health']?.toString() ?? 'NO_DATA',
       healthLabel: json['healthLabel']?.toString() ?? 'No loans',
     );

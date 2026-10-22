@@ -73,6 +73,7 @@ class APIUrls {
   static final stepsStatus = '${baseURL}v2/checkstatus?customerId=';
   static final downloadFileUrl = '${baseURL}downloadFileUrl';
   static final uploadFileDetails = '${baseURL}uploadFileDetails';
+  static final netWorthCertificate = '${baseURL}netWorthCertificate';
   static final updateOfficeAddress = '${baseURL}updateOfficeAddress';
   static final updateResidentAddress = '${baseURL}updateResidentAddress';
   static final getOldSipDetails = '${baseURL}getSipDetails?customerId=';

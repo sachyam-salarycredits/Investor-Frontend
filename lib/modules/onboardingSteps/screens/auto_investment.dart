@@ -313,7 +313,7 @@ class _AutoInvestmentScreenState extends State<AutoInvestmentScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-        return false;
+        return true;
       },
       child: Scaffold(
         appBar: ResponsiveWidget.isSmallScreen(context)

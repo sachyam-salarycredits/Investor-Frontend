@@ -11,6 +11,7 @@ import 'package:device_information/device_information.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flyy_flutter_plugin/flyy_flutter_plugin.dart';
 import 'package:in_app_review/in_app_review.dart';
@@ -70,15 +71,26 @@ class Utils {
     return ip;
   }
 
+  static const MethodChannel _androidFiles = MethodChannel('peerbridge/files');
+
   static Future<PlatformFile?> pickFile(
       {FileType fileType = FileType.custom,
       allowedExtensions = const ['png', 'jpeg', 'jpg', "pdf"]}) async {
-    var result = await FilePicker.platform.pickFiles(
-        allowedExtensions: allowedExtensions,
-        allowCompression: true,
-        type: fileType,
-        allowMultiple: false,
-        withData: true);
+    if (!kIsWeb && Platform.isAndroid) {
+      return _pickAndroidFile(List<String>.from(allowedExtensions));
+    }
+    FilePickerResult? result;
+    try {
+      result = await FilePicker.platform.pickFiles(
+          allowedExtensions: allowedExtensions,
+          allowCompression: true,
+          type: fileType,
+          allowMultiple: false,
+          withData: true);
+    } on PlatformException catch (e) {
+      Utils.showToast(msg: e.message ?? 'Could not open the file picker.');
+      return null;
+    }
 
     if (result == null) return null;
 
@@ -95,6 +107,41 @@ class Utils {
     }
 
     return file;
+  }
+
+  static Future<PlatformFile?> _pickAndroidFile(List<String> extensions) async {
+    try {
+      final raw = await _androidFiles.invokeMethod('pickFile');
+      if (raw is! Map) return null;
+      final name = raw['name']?.toString() ?? '';
+      final dot = name.lastIndexOf('.');
+      final ext = dot >= 0 ? name.substring(dot + 1).toLowerCase() : '';
+      final allowed = extensions.map((item) => item.toLowerCase()).toSet();
+      if (name.isEmpty || !allowed.contains(ext)) {
+        Utils.showToast(msg: 'Upload a PDF, JPG, or PNG.');
+        return null;
+      }
+      final bytesRaw = raw['bytes'];
+      Uint8List? bytes;
+      if (bytesRaw is Uint8List) {
+        bytes = bytesRaw;
+      } else if (bytesRaw is List) {
+        bytes = Uint8List.fromList(bytesRaw.cast<int>());
+      }
+      if (bytes == null ||
+          bytes.isEmpty ||
+          bytes.length > 2 * (1024 * 1024)) {
+        Utils.showToast(msg: LanguageHelper.textSelectFileSize);
+        return null;
+      }
+      return PlatformFile(name: name, size: bytes.length, bytes: bytes);
+    } on PlatformException catch (e) {
+      Utils.showToast(
+          msg: e.code == 'too_large'
+              ? LanguageHelper.textSelectFileSize
+              : (e.message ?? 'Could not open the file picker.'));
+      return null;
+    }
   }
 
   static Future<void> showToast({

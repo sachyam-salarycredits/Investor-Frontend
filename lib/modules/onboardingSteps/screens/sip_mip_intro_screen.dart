@@ -25,7 +25,7 @@ class _SIPMIPIntroScreen extends State<SIPMIPIntroScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-        return false;
+        return true;
       },
       child: Scaffold(
         body: PeerBridgeLoader(
@@ -42,8 +42,8 @@ class _SIPMIPIntroScreen extends State<SIPMIPIntroScreen> {
                       child: IconButton(
                         padding: EdgeInsets.symmetric(horizontal: 30),
                         icon: Icon(Icons.keyboard_backspace,size: 30,),
-                        onPressed: (){
-                          context.pop();
+                        onPressed: () {
+                          Navigator.of(context).maybePop();
                         },
                       ),
                     ),
@@ -65,8 +65,8 @@ class _SIPMIPIntroScreen extends State<SIPMIPIntroScreen> {
                           child: IconButton(
                             padding: EdgeInsets.symmetric(horizontal: 30,vertical: 20),
                             icon: Icon(Icons.keyboard_backspace,size: 30,),
-                            onPressed: (){
-                              context.pop();
+                            onPressed: () {
+                              Navigator.of(context).maybePop();
                             },
                           ),
                         ),

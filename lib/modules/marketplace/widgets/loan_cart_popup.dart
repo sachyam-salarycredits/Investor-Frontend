@@ -54,11 +54,19 @@ class _loanCartPopupDialogState extends State<loanCartPopupDialog> {
           ? provider.primaryCartList
           : provider.secondaryCartList;
 
-  double _expectedReturn(List<CommonLoanCart> cart) {
+  double _expectedInterest(List<CommonLoanCart> cart) {
     double sum = 0.0;
     for (final loan in cart) {
-      sum += loan.fundedAmount +
-          (((loan.lenderXIRR / 100) * loan.fundedAmount) / 12) * loan.tenor;
+      sum += ((loan.lenderXIRR / 100) * loan.fundedAmount / 12) * loan.tenor;
+    }
+    return sum;
+  }
+
+  /// 1% of the amount funded. Shown on the summary and not deducted from the investor.
+  double _platformFee(List<CommonLoanCart> cart) {
+    double sum = 0.0;
+    for (final loan in cart) {
+      sum += loan.fundedAmount * 0.01;
     }
     return sum;
   }
@@ -144,8 +152,9 @@ class _loanCartPopupDialogState extends State<loanCartPopupDialog> {
     final provider = Provider.of<AppStateProvider>(context);
     final cartList = _cart(provider);
     final total = provider.getTotalCartAmount();
-    final expected = _expectedReturn(cartList);
-    final interest = (expected - total).clamp(0, double.infinity);
+    final interest = _expectedInterest(cartList);
+    final platformFee = _platformFee(cartList);
+    final expected = (total + interest).clamp(0, double.infinity);
 
     return Form(
       key: formKey,
@@ -193,6 +202,9 @@ class _loanCartPopupDialogState extends State<loanCartPopupDialog> {
                         SummaryLine(
                             label: 'Expected interest',
                             value: '₹${interest.round().commaAddedValue()}'),
+                        SummaryLine(
+                            label: 'Platform fee',
+                            value: '₹${platformFee.round().commaAddedValue()}'),
                         const Divider(height: 12, color: AppColors.line),
                         SummaryLine(
                           label: 'Expected returns',
@@ -294,19 +306,10 @@ class LoanCartCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  cardData.productName.isEmpty
-                      ? cardData.customerName
-                      : cardData.productName,
+                  cardData.contract,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.semiBold(13.5),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${cardData.customerName} · ${cardData.lenderXIRR}% p.a.',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.caption,
                 ),
               ],
             ),

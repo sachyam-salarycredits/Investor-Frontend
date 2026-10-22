@@ -228,7 +228,7 @@ class _MIPSetupState extends State<MIPSetup> {
 
     return WillPopScope(
       onWillPop: () async {
-        return false;
+        return true;
       },
       child: Scaffold(
         appBar: ResponsiveWidget.isSmallScreen(context)
@@ -251,7 +251,7 @@ class _MIPSetupState extends State<MIPSetup> {
                 ),
                 leading: BackButton(
                   onPressed: () {
-                    context.pop();
+                    Navigator.of(context).maybePop();
                   },
                 ),
                 actions: [
@@ -324,7 +324,7 @@ class _MIPSetupState extends State<MIPSetup> {
                             children: [
                               Header(
                                 backOnPressed: () {
-                                  context.pop();
+                                  Navigator.of(context).maybePop();
                                 },
                               ),
                               SizedBox(height: 50),

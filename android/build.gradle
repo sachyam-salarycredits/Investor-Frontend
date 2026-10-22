@@ -50,6 +50,24 @@ subprojects { subproject ->
     }
 }
 
+// Plugins that declare compileSdk 35 are built with an aapt2 that cannot
+// read the installed Android 35 platform. Keep every module on 34.
+subprojects { subproject ->
+    if (subproject.state.executed) {
+        return
+    }
+    subproject.afterEvaluate {
+        def androidExt = subproject.extensions.findByName("android")
+        if (androidExt != null) {
+            androidExt.compileSdkVersion(34)
+        }
+        // JDK 17 turns these plugins' deprecation warnings into errors.
+        subproject.tasks.withType(JavaCompile).configureEach {
+            options.compilerArgs.removeAll(["-Werror"])
+        }
+    }
+}
+
 tasks.register("clean", Delete) {
     delete rootProject.layout.buildDirectory
 }

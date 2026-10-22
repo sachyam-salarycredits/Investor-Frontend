@@ -110,13 +110,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   SliverToBoxAdapter(
                     child: Container(
-                      color: AppColors.forest,
+                      color: AppColors.green,
                       child: _centered(_panel(provider)),
                     ),
                   ),
                   SliverFillRemaining(
                     hasScrollBody: false,
-                    child: Container(color: AppColors.forest),
+                    child: Container(color: AppColors.green),
                   ),
                 ],
               ),
@@ -238,8 +238,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 10),
           _PanelLink(
-            label: 'Redemptions',
-            onTap: () => context.pushNamed(RoutesName.Redemption),
+            label: 'Net worth certificate',
+            onTap: () => context.pushNamed(RoutesName.NetWorthCertificate),
           ),
           const SizedBox(height: 10),
           _PanelLink(
@@ -253,44 +253,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 10),
           _PanelLink(
+            label: 'Nominee details',
+            onTap: () => context.pushNamed(RoutesName.NomineeDetail),
+          ),
+          const SizedBox(height: 10),
+          _PanelLink(
             label: 'Call support',
             onTap: () => Utils.launchSupportCall(),
           ),
-          if (!Utils.isWeb) ...[
-            const SizedBox(height: 22),
-            Row(
-              children: [
-                Expanded(
-                  child: _PanelTile(
-                    icon: Icons.emoji_events_outlined,
-                    label: 'Rewards',
-                    onTap: () => FlyyFlutterPlugin.openFlyyRewardsPage(),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _PanelTile(
-                    icon: Icons.local_offer_outlined,
-                    label: 'Offers',
-                    onTap: () => FlyyFlutterPlugin.openFlyyOffersPage(),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _PanelTile(
-                    icon: Icons.quiz_outlined,
-                    label: 'Quiz',
-                    onTap: () => FlyyFlutterPlugin.openFlyyQuizListPage(),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _ReferBanner(
-              onTap: () => FlyyFlutterPlugin.openFlyyCustomInviteAndEarnPage(
-                  0, '#ffffff'),
-            ),
-          ],
           const SizedBox(height: 22),
           _PanelLink(
             label: 'Log out',
@@ -391,101 +361,6 @@ class _PanelLink extends StatelessWidget {
             ),
             trailing ??
                 Icon(Icons.arrow_forward_rounded, size: 18, color: color),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PanelTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _PanelTile(
-      {required this.icon, required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.07),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.10)),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: AppColors.goldLight.withOpacity(0.14),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, size: 20, color: AppColors.goldLight),
-            ),
-            const SizedBox(height: 8),
-            Text(label,
-                style: AppTextStyles.medium(12.5, color: Colors.white)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ReferBanner extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _ReferBanner({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          gradient: AppColors.goldGradient,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: AppColors.greenDeep.withOpacity(0.10),
-                borderRadius: BorderRadius.circular(13),
-              ),
-              child: const Icon(Icons.card_giftcard_rounded,
-                  color: AppColors.greenDeep, size: 22),
-            ),
-            const SizedBox(width: 13),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Invite friends, earn rewards',
-                      style: AppTextStyles.semiBold(13,
-                          color: AppColors.greenDeep)),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Share PeerBridge with people you trust.',
-                    style: AppTextStyles.regular(10.5,
-                        color: AppColors.greenDeep.withOpacity(0.75)),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_rounded,
-                color: AppColors.greenDeep, size: 18),
           ],
         ),
       ),

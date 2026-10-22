@@ -54,12 +54,6 @@ class _PersonalDetailScreenState extends State<PersonalDetailScreen> {
   setTextFields() {
     final panDetails = context.read<AppStateProvider>().panDetails!;
     nameController.text = panDetails.fullName;
-    emailController.text = panDetails.email;
-    phoneController.text = panDetails.mobile;
-    setState(() {
-      isEmailValid = panDetails.email.isEmailValid;
-      isPhoneValid = panDetails.mobile.isMobileNumberValid;
-    });
   }
 
   @override
@@ -104,26 +98,25 @@ class _PersonalDetailScreenState extends State<PersonalDetailScreen> {
       param[ApiParams.email] = emailController.text;
       param[ApiParams.phoneNo] = phoneController.text;
       param[ApiParams.aadharNumber] = adharController.text;
+      final provider = context.read<AppStateProvider>();
+      provider.personalDetail = PersonalDetail(
+        fullName: nameController.text,
+        email: emailController.text,
+        mobileNo: phoneController.text,
+        aadharNo: adharController.text,
+      );
       setState(() {
         _isLoading = true;
       });
-      var otpStatus =
-          await context.read<AppStateProvider>().signupSendOTP(param);
+      var otpSent = await provider.signupSendOTP(param);
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
-
-      if (otpStatus) {
-        context.read<AppStateProvider>().personalDetail = PersonalDetail(
-          fullName: nameController.text,
-          email: emailController.text,
-          mobileNo: phoneController.text,
-          aadharNo: adharController.text,
-        );
-
+      if (otpSent) {
         context.pushNamed(RoutesName.OTPVerification, params: {
           Constants.fromLogin: "false",
-          Constants.mobileNumber: phoneController.text
+          Constants.mobileNumber: phoneController.text,
         });
       }
     }
@@ -366,7 +359,7 @@ class _PersonalDetailScreenState extends State<PersonalDetailScreen> {
           Align(
             alignment: Alignment.bottomCenter,
             child: CustomButton(
-              titleStr: 'Send OTP',
+              titleStr: 'Continue',
               onPress: savePersonalDetails,
             ),
           ),

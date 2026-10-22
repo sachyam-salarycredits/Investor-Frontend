@@ -91,8 +91,8 @@ class _MarketPlaceCardState extends State<MarketPlaceCard> {
             label: 'Tenure',
             value: '${loan.tenor.round()} ${loan.frequency.toFrequency()}'),
         PbMetric(
-            label: 'Returns',
-            value: '${loan.lenderXIRR}% p.a.',
+            label: 'Interest rate (p.a.)',
+            value: loan.listedRateLabel,
             valueColor: AppColors.green),
       ],
       fundedPercent: loan.getAlreadyFunded().clamp(0, 1).toDouble(),

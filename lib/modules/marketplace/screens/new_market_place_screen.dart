@@ -4,7 +4,6 @@ import 'package:peerbridge/modules/marketplace/models/filter_data.dart';
 import 'package:peerbridge/modules/marketplace/widgets/loan_cart_button.dart';
 import 'package:peerbridge/modules/marketplace/widgets/market_place_grid_cards.dart';
 import 'package:peerbridge/modules/marketplace/widgets/no_data_widget.dart';
-import 'package:peerbridge/modules/marketplace/widgets/secondary_market_card.dart';
 import 'package:peerbridge/providers/app_state_provider.dart';
 import 'package:peerbridge/utils/extensions.dart';
 import 'package:peerbridge/utils/utils.dart';
@@ -36,7 +35,7 @@ class _NewMarketPlaceState extends State<NewMarketPlace> {
   bool isLoader = false;
   ScrollController scrollController = ScrollController();
   bool isFirstCall = true;
-  List<String> marketList = ['Primary Market', 'Secondary Market'];
+  List<String> marketList = ['Primary Market'];
   List<String> riskList = [
     'Show All',
     'Conservative',
@@ -53,7 +52,8 @@ class _NewMarketPlaceState extends State<NewMarketPlace> {
     super.initState();
     scrollController.addListener(scrollEndNotifier);
     final provider = Provider.of<AppStateProvider>(context, listen: false);
-    if (!provider.isPrimaryMarketSelected) selectedMarket = marketList[1];
+    provider.isPrimaryMarketSelected = true;
+    selectedMarket = marketList[0];
     getFundDetails();
     provider.filterData = FilterDetails();
     getFundsDetails();
@@ -74,7 +74,7 @@ class _NewMarketPlaceState extends State<NewMarketPlace> {
         provider.filterData.grade = [selectedRisk ?? ''];
       }
     }
-    provider.isPrimaryMarketSelected = selectedMarket != marketList[1];
+    provider.isPrimaryMarketSelected = true;
     setLoader(true);
     isFilter
         ? await provider.getMarketPlaceData(isFilter: true)
@@ -220,24 +220,6 @@ class _NewMarketPlaceState extends State<NewMarketPlace> {
                                   .pushNamed(RoutesName.NewFundTransferScreen),
                             ),
                             const SizedBox(height: 18),
-                            SegmentedTabs(
-                              tabs: const [
-                                SegmentedTab('Primary'),
-                                SegmentedTab('Secondary'),
-                              ],
-                              selectedIndex:
-                                  selectedMarket == marketList[1] ? 1 : 0,
-                              onChanged: (i) {
-                                final market = marketList[i];
-                                if (market == selectedMarket) return;
-                                setState(() {
-                                  selectedMarket = market;
-                                  selectedRisk = 'Show All';
-                                });
-                                loadMarkets(market, false);
-                              },
-                            ),
-                            const SizedBox(height: 14),
                             _riskChips(),
                             const SizedBox(height: 16),
                             _loanList(provider),
@@ -353,10 +335,8 @@ class _NewMarketPlaceState extends State<NewMarketPlace> {
   }
 
   Widget _loanList(AppStateProvider provider) {
-    final isPrimaryMarket = provider.isPrimaryMarketSelected;
-    final loans = isPrimaryMarket
-        ? provider.primaryMarketLoans ?? []
-        : provider.secondaryMarketLoans ?? [];
+    provider.isPrimaryMarketSelected = true;
+    final loans = provider.primaryMarketLoans ?? [];
 
     if (loans.isEmpty) {
       if (provider.isMarketPlaceLoading.value) return const SizedBox();
@@ -384,15 +364,7 @@ class _NewMarketPlaceState extends State<NewMarketPlace> {
   }
 
   Widget getCardWidget(int index) {
-    if (context.read<AppStateProvider>().isPrimaryMarketSelected) {
-      return MarketPlaceCard(
-        index: index,
-        onUpdate: () {
-          setState(() {});
-        },
-      );
-    }
-    return SecondaryMarketPlaceCard(
+    return MarketPlaceCard(
       index: index,
       onUpdate: () {
         setState(() {});

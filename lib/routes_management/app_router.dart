@@ -38,6 +38,7 @@ import 'package:peerbridge/modules/onboardingSteps/screens/sip_upi_screen2.dart'
 import 'package:peerbridge/modules/onboardingSteps/screens/sip_upi_screen3.dart';
 import 'package:peerbridge/modules/onboardingSteps/screens/sip_web_view.dart';
 import 'package:peerbridge/modules/onboardingSteps/screens/whats_next_screen.dart';
+import 'package:peerbridge/modules/profile/screens/net_worth_certificate_screen.dart';
 import 'package:peerbridge/modules/profile/screens/profile_detail_screen.dart';
 import 'package:peerbridge/providers/app_state_provider.dart';
 import 'package:peerbridge/routes_management/routes_list.dart';
@@ -321,6 +322,13 @@ class AppRouter {
               key: state.pageKey, child: FundTransferProcessScreen());
         }),
     GoRoute(
+        path: RoutesName.NetWorthCertificate,
+        name: RoutesName.NetWorthCertificate,
+        pageBuilder: (context, state) {
+          return MaterialPage(
+              key: state.pageKey, child: const NetWorthCertificateScreen());
+        }),
+    GoRoute(
         path: RoutesName.AuthorizedSignatory,
         name: RoutesName.AuthorizedSignatory,
         pageBuilder: (context, state) {
@@ -562,14 +570,7 @@ extension RouteContext on BuildContext {
         // }
 
       } else {
-        bool isOnBoarded =
-            await this.read<AppStateProvider>().getOnBoardStatus();
-
-        if (isOnBoarded) {
-          this.goNamed(RoutesName.LandingScreen);
-        } else {
-          this.goNamed(RoutesName.OnboardingScreen);
-        }
+        this.goNamed(RoutesName.LandingScreen);
       }
     };
 

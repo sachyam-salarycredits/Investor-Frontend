@@ -260,7 +260,7 @@ class _NomineeDetailScreenState extends State<NomineeDetailScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-        return false;
+        return true;
       },
       child: Scaffold(
         appBar: ResponsiveWidget.isSmallScreen(context)

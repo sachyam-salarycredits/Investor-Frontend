@@ -31,10 +31,15 @@ class PortfolioAnalysis extends StatefulWidget {
 enum _PortfolioBookSection { active, closed }
 
 class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
+  static const int _pageSize = 20;
+
   bool _isLoading = false;
   _PortfolioBookSection _selectedBook = _PortfolioBookSection.active;
   List<MyInvestmentLoan> _investments = [];
   bool _investmentsLoading = false;
+  bool _loadingMore = false;
+  bool _hasMore = false;
+  int _page = 1;
 
   @override
   void initState() {
@@ -44,13 +49,36 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
     context.read<AppStateProvider>().getUserFundDetails();
   }
 
-  Future<void> _loadInvestments() async {
-    setState(() => _investmentsLoading = true);
-    final data = await context.read<AppStateProvider>().getMyInvestments();
+  String get _book => _selectedBook == _PortfolioBookSection.active
+      ? 'active'
+      : 'closed';
+
+  Future<void> _loadInvestments({bool reset = true}) async {
+    if (!reset && (_loadingMore || !_hasMore || _investmentsLoading)) return;
+    if (reset && _investmentsLoading) return;
+    final nextPage = reset ? 1 : _page + 1;
+    if (!reset) _loadingMore = true;
+    if (reset) _investmentsLoading = true;
+    setState(() {
+      if (reset) {
+        _investmentsLoading = true;
+      } else {
+        _loadingMore = true;
+      }
+    });
+    final data = await context.read<AppStateProvider>().getMyInvestments(
+          book: _book,
+          page: nextPage,
+          pageSize: _pageSize,
+        );
     if (!mounted) return;
     setState(() {
-      _investments = data?.loanList ?? [];
+      final incoming = data?.loanList ?? [];
+      _investments = reset ? incoming : [..._investments, ...incoming];
+      _page = data?.page ?? nextPage;
+      _hasMore = data?.hasMore ?? false;
       _investmentsLoading = false;
+      _loadingMore = false;
     });
   }
 
@@ -78,16 +106,7 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
     });
   }
 
-  List<MyInvestmentLoan> get _visibleInvestments {
-    if (_selectedBook == _PortfolioBookSection.active) {
-      return _investments
-          .where((loan) => !isClosedInvestmentStatus(loan.status))
-          .toList();
-    }
-    return _investments
-        .where((loan) => isClosedInvestmentStatus(loan.status))
-        .toList();
-  }
+  List<MyInvestmentLoan> get _visibleInvestments => _investments;
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +137,15 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
             child: RefreshIndicator(
               color: AppColors.green,
               onRefresh: _refresh,
-              child: ListView(
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (notification.metrics.pixels >=
+                      notification.metrics.maxScrollExtent - 240) {
+                    _loadInvestments(reset: false);
+                  }
+                  return false;
+                },
+                child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
                 children: [
@@ -145,9 +172,18 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
                                 _selectedBook == _PortfolioBookSection.active
                                     ? 0
                                     : 1,
-                            onChanged: (i) => setState(() => _selectedBook = i == 0
-                                ? _PortfolioBookSection.active
-                                : _PortfolioBookSection.closed),
+                            onChanged: (i) {
+                              final next = i == 0
+                                  ? _PortfolioBookSection.active
+                                  : _PortfolioBookSection.closed;
+                              if (next == _selectedBook) return;
+                              setState(() {
+                                _selectedBook = next;
+                                _investments = [];
+                                _hasMore = false;
+                              });
+                              _loadInvestments();
+                            },
                           ),
                           const SizedBox(height: 24),
                           PbSectionTitle(
@@ -183,6 +219,7 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
                     ),
                   ),
                 ],
+                ),
               ),
             ),
           ),
@@ -198,25 +235,6 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
     final kind =
         _selectedBook == _PortfolioBookSection.active ? 'active' : 'closed';
     return '$count $kind ${count == 1 ? 'loan' : 'loans'}';
-  }
-
-  /// Interest earned as a share of the amount invested.
-  double _absoluteReturn(PortfolioSectionSummary section) {
-    if (section.totalInvested <= 0) return 0;
-    return section.interestEarned / section.totalInvested * 100;
-  }
-
-  /// Annualised net return: the invested-amount weighted rate of the loans
-  /// in the selected tab.
-  double _anrEarned() {
-    var invested = 0.0;
-    var weighted = 0.0;
-    for (final loan in _visibleInvestments) {
-      final amount = (loan.investedAmount ?? 0).toDouble();
-      invested += amount;
-      weighted += amount * (loan.interestRate ?? 0);
-    }
-    return invested > 0 ? weighted / invested : 0;
   }
 
   Widget _summarySection(PortfolioSectionSummary section) {
@@ -246,7 +264,7 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
             Expanded(
               child: SummaryTile(
                 label: 'Absolute return',
-                value: '${_absoluteReturn(section).toStringAsFixed(2)}%',
+                value: '${section.absoluteReturnPercent.toStringAsFixed(2)}%',
                 positive: true,
               ),
             ),
@@ -254,20 +272,31 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
             Expanded(
               child: SummaryTile(
                 label: 'ANR earned',
-                value: _investmentsLoading
-                    ? '…'
-                    : '${_anrEarned().toStringAsFixed(2)}%',
+                value: '${section.annualizedNetReturn.toStringAsFixed(2)}%',
                 positive: true,
               ),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        SummaryTile(
-          label: 'Interest earned',
-          value: '+₹${section.interestEarned.commaAddedValue()}',
-          positive: true,
-          highlight: true,
+        Row(
+          children: [
+            Expanded(
+              child: SummaryTile(
+                label: 'Interest earned',
+                value: '+₹${section.interestEarned.commaAddedValue()}',
+                positive: true,
+                highlight: true,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SummaryTile(
+                label: 'Platform fee',
+                value: '₹${section.platformFee.commaAddedValue(digit: 2)}',
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -314,6 +343,21 @@ class _PortfolioAnalysisState extends State<PortfolioAnalysis> {
         for (int i = 0; i < visible.length; i++) ...[
           if (i > 0) const SizedBox(height: 12),
           InvestmentRowCard(loan: visible[i]),
+        ],
+        if (_hasMore) ...[
+          const SizedBox(height: 16),
+          _loadingMore
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.green),
+                  ),
+                )
+              : PbGhostButton(
+                  label: 'Load more',
+                  icon: Icons.expand_more_rounded,
+                  onPressed: () => _loadInvestments(reset: false),
+                ),
         ],
       ],
     );

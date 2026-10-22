@@ -2,10 +2,14 @@ class MyInvestmentsResponse {
   MyInvestmentsResponse({
     this.loanList = const [],
     this.count = 0,
+    this.page = 1,
+    this.hasMore = false,
   });
 
   List<MyInvestmentLoan> loanList;
   int count;
+  int page;
+  bool hasMore;
 
   factory MyInvestmentsResponse.fromJson(Map<String, dynamic> json) =>
       MyInvestmentsResponse(
@@ -13,7 +17,9 @@ class MyInvestmentsResponse {
             ? []
             : List<MyInvestmentLoan>.from(
                 json["loanList"].map((x) => MyInvestmentLoan.fromJson(x))),
-        count: json["count"] == null ? 0 : json["count"] as int,
+        count: json["count"] == null ? 0 : (json["count"] as num).toInt(),
+        page: json["page"] == null ? 1 : (json["page"] as num).toInt(),
+        hasMore: json["hasMore"] == true,
       );
 }
 

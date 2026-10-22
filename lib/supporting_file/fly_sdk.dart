@@ -98,8 +98,13 @@ class FlySdk {
     if (Utils.isWeb) {
       return;
     }
-    await FlyyFlutterPlugin.setFlyyNewUser(cid);
-    // await FlyyFlutterPlugin.setFlyyNewUserWithSegment(cid, Constants.segmentID);
+    try {
+      await FlyyFlutterPlugin.setFlyyNewUser(cid).timeout(
+        const Duration(seconds: 3),
+      );
+    } catch (e) {
+      debugPrint('Flyy signup skipped: $e');
+    }
   }
 
   static void onFlyySdkClosed(String response) {

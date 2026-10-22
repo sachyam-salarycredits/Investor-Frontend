@@ -481,7 +481,7 @@ class _SIPScreenState extends State<SIPScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-        return false;
+        return true;
       },
       child: Scaffold(
         appBar: ResponsiveWidget.isSmallScreen(context)
@@ -508,12 +508,7 @@ class _SIPScreenState extends State<SIPScreen> {
                       context.read<AppStateProvider>().getStepsStatus();
                     }
 
-                    try {
-                      context.pop();
-                      context.pop();
-                    } catch (e) {
-                      context.moveInitialPage();
-                    }
+                    Navigator.of(context).maybePop();
                   },
                 ),
                 actions: [
@@ -668,7 +663,7 @@ class _SIPScreenState extends State<SIPScreen> {
                                         .read<AppStateProvider>()
                                         .getStepsStatus();
                                   }
-                                  context.pop();
+                                  Navigator.of(context).maybePop();
                                 },
                               ),
                               SizedBox(height: 50),

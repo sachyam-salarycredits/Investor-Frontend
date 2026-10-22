@@ -20,6 +20,18 @@ class ImgPicker {
     return croppedFile;
   }
 
+  static Future<XFile?> pickImageFromGallery() async {
+    return await ImagePicker().pickImage(source: ImageSource.gallery);
+  }
+
+  static Future<File?> pickAndCropFromGallery() async {
+    var pickedFile = await pickImageFromGallery();
+    if (pickedFile == null) return null;
+    var croppedFile = await cropSelectedImage(pickedFile.path);
+    if (croppedFile == null) return null;
+    return croppedFile;
+  }
+
   /// Pick Image From Gallery and return a File
   static Future<File?> cropSelectedImage(String filePath) async {
     debugPrint(filePath);

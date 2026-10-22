@@ -963,7 +963,12 @@ class AppStateProvider with ChangeNotifier {
         FlySdk.loginUser(
             detail.profileDetails!.customerId, detail.profileDetails!.fullName);
         if (!Utils.isWeb) {
-          await SFMCSDK.setContactKey(detail.panDetails?.pan ?? '');
+          try {
+            await SFMCSDK.setContactKey(detail.panDetails?.pan ?? '')
+                .timeout(const Duration(seconds: 3));
+          } catch (e) {
+            print(e);
+          }
         }
         userDetails = detail;
         mobileNo = userDetails?.profileDetails?.phoneNumber ?? '';
@@ -1117,6 +1122,41 @@ class AppStateProvider with ChangeNotifier {
     } catch (e) {
       print(e);
       return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getNetWorthCertificate() async {
+    try {
+      var url = '${APIUrls.netWorthCertificate}?customerId=$customerId';
+      var raw = await apiCalling.getRequest(url: url, headers: null);
+      var response = json.decode(raw);
+      if (response["statusCode"] == "200" && response["data"] is Map) {
+        return Map<String, dynamic>.from(response["data"]);
+      }
+      return null;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<String?> uploadNetWorthCertificate(PlatformFile file) async {
+    try {
+      var param = Map<String, String>();
+      param[ApiParams.customerId] = customerId;
+      var files = Map<String, PlatformFile>();
+      files[ApiParams.file] = file;
+      var raw = await apiCalling.dataPostRequestAllPlatform(
+          url: APIUrls.netWorthCertificate,
+          parameters: param,
+          files: files,
+          headers: null);
+      var response = json.decode(raw);
+      if (response["statusCode"] == "200") return null;
+      return response["message"]?.toString() ?? 'Could not upload the certificate.';
+    } catch (e) {
+      print(e);
+      return 'Could not upload the certificate.';
     }
   }
 
@@ -1774,9 +1814,15 @@ class AppStateProvider with ChangeNotifier {
     }
   }
 
-  Future<MyInvestmentsResponse?> getMyInvestments() async {
+  Future<MyInvestmentsResponse?> getMyInvestments({
+    String? book,
+    int page = 1,
+    int? pageSize,
+  }) async {
     try {
-      final url = '${APIUrls.getMyInvestments}?customerId=$customerId';
+      var url = '${APIUrls.getMyInvestments}?customerId=$customerId';
+      if (book != null && book.isNotEmpty) url += '&book=$book';
+      if (pageSize != null) url += '&page=$page&pageSize=$pageSize';
       final mipResp = await apiCalling.getRequest(url: url, headers: null);
       final response = json.decode(mipResp);
       if (response["statusCode"] == "200" && response["data"] != null) {
