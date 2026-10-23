@@ -15,8 +15,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Camera-only selfie step before bank account details (registration).
-/// Uploads selfie to S3 as the user's profile photo (no liveness).
+/// Camera-only selfie step after signup. The photo is saved as-is, with no crop screen.
+/// Uploads the selfie to S3 as the profile photo, then opens the bank-verification welcome page.
 class SelfieCaptureScreen extends StatefulWidget {
   const SelfieCaptureScreen({Key? key}) : super(key: key);
 
@@ -33,7 +33,7 @@ class _SelfieCaptureScreenState extends State<SelfieCaptureScreen> {
     if (_isCapturing || _isUploading) return;
     setState(() => _isCapturing = true);
     try {
-      final file = await ImgPicker.pickAndCropFromCamera();
+      final file = await ImgPicker.pickFromCamera();
       if (!mounted) return;
       if (file != null) {
         setState(() => _selfieFile = file);
@@ -70,7 +70,9 @@ class _SelfieCaptureScreenState extends State<SelfieCaptureScreen> {
       return;
     }
 
-    context.pushNamed(RoutesName.BankDetail);
+    context.goNamed(RoutesName.FirstDepositScreen, params: {
+      Constants.fromOtp: 'true',
+    });
   }
 
   @override

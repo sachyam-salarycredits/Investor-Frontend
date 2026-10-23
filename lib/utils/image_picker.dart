@@ -12,6 +12,13 @@ class ImgPicker {
     return await ImagePicker().pickImage(source: ImageSource.camera);
   }
 
+  /// Camera photo used as-is. Signup selfie skips the crop screen.
+  static Future<File?> pickFromCamera() async {
+    var pickedFile = await pickImageFromCamera();
+    if (pickedFile == null) return null;
+    return File(pickedFile.path);
+  }
+
   static Future<File?> pickAndCropFromCamera() async {
     var pickedFile = await pickImageFromCamera();
     if (pickedFile == null) return null;

@@ -590,9 +590,19 @@ extension RouteContext on BuildContext {
         break;
 
       case 2:
-        this.goNamed(RoutesName.FirstDepositScreen, params: {
-          Constants.fromOtp: "true",
-        });
+        final profileUrl = this
+                .read<AppStateProvider>()
+                .userDetails
+                ?.profileDetails
+                ?.profileUrl ??
+            '';
+        if (profileUrl.trim().isEmpty) {
+          this.goNamed(RoutesName.SelfieCapture);
+        } else {
+          this.goNamed(RoutesName.FirstDepositScreen, params: {
+            Constants.fromOtp: "true",
+          });
+        }
         break;
 
       case 3:

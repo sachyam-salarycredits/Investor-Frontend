@@ -285,7 +285,7 @@ class _FirstDepositScreenState extends State<FirstDepositScreen> {
                     : content[1].btnText,
                 onPress: () {
                   if (widget.fromOtp) {
-                    context.pushNamed(RoutesName.SelfieCapture);
+                    context.pushNamed(RoutesName.BankDetail);
                   } else {
                     context.pushNamed(RoutesName.NewFundTransferScreen);
                   }
