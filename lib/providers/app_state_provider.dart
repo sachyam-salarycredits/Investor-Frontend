@@ -2335,6 +2335,10 @@ class AppStateProvider with ChangeNotifier {
         final summary = response['data']['portfolioSummary'];
         portfolioSummary = summary != null
             ? PortfolioSummary.fromJson(Map<String, dynamic>.from(summary))
+            : PortfolioSummary();
+        final month = response['data']['monthRepayment'];
+        portfolioSummary!.monthRepayment = month is Map
+            ? MonthRepayment.fromJson(Map<String, dynamic>.from(month))
             : null;
         notifyListeners();
       }

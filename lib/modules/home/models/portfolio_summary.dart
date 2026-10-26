@@ -2,10 +2,12 @@ class PortfolioSummary {
   PortfolioSummary({
     this.active,
     this.closed,
+    this.monthRepayment,
   });
 
   PortfolioSectionSummary? active;
   PortfolioSectionSummary? closed;
+  MonthRepayment? monthRepayment;
 
   factory PortfolioSummary.fromJson(Map<String, dynamic>? json) {
     if (json == null) return PortfolioSummary();
@@ -82,4 +84,33 @@ double _asDouble(dynamic value) {
   if (value is double) return value;
   if (value is int) return value.toDouble();
   return double.tryParse(value.toString()) ?? 0;
+}
+
+class MonthRepayment {
+  MonthRepayment({
+    this.periodLabel = '',
+    this.principalReceived = 0,
+    this.interestReceived = 0,
+    this.totalReceived = 0,
+    this.due = 0,
+    this.stillToCome = 0,
+  });
+
+  String periodLabel;
+  int principalReceived;
+  int interestReceived;
+  int totalReceived;
+  int due;
+  int stillToCome;
+
+  factory MonthRepayment.fromJson(Map<String, dynamic> json) {
+    return MonthRepayment(
+      periodLabel: json['periodLabel']?.toString() ?? '',
+      principalReceived: _asInt(json['principalReceived']),
+      interestReceived: _asInt(json['interestReceived']),
+      totalReceived: _asInt(json['totalReceived']),
+      due: _asInt(json['due']),
+      stillToCome: _asInt(json['stillToCome']),
+    );
+  }
 }

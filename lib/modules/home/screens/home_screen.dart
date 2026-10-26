@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../routes_management/routes_list.dart';
 import '../../../utils/images.dart';
 import '../models/NewOfferModel.dart';
+import '../models/portfolio_summary.dart';
 import 'player_video_page.dart';
 import 'stories_page.dart';
 
@@ -167,6 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final totalValue = available + outstanding;
     final earned = active?.interestEarned ?? 0;
     final percent = active?.percentageEarned ?? 0;
+    final month = provider.portfolioSummary?.monthRepayment;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,6 +192,10 @@ class _HomeScreenState extends State<HomeScreen> {
           onPrimary: () => openShellTab(context, ShellTab.explore),
           onSecondary: _openAddFunds,
         ),
+        if (month != null) ...[
+          const SizedBox(height: 16),
+          _MonthRepaymentCard(month: month),
+        ],
         const SizedBox(height: 26),
         PbSectionTitle(
           title: 'At a glance',
@@ -483,6 +489,75 @@ class _ActionBanner extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _MonthRepaymentCard extends StatelessWidget {
+  final MonthRepayment month;
+
+  const _MonthRepaymentCard({required this.month});
+
+  @override
+  Widget build(BuildContext context) {
+    return PbCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text('Repayments', style: AppTextStyles.semiBold(16)),
+              ),
+              if (month.periodLabel.isNotEmpty)
+                Text(
+                  month.periodLabel,
+                  style: AppTextStyles.medium(12, color: AppColors.greenDeep),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '₹${month.totalReceived.commaAddedValue()}',
+            style: AppTextStyles.semiBold(26),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Received this month',
+            style: AppTextStyles.regular(12, color: AppColors.muted),
+          ),
+          const SizedBox(height: 14),
+          _line('Principal received', month.principalReceived),
+          const SizedBox(height: 8),
+          _line('Interest received', month.interestReceived),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(height: 1, color: AppColors.line),
+          ),
+          _line('Expected this month', month.due),
+          const SizedBox(height: 8),
+          _line('Still to come', month.stillToCome, emphasize: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _line(String label, int amount, {bool emphasize = false}) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: AppTextStyles.regular(13, color: AppColors.muted),
+          ),
+        ),
+        Text(
+          '₹${amount.commaAddedValue()}',
+          style: emphasize
+              ? AppTextStyles.semiBold(14, color: AppColors.greenDeep)
+              : AppTextStyles.medium(14),
+        ),
+      ],
     );
   }
 }
