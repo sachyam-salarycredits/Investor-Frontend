@@ -491,7 +491,9 @@ Widget PennyDropPopupDialog(
               height: 16.0,
             ),
             Text(
-              'Penny Drop process was Unsuccessful!',
+              pennyDropRes.message.contains('already linked')
+                  ? pennyDropRes.message
+                  : 'Penny Drop process was Unsuccessful!',
               textAlign: TextAlign.center,
               style: TextStyle(
                   color: Colors.black,
@@ -503,8 +505,9 @@ Widget PennyDropPopupDialog(
               height: 15.0,
             ),
             Text(
-              // '$name',
-              '${name},${pennyDropRes.message}',
+              pennyDropRes.message.contains('already linked')
+                  ? ''
+                  : '${name},${pennyDropRes.message}',
               maxLines: 4,
               textAlign: TextAlign.center,
               style: TextStyle(

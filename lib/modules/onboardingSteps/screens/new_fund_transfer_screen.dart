@@ -1,41 +1,23 @@
-import 'dart:io';
-
 import 'package:peerbridge/language/language_en.dart';
 import 'package:peerbridge/modules/onboardingSteps/models/cashFree_details.dart';
 import 'package:peerbridge/modules/onboardingSteps/models/cashfree_web_token_response.dart';
 import 'package:peerbridge/modules/profile/models/user_details.dart';
 import 'package:peerbridge/providers/app_state_provider.dart';
 import 'package:peerbridge/routes_management/routes_list.dart';
-import 'package:peerbridge/modules/onboardingSteps/screens/fund_transfer_process_screen.dart';
 import 'package:peerbridge/supporting_file/cashfree_api.dart';
-import 'package:peerbridge/supporting_file/api_calling.dart';
-import 'package:peerbridge/utils/api_constant.dart';
-import 'package:peerbridge/utils/colours_util.dart';
 import 'package:peerbridge/utils/enums.dart';
 import 'package:peerbridge/utils/extensions.dart';
-import 'package:peerbridge/utils/fonts.dart';
-import 'package:peerbridge/utils/image_picker.dart';
 import 'package:peerbridge/utils/images.dart';
-import 'package:peerbridge/utils/responsive.dart';
-import 'package:peerbridge/utils/user_preferences.dart';
 import 'package:peerbridge/utils/utils.dart';
-import 'package:peerbridge/widgets/checkbox_widget.dart';
-import 'package:peerbridge/widgets/custom_button.dart';
-import 'package:peerbridge/widgets/header.dart';
-import 'package:peerbridge/widgets/input_widget.dart';
 import 'package:peerbridge/widgets/loader.dart';
-import 'package:peerbridge/widgets/title_header.dart';
+import 'package:peerbridge/widgets/pb/pb.dart';
 import 'package:peerbridge/widgets/tpv_registered_bank_banner.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../../../supporting_file/appsFlyerSdk.dart';
-import 'package:peerbridge/modules/bankDetails/screens/welcome_screen.dart';
 
 import '../../../utils/constants.dart';
 
@@ -179,55 +161,62 @@ class _NewFundTransferScreenState extends State<NewFundTransferScreen> {
   }
 
   Widget _upiPaymentSection() {
-    if (_usesRegisteredUpiCollect) {
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 14),
-        child: InputWidget(
+    final readOnly = _usesRegisteredUpiCollect;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
           focusNode: _focus,
-          isFocused: isFocused,
-          isUPI: true,
-          isEditable: false,
-          rightIcon: isUpiValid
-              ? Image(
-                  width: 25,
-                  height: 20,
-                  fit: BoxFit.cover,
-                  image: AssetImage(LocalImages.upi_valid_icon),
-                )
-              : Container(),
           controller: upiController,
+          readOnly: readOnly,
           keyboardType: TextInputType.emailAddress,
-          isValid: isUpiValid,
-          isError: isUpiError,
-          hintStr: LanguageHelper.textTpvRegisteredUpi,
-          heading: LanguageHelper.textTpvRegisteredUpi,
-          horizontalMargin: 0,
-          onChange: (_) {},
+          style: AppTextStyles.medium(15),
+          onChanged: readOnly
+              ? null
+              : (input) {
+                  setState(() {
+                    isUpiValid = input.trim().isUpiIdValid;
+                    isUpiError = input.trim().isNotEmpty && !isUpiValid;
+                  });
+                },
+          decoration: InputDecoration(
+            hintText: readOnly
+                ? LanguageHelper.textTpvRegisteredUpi
+                : LanguageHelper.textEnterUpiId,
+            hintStyle: AppTextStyles.regular(14, color: const Color(0xffB0B0B0)),
+            filled: readOnly,
+            fillColor: const Color(0xffF7F7F7),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            enabledBorder: _fieldBorder(
+                isUpiError ? AppColors.error : const Color(0xffE4E4E4)),
+            focusedBorder: _fieldBorder(
+                isUpiError ? AppColors.error : AppColors.green),
+            suffixIcon: isUpiValid
+                ? const Icon(Icons.check_circle, color: AppColors.green, size: 20)
+                : null,
+          ),
         ),
-      );
-    }
+        if (!readOnly) ...[
+          const SizedBox(height: 6),
+          Text(
+            isUpiError
+                ? LanguageHelper.textInvalidUpiId
+                : LanguageHelper.textEnterUpiLinkedToBank,
+            style: AppTextStyles.regular(
+              12,
+              color: isUpiError ? AppColors.error : AppColors.muted,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 14),
-      child: InputWidget(
-        focusNode: _focus,
-        isFocused: isFocused,
-        isUPI: true,
-        controller: upiController,
-        keyboardType: TextInputType.emailAddress,
-        isValid: isUpiValid,
-        isError: isUpiError,
-        alertStr: isUpiError ? LanguageHelper.textInvalidUpiId : '',
-        hintStr: LanguageHelper.textEnterUpiId,
-        heading: LanguageHelper.textEnterUpiLinkedToBank,
-        horizontalMargin: 0,
-        onChange: (String input) {
-          setState(() {
-            isUpiValid = input.trim().isUpiIdValid;
-            isUpiError = input.trim().isNotEmpty && !isUpiValid;
-          });
-        },
-      ),
+  OutlineInputBorder _fieldBorder(Color color) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: color, width: 1.1),
     );
   }
 
@@ -415,125 +404,55 @@ class _NewFundTransferScreenState extends State<NewFundTransferScreen> {
     });
   }
 
+  void _openHelp() {
+    showPbBottomSheet<void>(
+      context: context,
+      builder: (_) => const NeedHelpWidget(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    var screenSize = MediaQuery.of(context).size;
     return WillPopScope(
-      onWillPop: () async {
-        return true;
-      },
+      onWillPop: () async => true,
       child: Scaffold(
-        appBar: ResponsiveWidget.isSmallScreen(context)
-            ? AppBar(
-                title: Text(
-                  'Fund Transfer',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontFamily: CustomFonts.nunito,
-                    color: ColorsUtil.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                toolbarHeight: 70,
-                backgroundColor: ColorsUtil.blueColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(8),
-                  ),
-                ),
-                leading: BackButton(
-                  onPressed: () {
-                    context.pop();
-                  },
-                ),
-                actions: [
-                  InkWell(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        shape: const RoundedRectangleBorder(
-                          // <-- SEE HERE
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(15.0),
-                          ),
-                        ),
-                        builder: (BuildContext context) => NeedHelpWidget(),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Center(
-                        child: Text(
-                          'Need Help ?',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: CustomFonts.nunito,
-                            color: ColorsUtil.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              )
-            : null,
+        backgroundColor: AppColors.white,
+        appBar: PbPageHeader(
+          title: 'Fund transfer',
+          onBack: () => context.pop(),
+          actions: [
+            IconButton(
+              onPressed: _openHelp,
+              tooltip: 'Need help',
+              icon: const Icon(Icons.help_outline_rounded, color: Colors.white),
+            ),
+          ],
+        ),
         body: PeerBridgeLoader(
           isLoading: _isLoading,
           child: SafeArea(
-            child: ResponsiveWidget.isSmallScreen(context)
-                ? Container(
-                    margin: EdgeInsets.fromLTRB(15, 20, 15, 20),
-                    child: Column(
-                      children: [
-                        mainWidgets(context),
-                      ],
-                    ))
-                : Row(
-                    children: [
-                      Container(
-                        width: screenSize.width * .56,
-                        height: screenSize.height,
-                        color: ColorsUtil.white,
-                        child: Column(
-                          children: [
-                            Header(
-                              backOnPressed: () {
-                                context.pop();
-                              },
-                            ),
-                            SizedBox(height: 50),
-                            Expanded(
-                              child: Container(
-                                child: Center(
-                                  child: Container(
-                                    width: screenSize.width * .4,
-                                    constraints: BoxConstraints(maxWidth: 500),
-                                    margin: EdgeInsets.symmetric(vertical: 20),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        TitleHeader(
-                                          titleStr: 'Fund Transfer',
-                                          desStr: '',
-                                        ),
-                                        mainWidgets(context)
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+            top: false,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: 520,
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+                      child: Column(
+                        children: [
+                          mainWidgets(context),
+                        ],
                       ),
-                      Container(
-                        width: screenSize.width * .44,
-                        color: ColorsUtil.blueColor,
-                      )
-                    ],
+                    ),
                   ),
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -556,21 +475,19 @@ class _NewFundTransferScreenState extends State<NewFundTransferScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Transfer Money instantly and start earning 18%*',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: CustomFonts.nunito,
-                      fontWeight: FontWeight.w400,
-                    ),
+                    'Add money and start lending',
+                    style: AppTextStyles.semiBold(22).copyWith(height: 1.25),
                   ),
-                  SizedBox(
-                    height: 15.0,
+                  const SizedBox(height: 6),
+                  Text(
+                    'Transfer from your registered bank. Minimum ₹1,000.',
+                    style: AppTextStyles.regular(13, color: AppColors.muted)
+                        .copyWith(height: 1.4),
                   ),
+                  const SizedBox(height: 18),
                   _tpvBankBanner(),
                   amountWidget(),
-                  SizedBox(
-                    height: 10,
-                  ),
+                  const SizedBox(height: 12),
                   Wrap(
                     spacing: 10,
                     runSpacing: 10,
@@ -631,16 +548,13 @@ class _NewFundTransferScreenState extends State<NewFundTransferScreen> {
                       )
                     ],
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
-
-                  CheckBoxWidget(
-                    isUPIBox: true,
-                    UPIWidget: _upiPaymentSection(),
-                    titleStr: 'UPI',
-                    isSelected: isUPISelected,
-                    onPress: () {
+                  const SizedBox(height: 22),
+                  Text('Pay using', style: AppTextStyles.semiBold(15)),
+                  const SizedBox(height: 10),
+                  _paymentOption(
+                    title: 'UPI',
+                    selected: isUPISelected,
+                    onTap: () {
                       if (isUPISelected) {
                         setState(() {
                           isUPISelected = false;
@@ -651,11 +565,12 @@ class _NewFundTransferScreenState extends State<NewFundTransferScreen> {
                         _selectUpi();
                       }
                     },
+                    child: isUPISelected ? _upiPaymentSection() : null,
                   ),
-                  CheckBoxWidget(
-                    titleStr: 'Net Banking',
-                    isSelected: isNetBankingSelected,
-                    onPress: () {
+                  _paymentOption(
+                    title: 'Net banking',
+                    selected: isNetBankingSelected,
+                    onTap: () {
                       if (isNetBankingSelected) {
                         setState(() {
                           isNetBankingSelected = false;
@@ -680,119 +595,17 @@ class _NewFundTransferScreenState extends State<NewFundTransferScreen> {
                   //     });
                   //   },
                   //                   ),
-                  Visibility(
-                    visible: isFundExceeded,
-                    child: Container(
-                      margin: EdgeInsets.symmetric(vertical: 20),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                      decoration: BoxDecoration(
-                          color: ColorsUtil.rewardRedContainer,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.red)),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RotatedBox(
-                            quarterTurns: 2,
-                            child: Icon(
-                              Icons.info,
-                              color: Colors.red,
-                            ),
-                          ),
-                          SizedBox(
-                            width: 14,
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Your total funding amount has crossed ₹ 10 Lakh. Please follow the instructions, fill the document and upload it.',
-                                  maxLines: 3,
-                                  softWrap: true,
-                                  style: TextStyle(
-                                      fontFamily: CustomFonts.nunito,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 15),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Row(
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        context.pushNamed(
-                                            RoutesName.FundTransferProcess);
-                                      },
-                                      child: Text(
-                                        'Complete this process now',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          decoration: TextDecoration.underline,
-                                          fontWeight: FontWeight.w700,
-                                          fontFamily: CustomFonts.nunito,
-                                        ),
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.keyboard_arrow_right,
-                                      size: 21,
-                                    )
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                  if (isFundExceeded)
+                    _notice(
+                      'Your total funding amount has crossed ₹10 lakh. Follow the instructions, fill the document and upload it.',
+                      action: 'Complete this process now',
+                      onAction: () =>
+                          context.pushNamed(RoutesName.FundTransferProcess),
                     ),
-                  ),
                   if (!isBankCodeAvailable &&
                       (isUPISelected || isNetBankingSelected))
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                      margin: EdgeInsets.symmetric(vertical: 20),
-                      decoration: BoxDecoration(
-                          color: ColorsUtil.rewardRedContainer,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: ColorsUtil.redColor)),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RotatedBox(
-                            quarterTurns: 2,
-                            child: Icon(
-                              Icons.info,
-                              color: ColorsUtil.redColor,
-                            ),
-                          ),
-                          SizedBox(
-                            width: 14,
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Your bank account is not supported for UPI or net banking.',
-                                  maxLines: 3,
-                                  softWrap: true,
-                                  style: TextStyle(
-                                      fontFamily: CustomFonts.nunito,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 15),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    _notice(
+                      'Your bank account is not supported for UPI or net banking.',
                     ),
                   SizedBox(
                     height: 24.0,
@@ -803,31 +616,22 @@ class _NewFundTransferScreenState extends State<NewFundTransferScreen> {
           ),
           Column(
             children: [
-              CustomButton(
-                titleStr: 'Deposit Money',
-                horizontalMargin: 0,
-                isDisable: (!isUPISelected && !isNetBankingSelected) ||
-                    (!isBankCodeAvailable &&
-                        (isUPISelected || isNetBankingSelected)),
-                onPress: makePayment,
+              PbPrimaryButton(
+                label: 'Deposit money',
+                onPressed: (!isUPISelected && !isNetBankingSelected) ||
+                        (!isBankCodeAvailable &&
+                            (isUPISelected || isNetBankingSelected))
+                    ? null
+                    : makePayment,
               ),
-              SizedBox(
-                height: 8,
-              ),
-              InkWell(
-                onTap: () {
-                  context.pushNamed(RoutesName.HomeScreen);
-                },
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: () => context.pushNamed(RoutesName.HomeScreen),
                 child: Text(
                   'Skip for now',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontFamily: CustomFonts.nunito,
-                    color: ColorsUtil.greenText,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.medium(14, color: AppColors.green),
                 ),
-              )
+              ),
             ],
           )
         ],
@@ -835,59 +639,156 @@ class _NewFundTransferScreenState extends State<NewFundTransferScreen> {
     );
   }
 
+  Widget _paymentOption({
+    required String title,
+    required bool selected,
+    required VoidCallback onTap,
+    Widget? child,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: selected ? AppColors.mintSurface : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: selected ? AppColors.green : AppColors.line,
+                width: selected ? 1.4 : 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: selected ? AppColors.green : Colors.white,
+                        border: Border.all(
+                          color: selected ? AppColors.green : AppColors.handle,
+                          width: 1.6,
+                        ),
+                      ),
+                      child: selected
+                          ? const Icon(Icons.check, size: 13, color: Colors.white)
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(title, style: AppTextStyles.medium(15)),
+                  ],
+                ),
+                if (child != null) ...[
+                  const SizedBox(height: 12),
+                  child,
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _notice(String message, {String? action, VoidCallback? onAction}) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xffFDECEC),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.error.withOpacity(0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(message, style: AppTextStyles.regular(13).copyWith(height: 1.4)),
+          if (action != null) ...[
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: onAction,
+              child: Text(
+                action,
+                style: AppTextStyles.semiBold(13, color: AppColors.green)
+                    .copyWith(decoration: TextDecoration.underline),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget amountWidget() {
-    return InputWidget(
-      prefixText: '₹ ',
-      initialValue: '1000',
-      controller: amountController,
-      keyboardType: TextInputType.number,
-      isValid: isAmountValid,
-      alertColor: Colors.red,
-      alertStr: isNetBankingSelected ? LanguageHelper.textNetBankingCharge : "",
-      isError: isAmountError,
-      hintStr: 'Enter Amount',
-      heading: 'Enter Amount',
-      horizontalMargin: 0,
-      onChange: (String input) {
-        setState(() {
-          isAmountValid = input.doubleValue() >= 5000;
-          isAmountError = false;
-        });
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Amount', style: AppTextStyles.medium(13, color: AppColors.muted)),
+        const SizedBox(height: 8),
+        TextField(
+          controller: amountController,
+          keyboardType: TextInputType.number,
+          style: AppTextStyles.semiBold(22),
+          onChanged: (input) {
+            setState(() {
+              isAmountValid = input.doubleValue() >= 5000;
+              isAmountError = false;
+            });
+          },
+          decoration: InputDecoration(
+            prefixText: '₹ ',
+            prefixStyle: AppTextStyles.semiBold(22, color: AppColors.ink),
+            hintText: 'Enter amount',
+            hintStyle: AppTextStyles.regular(16, color: const Color(0xffB0B0B0)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            enabledBorder: _fieldBorder(
+                isAmountError ? AppColors.error : const Color(0xffE4E4E4)),
+            focusedBorder: _fieldBorder(
+                isAmountError ? AppColors.error : AppColors.green),
+          ),
+        ),
+        if (isNetBankingSelected) ...[
+          const SizedBox(height: 6),
+          Text(
+            LanguageHelper.textNetBankingCharge,
+            style: AppTextStyles.regular(12, color: AppColors.muted),
+          ),
+        ],
+      ],
     );
   }
 }
 
 class AmountTabsWidget extends StatelessWidget {
-  AmountTabsWidget({Key? key, required this.title, required this.ontap})
+  const AmountTabsWidget({Key? key, required this.title, required this.ontap})
       : super(key: key);
 
-  int title;
-  Function() ontap;
+  final int title;
+  final Function() ontap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: ontap,
-      child: Container(
-        // height: 35,
-        width: 80,
-        decoration: BoxDecoration(
-          color: ColorsUtil.greenDepositScreenText.withOpacity(.2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: EdgeInsets.all(8),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
-              '+${title.toString()}',
-              style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontFamily: CustomFonts.nunito,
-                  fontSize: 13,
-                  color: ColorsUtil.blackish),
-            ),
+    return Material(
+      color: AppColors.mint,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: ontap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Text(
+            '+₹$title',
+            style: AppTextStyles.medium(13, color: AppColors.greenDeep),
           ),
         ),
       ),
@@ -913,12 +814,8 @@ class NeedHelpWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Help with Fund Transfer',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontFamily: CustomFonts.nunito,
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.w600),
+                'Help with fund transfer',
+                style: AppTextStyles.semiBold(18),
               ),
               IconButton(
                   onPressed: () {
@@ -930,12 +827,12 @@ class NeedHelpWidget extends StatelessWidget {
                   )),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 2),
             child: Divider(
               thickness: .5,
               height: 1.0,
-              color: ColorsUtil.lighterGrey,
+              color: AppColors.line,
             ),
           ),
 
@@ -957,10 +854,10 @@ class NeedHelpWidget extends StatelessWidget {
           SizedBox(
             height: 10,
           ),
-          Divider(
+          const Divider(
             thickness: .5,
             height: 1.0,
-            color: ColorsUtil.lighterGrey,
+            color: AppColors.line,
           ),
           SizedBox(
             height: 10.0,
@@ -970,21 +867,11 @@ class NeedHelpWidget extends StatelessWidget {
               text: TextSpan(
                 text:
                     "Can’t find what you’re looking for?\nGive us a call at : ",
-                style: TextStyle(
-                  color: ColorsUtil.lightGrey,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: CustomFonts.nunito,
-                  fontSize: 13.0,
-                ),
+                style: AppTextStyles.medium(13, color: AppColors.muted),
                 children: <TextSpan>[
                   TextSpan(
                     text: Constants.callSupportNumber,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: ColorsUtil.greenText,
-                      fontFamily: CustomFonts.nunito,
-                      fontSize: 13.0,
-                    ),
+                    style: AppTextStyles.semiBold(13, color: AppColors.green),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () async {
                         launch('tel://${Constants.callSupportNumber}');
@@ -1018,31 +905,27 @@ class PointWidget extends StatelessWidget {
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         tilePadding: EdgeInsets.all(0),
-        trailing: Icon(
+        trailing: const Icon(
           Icons.check,
           size: 0.0,
-          color: ColorsUtil.white,
+          color: AppColors.white,
         ),
-        leading: Padding(
-          padding: const EdgeInsets.only(
+        leading: const Padding(
+          padding: EdgeInsets.only(
             top: 5.5,
           ),
           child: Icon(
             Icons.arrow_forward_ios_outlined,
-            color: ColorsUtil.arrowColor,
+            color: AppColors.green,
             size: 14.0,
           ),
         ),
-        textColor: Colors.black54,
-        collapsedIconColor: ColorsUtil.white,
-        iconColor: Colors.white,
+        textColor: AppColors.ink,
+        collapsedIconColor: AppColors.white,
+        iconColor: AppColors.white,
         title: Text(
           heading,
-          style: TextStyle(
-              color: Colors.black,
-              fontFamily: CustomFonts.nunito,
-              fontSize: 16.0,
-              fontWeight: FontWeight.w400),
+          style: AppTextStyles.regular(15),
         ),
         children: [
           VerticalDivider(
@@ -1073,12 +956,7 @@ class PointWidget extends StatelessWidget {
                             maxLines: 7,
                             softWrap: true,
                             textAlign: TextAlign.left,
-                            style: TextStyle(
-                              fontSize: 12.0,
-                              fontFamily: CustomFonts.nunito,
-                              fontWeight: FontWeight.w400,
-                              color: ColorsUtil.greyPlaceHolder,
-                            ),
+                            style: AppTextStyles.regular(12, color: AppColors.muted),
                           ),
                         ),
                       ],

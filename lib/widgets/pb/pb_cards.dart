@@ -126,6 +126,14 @@ class BalanceStrip extends StatelessWidget {
   }
 }
 
+/// One month on the home portfolio chart.
+class PortfolioChartPoint {
+  final String label;
+  final double value;
+
+  const PortfolioChartPoint({required this.label, required this.value});
+}
+
 /// Green gradient hero card with the total value, change badge and growth chart.
 class PortfolioValueCard extends StatelessWidget {
   final String title;
@@ -133,7 +141,7 @@ class PortfolioValueCard extends StatelessWidget {
   final String? changeBadge;
   final String? changeNote;
   final String? periodLabel;
-  final List<double> chartPoints;
+  final List<PortfolioChartPoint> chartPoints;
   final String primaryLabel;
   final VoidCallback? onPrimary;
   final String secondaryLabel;
@@ -146,7 +154,7 @@ class PortfolioValueCard extends StatelessWidget {
     this.changeBadge,
     this.changeNote,
     this.periodLabel,
-    this.chartPoints = const [],
+    this.chartPoints = const <PortfolioChartPoint>[],
     this.primaryLabel = 'Explore investments',
     this.onPrimary,
     this.secondaryLabel = 'Add funds',
@@ -256,14 +264,10 @@ class PortfolioValueCard extends StatelessWidget {
                     ],
                   ),
                 ],
-                const SizedBox(height: 18),
-                SizedBox(
-                  height: 76,
-                  width: double.infinity,
-                  child: CustomPaint(
-                    painter: GrowthChartPainter(points: chartPoints),
-                  ),
-                ),
+                if (chartPoints.length >= 2) ...[
+                  const SizedBox(height: 18),
+                  _InvestedChart(points: chartPoints),
+                ],
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -317,26 +321,125 @@ class _Rings extends StatelessWidget {
   }
 }
 
+/// Amount-invested line with a rupee scale and a month along the bottom.
+class _InvestedChart extends StatelessWidget {
+  final List<PortfolioChartPoint> points;
+
+  const _InvestedChart({required this.points});
+
+  static const _labelWidth = 52.0;
+  static const _gap = 8.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final values = points.map((point) => point.value).toList();
+    final maxV = values.reduce(math.max);
+    final minV = values.reduce(math.min);
+    final axisStyle = AppTextStyles.medium(10, color: Colors.white.withOpacity(0.72));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Amount invested',
+          style: AppTextStyles.medium(12, color: Colors.white.withOpacity(0.76)),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 72,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: _labelWidth,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(_axisAmount(maxV), style: axisStyle),
+                    Text(_axisAmount(minV), style: axisStyle),
+                  ],
+                ),
+              ),
+              const SizedBox(width: _gap),
+              Expanded(
+                child: CustomPaint(
+                  painter: GrowthChartPainter(points: values),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+        Padding(
+          padding: const EdgeInsets.only(left: _labelWidth + _gap),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (final point in points)
+                Text(
+                  point.label,
+                  style: AppTextStyles.regular(10, color: Colors.white.withOpacity(0.7)),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+String _axisAmount(double value) {
+  final rounded = value.round();
+  final abs = rounded.abs();
+  if (abs >= 10000000) return '₹${_compact(rounded / 10000000)}Cr';
+  if (abs >= 100000) return '₹${_compact(rounded / 100000)}L';
+  if (abs >= 1000) return '₹${_compact(rounded / 1000)}k';
+  return '₹$rounded';
+}
+
+String _compact(double value) {
+  final text = value.abs() >= 10
+      ? value.toStringAsFixed(0)
+      : value.toStringAsFixed(1);
+  return text.endsWith('.0') ? text.substring(0, text.length - 2) : text;
+}
+
 /// Smooth gold growth line with a fading fill and an end dot.
 class GrowthChartPainter extends CustomPainter {
   final List<double> points;
 
   GrowthChartPainter({required this.points});
 
-  static const _fallback = [
-    70.0, 60.0, 64.0, 50.0, 45.0, 42.0, 31.0, 25.0, 18.0, 8.0
-  ];
-
   @override
   void paint(Canvas canvas, Size size) {
-    final values = _normalised();
-    if (values.length < 2) return;
+    if (points.length < 2) return;
 
-    final step = size.width / (values.length - 1);
-    final offsets = <Offset>[
-      for (var i = 0; i < values.length; i++)
-        Offset(i * step, 6 + values[i] * (size.height - 12)),
-    ];
+    final maxV = points.reduce(math.max);
+    final minV = points.reduce(math.min);
+    final range = maxV - minV;
+    final flat = range.abs() < 1;
+
+    final offsets = <Offset>[];
+    final step = size.width / (points.length - 1);
+    for (var i = 0; i < points.length; i++) {
+      final t = flat ? 0.5 : (points[i] - minV) / range;
+      final y = (size.height - 3) - t * (size.height - 6);
+      offsets.add(Offset(i * step, y));
+    }
+
+    final guide = Paint()
+      ..color = Colors.white.withOpacity(0.16)
+      ..strokeWidth = 1;
+    canvas.drawLine(
+      Offset(0, offsets.map((p) => p.dy).reduce(math.min)),
+      Offset(size.width, offsets.map((p) => p.dy).reduce(math.min)),
+      guide,
+    );
+    canvas.drawLine(
+      Offset(0, offsets.map((p) => p.dy).reduce(math.max)),
+      Offset(size.width, offsets.map((p) => p.dy).reduce(math.max)),
+      guide,
+    );
 
     final line = Path()..moveTo(offsets.first.dx, offsets.first.dy);
     for (var i = 0; i < offsets.length - 1; i++) {
@@ -347,8 +450,8 @@ class GrowthChartPainter extends CustomPainter {
     }
 
     final fill = Path.from(line)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
+      ..lineTo(offsets.last.dx, size.height)
+      ..lineTo(offsets.first.dx, size.height)
       ..close();
 
     canvas.drawPath(
@@ -371,25 +474,22 @@ class GrowthChartPainter extends CustomPainter {
         ..strokeWidth = 2.2
         ..strokeCap = StrokeCap.round,
     );
+    for (final offset in offsets) {
+      canvas.drawCircle(offset, 2.2, Paint()..color = AppColors.goldLight);
+    }
     final end = offsets.last;
     canvas.drawCircle(end, 4.5, Paint()..color = AppColors.greenDeep);
     canvas.drawCircle(end, 3.5, Paint()..color = AppColors.goldLight);
   }
 
-  /// Returns values in 0..1 where 0 is the top of the chart.
-  List<double> _normalised() {
-    if (points.length < 2) {
-      return _fallback.map((v) => v / 84).toList();
-    }
-    final maxV = points.reduce(math.max);
-    final minV = points.reduce(math.min);
-    final range = (maxV - minV).abs() < 1e-9 ? 1.0 : maxV - minV;
-    return points.map((v) => 1 - (v - minV) / range).toList();
-  }
-
   @override
-  bool shouldRepaint(covariant GrowthChartPainter oldDelegate) =>
-      oldDelegate.points != points;
+  bool shouldRepaint(covariant GrowthChartPainter oldDelegate) {
+    if (oldDelegate.points.length != points.length) return true;
+    for (var i = 0; i < points.length; i++) {
+      if (oldDelegate.points[i] != points[i]) return true;
+    }
+    return false;
+  }
 }
 
 /// Small rounded tile with a tinted icon, value and label.

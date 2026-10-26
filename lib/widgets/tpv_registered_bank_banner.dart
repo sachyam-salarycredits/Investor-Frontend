@@ -1,7 +1,6 @@
 import 'package:peerbridge/language/language_en.dart';
-import 'package:peerbridge/utils/colours_util.dart';
-import 'package:peerbridge/utils/fonts.dart';
 import 'package:peerbridge/utils/tpv_utils.dart';
+import 'package:peerbridge/widgets/pb/pb.dart';
 import 'package:flutter/material.dart';
 
 class TpvRegisteredBankBanner extends StatelessWidget {
@@ -27,50 +26,33 @@ class TpvRegisteredBankBanner extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: ColorsUtil.blueColor.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: ColorsUtil.blueColor.withOpacity(0.25)),
+        color: AppColors.mint,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.green.withOpacity(0.18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             LanguageHelper.textTpvRegisteredBankTitle,
-            style: TextStyle(
-              fontFamily: CustomFonts.nunito,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: ColorsUtil.blueColor,
-            ),
+            style: AppTextStyles.semiBold(13, color: AppColors.greenDeep),
           ),
           const SizedBox(height: 6),
           Text(
             '$bankLabel • $masked',
-            style: TextStyle(
-              fontFamily: CustomFonts.nunito,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTextStyles.medium(14),
           ),
           const SizedBox(height: 4),
           Text(
             LanguageHelper.textTpvRegisteredBankBody,
-            style: TextStyle(
-              fontFamily: CustomFonts.nunito,
-              fontSize: 12,
-              height: 1.35,
-              color: ColorsUtil.black.withOpacity(0.72),
-            ),
+            style: AppTextStyles.regular(12, color: AppColors.muted)
+                .copyWith(height: 1.35),
           ),
           if (upi != null && upi.isNotEmpty) ...[
             const SizedBox(height: 6),
             Text(
               '${LanguageHelper.textTpvRegisteredUpi}: $upi',
-              style: TextStyle(
-                fontFamily: CustomFonts.nunito,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTextStyles.medium(12, color: AppColors.ink),
             ),
           ],
         ],

@@ -232,24 +232,29 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  List<double> _chartPoints(AppStateProvider provider) {
+  List<PortfolioChartPoint> _chartPoints(AppStateProvider provider) {
     final earned = provider.portfolioAnalysis?.data?.interestEarned;
-    if (earned == null) return const [];
+    if (earned == null) return const <PortfolioChartPoint>[];
     final months = <dynamic>[
-      earned.interestEarned6,
-      earned.interestEarned5,
-      earned.interestEarned4,
-      earned.interestEarned3,
-      earned.interestEarned2,
       earned.interestEarned1,
+      earned.interestEarned2,
+      earned.interestEarned3,
+      earned.interestEarned4,
+      earned.interestEarned5,
+      earned.interestEarned6,
     ];
-    final points = <double>[];
+    final points = <PortfolioChartPoint>[];
     for (final month in months) {
-      final double? value = month?.totalInvestement as double?;
-      if (value != null) points.add(value);
+      if (month == null) continue;
+      final raw = month.totalInvestement;
+      final double value = raw is num ? raw.toDouble() : 0;
+      final String statement = (month.statementMonth ?? '').toString().trim();
+      final label =
+          statement.isEmpty ? '' : statement.split(' ').first;
+      points.add(PortfolioChartPoint(label: label, value: value));
     }
-    final hasSignal = points.where((p) => p > 0).length >= 2;
-    return hasSignal ? points : const [];
+    final hasSignal = points.where((point) => point.value > 0).length >= 2;
+    return hasSignal ? points : const <PortfolioChartPoint>[];
   }
 
   Widget _greeting(BuildContext context, String firstName, bool kycDone) {

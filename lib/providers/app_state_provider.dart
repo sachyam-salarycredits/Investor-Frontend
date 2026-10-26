@@ -790,8 +790,10 @@ class AppStateProvider with ChangeNotifier {
 
         return result;
       } else if (response["statusCode"] == "400") {
-        result.message =
-            "You can not validate your account more than two times in a week, please try again after 7 days.\nYou can call our helpline too.";
+        final serverMessage = (response["message"] ?? "").toString().trim();
+        result.message = serverMessage.isNotEmpty
+            ? serverMessage
+            : "You can not validate your account more than two times in a week, please try again after 7 days.\nYou can call our helpline too.";
       }
       return result;
     } catch (e) {
