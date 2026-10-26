@@ -1928,8 +1928,13 @@ class AppStateProvider with ChangeNotifier {
     }
   }
 
-  Future<AccountTransactions?> getAccountTransactions() async {
+  Future<AccountTransactions?> getAccountTransactions({
+    DateTime? from,
+    DateTime? to,
+  }) async {
     var url = APIUrls.getAccountTransactions + "?customerId=$customerId";
+    if (from != null) url += "&from=${_statementDate(from)}";
+    if (to != null) url += "&to=${_statementDate(to)}";
     try {
       var resp = await apiCalling.getRequest(url: url, headers: null);
       var response = json.decode(resp);
@@ -1941,6 +1946,12 @@ class AppStateProvider with ChangeNotifier {
       debugPrint("getAccountTransactions error: $e");
     }
     return null;
+  }
+
+  String _statementDate(DateTime value) {
+    final month = value.month.toString().padLeft(2, '0');
+    final day = value.day.toString().padLeft(2, '0');
+    return '${value.year}-$month-$day';
   }
 
   /// Returns the server message; [success] is true only when the email was sent.

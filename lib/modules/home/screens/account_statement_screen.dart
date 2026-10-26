@@ -19,24 +19,55 @@ class _AccountStatementScreenState extends State<AccountStatementScreen> {
   AccountTransactions? _data;
   bool _loading = true;
   int _tab = 0;
+  DateTime? _from;
+  DateTime? _to;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _load(includeStatements: true);
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool includeStatements = false}) async {
     final provider = context.read<AppStateProvider>();
-    final results = await Future.wait<dynamic>([
-      provider.getAccountTransactions(),
-      provider.getStatement(),
-    ]);
+    final transactions =
+        provider.getAccountTransactions(from: _from, to: _to);
+    if (includeStatements) {
+      final results = await Future.wait<dynamic>([
+        transactions,
+        provider.getStatement(),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _data = results.first as AccountTransactions?;
+        _loading = false;
+      });
+      return;
+    }
+    final data = await transactions;
     if (!mounted) return;
     setState(() {
-      _data = results.first as AccountTransactions?;
+      _data = data;
       _loading = false;
     });
+  }
+
+  void _openFilter() {
+    showPbBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) => _DateFilterSheet(
+        from: _from,
+        to: _to,
+        onApply: (from, to) {
+          Navigator.of(sheetContext).pop();
+          setState(() {
+            _from = from;
+            _to = to;
+          });
+          _load();
+        },
+      ),
+    );
   }
 
   List<AccountTransaction> get _visibleEntries {
@@ -167,7 +198,9 @@ class _AccountStatementScreenState extends State<AccountStatementScreen> {
           selectedIndex: _tab,
           onChanged: (index) => setState(() => _tab = index),
         ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 18),
+        _filterButton(),
+        const SizedBox(height: 16),
         _transactionsHeader(entries),
         const SizedBox(height: 12),
         if (data == null)
@@ -176,9 +209,11 @@ class _AccountStatementScreenState extends State<AccountStatementScreen> {
             message: 'We could not load your transactions. Pull to retry.',
           )
         else if (entries.isEmpty)
-          const PbEmptyState(
+          PbEmptyState(
             icon: Icons.receipt_long_outlined,
-            message: 'No transactions to show yet.',
+            message: _from != null || _to != null
+                ? 'No transactions in this date range.'
+                : 'No transactions to show yet.',
           )
         else
           PbCard(
@@ -199,11 +234,64 @@ class _AccountStatementScreenState extends State<AccountStatementScreen> {
     );
   }
 
+  Widget _filterButton() {
+    final hasRange = _from != null || _to != null;
+    final range = [
+      if (_from != null) DateFormat('d MMM yyyy').format(_from!),
+      if (_to != null) DateFormat('d MMM yyyy').format(_to!),
+    ].join(' - ');
+    return Row(
+      children: [
+        InkWell(
+          onTap: _openFilter,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Filter',
+                  style: AppTextStyles.medium(
+                    15,
+                    color: hasRange ? AppColors.green : AppColors.ink,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Icon(
+                  Icons.tune_rounded,
+                  size: 18,
+                  color: hasRange ? AppColors.green : AppColors.greenDeep,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (hasRange) ...[
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              range,
+              textAlign: TextAlign.right,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.medium(12, color: AppColors.green),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _transactionsHeader(List<AccountTransaction> entries) {
     final latest = entries.isNotEmpty ? entries.first.createdAt : null;
-    final period = latest == null
-        ? null
-        : '${DateFormat('MMMM yyyy').format(latest)} and earlier';
+    final period = _from != null || _to != null
+        ? [
+            if (_from != null) DateFormat('d MMM yyyy').format(_from!),
+            if (_to != null) DateFormat('d MMM yyyy').format(_to!),
+          ].join(' - ')
+        : latest == null
+            ? null
+            : '${DateFormat('MMMM yyyy').format(latest)} and earlier';
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -271,6 +359,157 @@ class _AccountStatementScreenState extends State<AccountStatementScreen> {
 }
 
 String _fyLabel(int fyEnd) => 'FY ${fyEnd - 1}–${fyEnd.toString().substring(2)}';
+
+class _DateFilterSheet extends StatefulWidget {
+  final DateTime? from;
+  final DateTime? to;
+  final void Function(DateTime? from, DateTime? to) onApply;
+
+  const _DateFilterSheet({
+    required this.from,
+    required this.to,
+    required this.onApply,
+  });
+
+  @override
+  State<_DateFilterSheet> createState() => _DateFilterSheetState();
+}
+
+class _DateFilterSheetState extends State<_DateFilterSheet> {
+  DateTime? _from;
+  DateTime? _to;
+
+  @override
+  void initState() {
+    super.initState();
+    _from = widget.from;
+    _to = widget.to;
+  }
+
+  Future<void> _pick({required bool isFrom}) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final initial = isFrom ? (_from ?? _to ?? today) : (_to ?? _from ?? today);
+    final first = isFrom ? DateTime(2018) : (_from ?? DateTime(2018));
+    final last = isFrom ? (_to ?? today) : today;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial.isBefore(first)
+          ? first
+          : (initial.isAfter(last) ? last : initial),
+      firstDate: first,
+      lastDate: last,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.green,
+              onPrimary: Colors.white,
+              onSurface: AppColors.ink,
+            ),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      final day = DateTime(picked.year, picked.month, picked.day);
+      if (isFrom) {
+        _from = day;
+      } else {
+        _to = day;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Filter', style: AppTextStyles.semiBold(18)),
+          const SizedBox(height: 4),
+          Text(
+            'Choose a from and to date',
+            style: AppTextStyles.regular(13, color: AppColors.muted),
+          ),
+          const SizedBox(height: 16),
+          _DateField(
+            label: 'From',
+            value: _from == null
+                ? 'Start date'
+                : DateFormat('d MMM yyyy').format(_from!),
+            onTap: () => _pick(isFrom: true),
+          ),
+          const SizedBox(height: 10),
+          _DateField(
+            label: 'To',
+            value: _to == null
+                ? 'End date'
+                : DateFormat('d MMM yyyy').format(_to!),
+            onTap: () => _pick(isFrom: false),
+          ),
+          const SizedBox(height: 18),
+          PbPrimaryButton(
+            label: 'Apply',
+            onPressed: () => widget.onApply(_from, _to),
+          ),
+          if (_from != null || _to != null)
+            TextButton(
+              onPressed: () => widget.onApply(null, null),
+              child: Text(
+                'Clear dates',
+                style: AppTextStyles.medium(14, color: AppColors.green),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DateField extends StatelessWidget {
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+
+  const _DateField({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.line),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: AppTextStyles.regular(11, color: AppColors.muted)),
+              const SizedBox(height: 2),
+              Text(value, style: AppTextStyles.medium(14)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class _BalanceCard extends StatelessWidget {
   final String amount;
